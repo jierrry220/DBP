@@ -1,0 +1,20 @@
+{
+  "name": "debear-party-gamefi",
+  "build": {
+    "buildCommand": "npm install",
+    "outputDirectory": "."
+  },
+  "run": {
+    "startCommand": "node server.js"
+  },
+  "volumes": [
+    {
+      "name": "game-data",
+      "mount": "/app/data"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "PORT": "3000"
+  }
+}

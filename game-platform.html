@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <script src="js/disable-console.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameFi Platform - Debear Party</title>
+    <style>
+        /* ========== Global Styles ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #00c4ef 0%, #e900e9 100%);
+            --secondary-gradient: linear-gradient(135deg, #4dd0e1 0%, #d91e5a 100%);
+            --neon-cyan: #00c4ef;
+            --neon-pink: #e900e9;
+            --dark-bg: #0a0e1a;
+            --dark-surface: #1a0a2e;
+            --text-primary: #ffffff;
+            --text-secondary: #a0b1d4;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* ========== Particle Background ========== */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: radial-gradient(ellipse at top, #2d1b4e 0%, #1a0a2e 50%, #0a0e1a 100%);
+        }
+
+        /* ========== Navbar ========== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 14, 26, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 2px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .balance-display {
+            background: rgba(0, 196, 239, 0.1);
+            border: 2px solid rgba(0, 196, 239, 0.3);
+            border-radius: 20px;
+            padding: 8px 20px;
+            color: var(--neon-cyan);
+            font-weight: 700;
+        }
+
+        .connect-btn {
+            padding: 10px 25px;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .connect-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
+        }
+
+        .connect-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* ========== Main Content ========== */
+        .main-content {
+            padding: 100px 5% 50px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            font-weight: 900;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
+        /* ========== Cards Grid ========== */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.05) 0%, rgba(255, 0, 255, 0.08) 100%);
+            border: 2px solid rgba(0, 212, 255, 0.25);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.15);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 212, 255, 0.25);
+        }
+
+        .card h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .info-box {
+            background: rgba(0, 196, 239, 0.1);
+            border: 1px solid rgba(0, 196, 239, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .info-value {
+            color: var(--neon-cyan);
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 196, 239, 0.05);
+            border: 2px solid rgba(0, 196, 239, 0.3);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 196, 239, 0.3);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .action-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .action-btn.secondary {
+            background: transparent;
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+        }
+
+        /* ========== Game Demo Section ========== */
+        .game-section {
+            background: linear-gradient(135deg, rgba(233, 0, 233, 0.05) 0%, rgba(0, 196, 239, 0.08) 100%);
+            border: 2px solid rgba(233, 0, 233, 0.25);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .game-section h2 {
+            font-size: 32px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .game-demo {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 196, 239, 0.2);
+            border-radius: 15px;
+            padding: 40px;
+            margin: 30px 0;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .game-btn {
+            padding: 12px 30px;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .game-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
+        }
+
+        .game-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .game-result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+        }
+
+        /* ========== Toast ========== */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            background: rgba(10, 14, 26, 0.95);
+            border: 2px solid;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-color: #4caf50;
+            color: #4caf50;
+        }
+
+        .toast.error {
+            border-color: #f44336;
+            color: #f44336;
+        }
+
+        .toast.info {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+        }
+
+        /* ========== Responsive ========== */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 36px;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .game-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">🐻 Debear Party GameFi</a>
+        <div class="nav-right">
+            <div class="balance-display" id="balanceDisplay">余额: -- DP</div>
+            <button class="connect-btn" id="connectBtn" onclick="connectWallet()">连接钱包</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎮 GameFi 游戏平台</h1>
+            <p>充值 DP Token 开始游戏，赢取奖励后可提现到钱包</p>
+        </div>
+
+        <!-- Balance Management Cards -->
+        <div class="cards-grid">
+            <!-- 充值卡片 -->
+            <div class="card">
+                <h2>💰 充值 DP Token</h2>
+                <div class="info-box">
+                    <div class="info-row">
+                        <span class="info-label">钱包余额:</span>
+                        <span class="info-value" id="walletBalance">-- DP</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">游戏余额:</span>
+                        <span class="info-value" id="gameBalance">-- DP</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">平台地址:</span>
+                        <span class="info-value" style="font-size: 11px;">0xE332...0FB</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">充值数量 (DP)</label>
+                    <input type="number" class="form-input" id="depositAmount" placeholder="输入充值数量" min="1" step="0.01">
+                </div>
+
+                <button class="action-btn" onclick="depositToGame()" id="depositBtn">充值到游戏平台</button>
+            </div>
+
+            <!-- 提现卡片 -->
+            <div class="card">
+                <h2>💎 提现到钱包</h2>
+                <div class="info-box">
+                    <div class="info-row">
+                        <span class="info-label">可提现余额:</span>
+                        <span class="info-value" id="withdrawableBalance">-- DP</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">最小提现:</span>
+                        <span class="info-value">1 DP</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">提现手续费:</span>
+                        <span class="info-value">0 DP</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">提现数量 (DP)</label>
+                    <input type="number" class="form-input" id="withdrawAmount" placeholder="输入提现数量" min="1" step="0.01">
+                </div>
+
+                <button class="action-btn secondary" onclick="withdrawFromGame()" id="withdrawBtn">提现到钱包</button>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="card">
+                <h2>📊 账户统计</h2>
+                <div class="info-box">
+                    <div class="info-row">
+                        <span class="info-label">总充值:</span>
+                        <span class="info-value" id="totalDeposit">-- DP</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">总提现:</span>
+                        <span class="info-value" id="totalWithdraw">-- DP</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">游戏消费:</span>
+                        <span class="info-value" id="totalSpend">-- DP</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">游戏奖励:</span>
+                        <span class="info-value" id="totalReward">-- DP</span>
+                    </div>
+                </div>
+
+                <button class="action-btn secondary" onclick="loadAllData()">刷新数据</button>
+            </div>
+        </div>
+
+        <!-- Game Demo Section -->
+        <div class="game-section">
+            <h2>🎲 示例游戏: 猜大小</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">每次游戏消耗 1 DP，猜对翻倍奖励！</p>
+
+            <div class="game-demo">
+                <div class="game-icon">🎰</div>
+                <div id="gameStatus" style="font-size: 20px; color: var(--text-secondary); margin-bottom: 20px;">
+                    选择大小开始游戏
+                </div>
+                <div class="game-controls">
+                    <button class="game-btn" onclick="playGame('big')" id="bigBtn">猜大 (6-12)</button>
+                    <button class="game-btn" onclick="playGame('small')" id="smallBtn">猜小 (1-5)</button>
+                </div>
+                <div class="game-result" id="gameResult"></div>
+            </div>
+
+            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 20px;">
+                💡 提示: 这只是一个简单示例，你可以开发更复杂的游戏！
+            </p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/libs/particles.min.js"></script>
+    <script src="js/libs/ethers-5.7.2.umd.min.js"></script>
+
+    <script>
+        // 配置
+        const CONFIG = {
+            RPC_URL: 'https://rpc.berachain.com',
+            CHAIN_ID: '0x138de',
+            DP_TOKEN: '0xf7C464c7832e59855aa245Ecc7677f54B3460e7d',
+            PLATFORM_RECEIVER: '0xE3325A0CAABb3C677a89C5A72C2878Ef2E7470FB',
+            API_BASE: 'https://yhgl.zeabur.app/api/game-balance',  // 后端 API 地址
+            BERA_EXPLORER: 'https://beratrail.io'
+        };
+
+        const DP_TOKEN_ABI = [
+            'function balanceOf(address) view returns (uint256)',
+            'function approve(address spender, uint256 amount) returns (bool)',
+            'function transfer(address to, uint256 amount) returns (bool)',
+            'function allowance(address owner, address spender) view returns (uint256)'
+        ];
+
+        let provider, signer, userAddress;
+        let gameInProgress = false;
+
+        // 粒子背景
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: ['#00c4ef', '#e900e9'] },
+                shape: { type: 'circle' },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                move: { enable: true, speed: 1.5, direction: 'none', random: true }
+            }
+        });
+
+        // Toast 通知
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // 连接钱包
+        async function connectWallet() {
+            try {
+                const walletProvider = window.okxwallet || window.ethereum;
+                if (!walletProvider) {
+                    showToast('请安装 MetaMask 或 OKX Wallet!', 'error');
+                    return;
+                }
+
+                await walletProvider.request({ method: 'eth_requestAccounts' });
+
+                const chainId = await walletProvider.request({ method: 'eth_chainId' });
+                if (chainId !== CONFIG.CHAIN_ID) {
+                    try {
+                        await walletProvider.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: CONFIG.CHAIN_ID }]
+                        });
+                    } catch (error) {
+                        showToast('请切换到 Berachain 主网', 'error');
+                        return;
+                    }
+                }
+
+                provider = new ethers.providers.Web3Provider(walletProvider);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+
+                const shortAddr = userAddress.substring(0, 6) + '...' + userAddress.substring(38);
+                document.getElementById('connectBtn').textContent = shortAddr;
+                document.getElementById('connectBtn').disabled = true;
+
+                showToast('钱包连接成功!', 'success');
+                await loadAllData();
+            } catch (error) {
+                console.error('连接钱包失败:', error);
+                showToast('连接钱包失败: ' + error.message, 'error');
+            }
+        }
+
+        // 加载所有数据
+        async function loadAllData() {
+            if (!provider || !userAddress) return;
+
+            try {
+                await Promise.all([
+                    loadWalletBalance(),
+                    loadGameBalance(),
+                    loadStatistics()
+                ]);
+            } catch (error) {
+                console.error('加载数据失败:', error);
+            }
+        }
+
+        // 加载钱包余额
+        async function loadWalletBalance() {
+            const dpToken = new ethers.Contract(CONFIG.DP_TOKEN, DP_TOKEN_ABI, provider);
+            const balance = await dpToken.balanceOf(userAddress);
+            const formatted = parseFloat(ethers.utils.formatEther(balance)).toFixed(2);
+            document.getElementById('walletBalance').textContent = formatted + ' DP';
+        }
+
+        // 加载游戏余额
+        async function loadGameBalance() {
+            const response = await fetch(`${CONFIG.API_BASE}?action=getBalance&address=${userAddress}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                const balance = data.data.balance.toFixed(2);
+                document.getElementById('gameBalance').textContent = balance + ' DP';
+                document.getElementById('balanceDisplay').textContent = '余额: ' + balance + ' DP';
+                document.getElementById('withdrawableBalance').textContent = balance + ' DP';
+            }
+        }
+
+        // 加载统计信息
+        async function loadStatistics() {
+            const response = await fetch(`${CONFIG.API_BASE}?action=getTransactions&address=${userAddress}&limit=1000`);
+            const data = await response.json();
+            
+            if (data.success) {
+                let totalDeposit = 0, totalWithdraw = 0, totalSpend = 0, totalReward = 0;
+                
+                data.data.forEach(tx => {
+                    switch (tx.type) {
+                        case 'deposit':
+                            totalDeposit += tx.amount;
+                            break;
+                        case 'withdraw':
+                            totalWithdraw += tx.amount;
+                            break;
+                        case 'spend':
+                            totalSpend += tx.amount;
+                            break;
+                        case 'reward':
+                            totalReward += tx.amount;
+                            break;
+                    }
+                });
+
+                document.getElementById('totalDeposit').textContent = totalDeposit.toFixed(2) + ' DP';
+                document.getElementById('totalWithdraw').textContent = totalWithdraw.toFixed(2) + ' DP';
+                document.getElementById('totalSpend').textContent = totalSpend.toFixed(2) + ' DP';
+                document.getElementById('totalReward').textContent = totalReward.toFixed(2) + ' DP';
+            }
+        }
+
+        // 充值到游戏
+        async function depositToGame() {
+            if (!signer || !userAddress) {
+                showToast('请先连接钱包', 'error');
+                return;
+            }
+
+            const amount = document.getElementById('depositAmount').value;
+            if (!amount || parseFloat(amount) < 1) {
+                showToast('充值金额不能少于 1 DP', 'error');
+                return;
+            }
+
+            try {
+                const depositBtn = document.getElementById('depositBtn');
+                depositBtn.disabled = true;
+
+                const amountWei = ethers.utils.parseEther(amount);
+
+                // Step 1: 授权
+                showToast('步骤 1/3: 授权 DP Token...', 'info');
+                const dpToken = new ethers.Contract(CONFIG.DP_TOKEN, DP_TOKEN_ABI, signer);
+                const allowance = await dpToken.allowance(userAddress, CONFIG.PLATFORM_RECEIVER);
+
+                if (allowance.lt(amountWei)) {
+                    const approveTx = await dpToken.approve(CONFIG.PLATFORM_RECEIVER, ethers.constants.MaxUint256);
+                    await approveTx.wait();
+                }
+
+                // Step 2: 转账到平台
+                showToast('步骤 2/3: 转账 DP 到平台...', 'info');
+                const transferTx = await dpToken.transfer(CONFIG.PLATFORM_RECEIVER, amountWei);
+                await transferTx.wait();
+
+                // Step 3: 更新游戏余额
+                showToast('步骤 3/3: 更新游戏余额...', 'info');
+                const response = await fetch(`${CONFIG.API_BASE}?action=deposit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        address: userAddress,
+                        amount: amount,
+                        txHash: transferTx.hash
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showToast('充值成功! 可以开始游戏了 🎮', 'success');
+                    document.getElementById('depositAmount').value = '';
+                    await loadAllData();
+                } else if (data.pending) {
+                    // 确认数不足，显示充值中状态
+                    showToast(`✨ ${data.message}`, 'info');
+                    document.getElementById('depositAmount').value = '';
+                    // 开始轮询检查确认数（传入原始金额）
+                    pollDepositConfirmation(transferTx.hash, amount);
+                } else {
+                    throw new Error(data.error || data.message);
+                }
+            } catch (error) {
+                console.error('充值失败:', error);
+                showToast('充值失败: ' + (error.reason || error.message), 'error');
+            } finally {
+                document.getElementById('depositBtn').disabled = false;
+            }
+        }
+
+        // 轮询检查充值确认状态
+        async function pollDepositConfirmation(txHash, depositAmount) {
+            const maxAttempts = 60; // 最多轮询60次 (10分钟)
+            const interval = 10000; // 每10秒检查一次
+            let attempts = 0;
+
+            const checkConfirmation = async () => {
+                if (attempts >= maxAttempts) {
+                    showToast('充值确认超时，请手动刷新页面', 'error');
+                    return;
+                }
+
+                attempts++;
+
+                try {
+                    const response = await fetch(`${CONFIG.API_BASE}?action=deposit`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            address: userAddress,
+                            amount: depositAmount, // 使用原始充值金额
+                            txHash: txHash
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // 充值成功
+                        showToast('✅ 充值成功! 可以开始游戏了 🎮', 'success');
+                        await loadAllData();
+                    } else if (data.pending) {
+                        // 还在等待确认，继续轮询
+                        console.log(`充值进度: ${data.confirmations}/${data.requiredConfirmations}`);
+                        setTimeout(checkConfirmation, interval);
+                    } else {
+                        // 其他错误
+                        showToast(`充值失败: ${data.error || data.message}`, 'error');
+                    }
+                } catch (error) {
+                    console.error('检查充值状态失败:', error);
+                    setTimeout(checkConfirmation, interval);
+                }
+            };
+
+            // 开始第一次检查
+            setTimeout(checkConfirmation, interval);
+        }
+
+        // 从游戏提现
+        async function withdrawFromGame() {
+            if (!signer || !userAddress) {
+                showToast('请先连接钱包', 'error');
+                return;
+            }
+
+            const amount = document.getElementById('withdrawAmount').value;
+            if (!amount || parseFloat(amount) < 1) {
+                showToast('提现金额不能少于 1 DP', 'error');
+                return;
+            }
+
+            try {
+                const withdrawBtn = document.getElementById('withdrawBtn');
+                withdrawBtn.disabled = true;
+
+                showToast('正在处理提现...', 'info');
+                const response = await fetch(`${CONFIG.API_BASE}?action=withdraw`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        address: userAddress,
+                        amount: amount
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showToast('提现成功! DP 已转入钱包 💰', 'success');
+                    document.getElementById('withdrawAmount').value = '';
+                    await loadAllData();
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                console.error('提现失败:', error);
+                showToast('提现失败: ' + error.message, 'error');
+            } finally {
+                document.getElementById('withdrawBtn').disabled = false;
+            }
+        }
+
+        // 游戏: 猜大小
+        async function playGame(choice) {
+            if (!userAddress) {
+                showToast('请先连接钱包', 'error');
+                return;
+            }
+
+            if (gameInProgress) return;
+
+            try {
+                gameInProgress = true;
+                document.getElementById('bigBtn').disabled = true;
+                document.getElementById('smallBtn').disabled = true;
+                document.getElementById('gameResult').textContent = '';
+
+                // 扣除 1 DP
+                const spendResponse = await fetch(`${CONFIG.API_BASE}?action=spend`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        address: userAddress,
+                        amount: 1,
+                        gameId: 'dice-game',
+                        description: '猜大小游戏'
+                    })
+                });
+
+                const spendData = await spendResponse.json();
+                if (!spendData.success) {
+                    throw new Error(spendData.error);
+                }
+
+                // 模拟摇骰子
+                document.getElementById('gameStatus').textContent = '摇骰子中...';
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                // 生成随机数 1-12
+                const dice = Math.floor(Math.random() * 12) + 1;
+                const isBig = dice >= 6;
+                const won = (choice === 'big' && isBig) || (choice === 'small' && !isBig);
+
+                document.getElementById('gameStatus').textContent = `骰子点数: ${dice}`;
+
+                if (won) {
+                    // 赢了，获得 2 DP
+                    const rewardResponse = await fetch(`${CONFIG.API_BASE}?action=reward`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            address: userAddress,
+                            amount: 2,
+                            gameId: 'dice-game',
+                            description: '猜大小获胜'
+                        })
+                    });
+
+                    const rewardData = await rewardResponse.json();
+                    if (rewardData.success) {
+                        document.getElementById('gameResult').textContent = '🎉 恭喜！你赢了 2 DP!';
+                        document.getElementById('gameResult').style.color = '#4caf50';
+                        showToast('恭喜获胜! +2 DP 🎉', 'success');
+                    }
+                } else {
+                    document.getElementById('gameResult').textContent = '😢 很遗憾，你输了！';
+                    document.getElementById('gameResult').style.color = '#f44336';
+                    showToast('很遗憾输了 -1 DP', 'error');
+                }
+
+                await loadAllData();
+            } catch (error) {
+                console.error('游戏失败:', error);
+                showToast('游戏失败: ' + error.message, 'error');
+            } finally {
+                gameInProgress = false;
+                document.getElementById('bigBtn').disabled = false;
+                document.getElementById('smallBtn').disabled = false;
+            }
+        }
+
+        // 页面加载完成
+        window.addEventListener('load', () => {
+            const walletProvider = window.okxwallet || window.ethereum;
+            if (walletProvider) {
+                walletProvider.request({ method: 'eth_accounts' }).then(accounts => {
+                    if (accounts && accounts.length > 0) {
+                        connectWallet();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

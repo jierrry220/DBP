@@ -1,0 +1,23 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Log files
+*.log
+
+# Environment files (if needed in future)
+.env.local
+
+# Temporary files
+*.tmp
+*~
+
+# Owner specific files (keep folder but ignore contents)
+owner/*
+!owner/.gitignore
