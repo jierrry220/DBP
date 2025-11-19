@@ -711,10 +711,10 @@
                     await loadAllData();
                 } else if (data.pending) {
                     // 确认数不足，显示充值中状态
-                    showToast(`✨ ${data.message}`, 'info');
+                    showToast(`🔄 充值中: ${data.confirmations}/${data.requiredConfirmations} 确认 - 请稍候...`, 'info');
                     document.getElementById('depositAmount').value = '';
                     // 开始轮询检查确认数（传入原始金额）
-                    pollDepositConfirmation(transferTx.hash, amount);
+                    pollDepositConfirmation(transferTx.hash, amount, data.confirmations);
                 } else {
                     throw new Error(data.error || data.message);
                 }
@@ -727,9 +727,9 @@
         }
 
         // 轮询检查充值确认状态
-        async function pollDepositConfirmation(txHash, depositAmount) {
+        async function pollDepositConfirmation(txHash, depositAmount, currentConfirmations = 0) {
             const maxAttempts = 60; // 最多轮询60次 (10分钟)
-            const interval = 10000; // 每10秒检查一次
+            const interval = 5000; // 每5秒检查一次 (加快轮询)
             let attempts = 0;
 
             const checkConfirmation = async () => {
@@ -758,8 +758,10 @@
                         showToast('✅ 充值成功! 可以开始游戏了 🎮', 'success');
                         await loadAllData();
                     } else if (data.pending) {
-                        // 还在等待确认，继续轮询
-                        console.log(`充值进度: ${data.confirmations}/${data.requiredConfirmations}`);
+                        // 还在等待确认，显示进度
+                        const progress = Math.floor((data.confirmations / data.requiredConfirmations) * 100);
+                        console.log(`充值进度: ${data.confirmations}/${data.requiredConfirmations} (${progress}%)`);
+                        showToast(`🔄 充值中: ${data.confirmations}/${data.requiredConfirmations} 确认 (${progress}%)`, 'info');
                         setTimeout(checkConfirmation, interval);
                     } else {
                         // 其他错误
