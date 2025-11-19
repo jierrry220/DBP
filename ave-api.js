@@ -44,39 +44,24 @@ class AveAPI {
             return this.priceCache.data;
         }
         
-        // 自动检测是否需要使用代理（生产环境）
-        const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+        // 使用 CORS 代理解决跨域问题
+        const corsProxy = 'https://corsproxy.io/?';
         
         try {
-            let response;
-            
-            if (isProduction) {
-                // 生产环境：使用服务器端代理避免 CORS
-                // console.log('Fetching price via proxy');
-                response = await fetch('/api/ave-price', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                });
-            } else {
-                // 本地开发：直接调用 Ave API
-                // console.log('Fetching price from Ave API directly');
-                response = await fetch(`${this.baseURL}/v2/tokens/price`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-KEY': this.apiKey,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        token_ids: [this.dpTokenId],
-                        tvl_min: 0,
-                        tx_24h_volume_min: 0
-                    })
-                });
-            }
+            // 始终通过 CORS 代理访问 Ave API
+            const response = await fetch(`${corsProxy}${encodeURIComponent(this.baseURL + '/v2/tokens/price')}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-KEY': this.apiKey,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    token_ids: [this.dpTokenId],
+                    tvl_min: 0,
+                    tx_24h_volume_min: 0
+                })
+            });
             
             if (!response.ok) {
                 throw new Error(`Ave API error: ${response.status}`);
