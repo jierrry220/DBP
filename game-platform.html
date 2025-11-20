@@ -361,143 +361,145 @@
             color: var(--neon-cyan);
         }
 
-        /* ========== 充值进度条 ========== */
-        .progress-modal {
-            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(255, 0, 255, 0.2) 100%);
-            border: 2px solid rgba(0, 212, 255, 0.5);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 600px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.4);
+        /* ========== 充值进度条 (顶部固定) ========== */
+        .deposit-progress-bar {
+            position: fixed;
+            top: 80px; /* 在导航栏下方 */
+            left: 0;
+            right: 0;
+            background: rgba(10, 14, 26, 0.98);
+            backdrop-filter: blur(20px);
+            border-bottom: 2px solid rgba(0, 196, 239, 0.3);
+            padding: 20px 5%;
+            z-index: 90;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
-        .progress-header {
-            text-align: center;
-            margin-bottom: 40px;
+        .deposit-progress-bar.active {
+            transform: translateY(0);
         }
 
-        .progress-header h2 {
-            font-size: 28px;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .progress-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--neon-cyan);
         }
 
         .progress-amount {
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--neon-cyan);
-            margin-top: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--neon-pink);
         }
 
-        .progress-steps {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 196, 239, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            position: relative;
         }
 
-        .progress-step {
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-cyan) 0%, var(--neon-pink) 100%);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-steps-inline {
             display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(0, 196, 239, 0.2);
-            border-radius: 15px;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .progress-step-inline {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(0, 196, 239, 0.05);
+            border: 1px solid rgba(0, 196, 239, 0.2);
             transition: all 0.3s;
         }
 
-        .progress-step.active {
+        .progress-step-inline.active {
+            background: rgba(0, 196, 239, 0.15);
             border-color: var(--neon-cyan);
-            background: rgba(0, 196, 239, 0.1);
-            box-shadow: 0 0 20px rgba(0, 196, 239, 0.3);
+            box-shadow: 0 0 15px rgba(0, 196, 239, 0.3);
         }
 
-        .progress-step.completed {
-            border-color: #4caf50;
-            background: rgba(76, 175, 80, 0.1);
-        }
-
-        .progress-step.error {
-            border-color: #f44336;
-            background: rgba(244, 67, 54, 0.1);
-        }
-
-        .step-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            background: rgba(0, 196, 239, 0.2);
-            border: 2px solid rgba(0, 196, 239, 0.4);
-            flex-shrink: 0;
-        }
-
-        .progress-step.active .step-icon {
-            background: rgba(0, 196, 239, 0.3);
-            border-color: var(--neon-cyan);
-            animation: pulse 1.5s infinite;
-        }
-
-        .progress-step.completed .step-icon {
-            background: rgba(76, 175, 80, 0.3);
+        .progress-step-inline.completed {
+            background: rgba(76, 175, 80, 0.15);
             border-color: #4caf50;
         }
 
-        .progress-step.error .step-icon {
-            background: rgba(244, 67, 54, 0.3);
+        .progress-step-inline.error {
+            background: rgba(244, 67, 54, 0.15);
             border-color: #f44336;
         }
 
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 0 0 0 rgba(0, 196, 239, 0.7);
-            }
-            50% {
-                box-shadow: 0 0 0 15px rgba(0, 196, 239, 0);
-            }
-        }
-
-        .step-content {
-            flex: 1;
-        }
-
-        .step-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text-primary);
+        .step-icon-inline {
+            font-size: 20px;
             margin-bottom: 5px;
         }
 
-        .step-description {
-            font-size: 14px;
+        .step-text-inline {
+            font-size: 12px;
             color: var(--text-secondary);
+            font-weight: 600;
         }
 
-        .progress-step.active .step-description {
+        .progress-step-inline.active .step-text-inline {
             color: var(--neon-cyan);
         }
 
-        .progress-step.completed .step-description {
+        .progress-step-inline.completed .step-text-inline {
             color: #4caf50;
         }
 
-        .progress-step.error .step-description {
+        .progress-step-inline.error .step-text-inline {
             color: #f44336;
         }
 
-        .loading-spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(0, 196, 239, 0.3);
-            border-top-color: var(--neon-cyan);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .progress-description {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .progress-description.active {
+            color: var(--neon-cyan);
         }
 
         @keyframes spin {
@@ -521,6 +523,7 @@
             pointer-events: none;
             transition: opacity 0.3s;
         }
+
 
         .modal-overlay.active {
             opacity: 1;
@@ -859,65 +862,41 @@
         </div>
     </div>
 
-    <!-- 充值进度条弹窗 -->
-    <div class="modal-overlay" id="depositProgressModal">
-        <div class="progress-modal">
-            <div class="progress-header">
-                <h2>💰 正在充值</h2>
-                <div class="progress-amount" id="progressAmount">0 DP</div>
+    <!-- 充值进度条 (顶部固定) -->
+    <div class="deposit-progress-bar" id="depositProgressBar">
+        <div class="progress-info">
+            <div class="progress-title">💰 正在充值</div>
+            <div class="progress-amount" id="progressAmount">0 DP</div>
+        </div>
+        
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div class="progress-steps-inline">
+            <div class="progress-step-inline" id="step1">
+                <div class="step-icon-inline" id="step1Icon">🔑</div>
+                <div class="step-text-inline">授权</div>
             </div>
-
-            <div class="progress-steps">
-                <!-- 步骤1: 授权 -->
-                <div class="progress-step" id="step1">
-                    <div class="step-icon" id="step1Icon">🔑</div>
-                    <div class="step-content">
-                        <div class="step-title">步骤 1: 授权 DP Token</div>
-                        <div class="step-description" id="step1Desc">等待开始...</div>
-                    </div>
-                    <div class="loading-spinner" id="step1Spinner" style="display: none;"></div>
-                </div>
-
-                <!-- 步骤2: 转账 -->
-                <div class="progress-step" id="step2">
-                    <div class="step-icon" id="step2Icon">💸</div>
-                    <div class="step-content">
-                        <div class="step-title">步骤 2: 转账到平台</div>
-                        <div class="step-description" id="step2Desc">等待授权完成...</div>
-                    </div>
-                    <div class="loading-spinner" id="step2Spinner" style="display: none;"></div>
-                </div>
-
-                <!-- 步骤3: 等待确认 -->
-                <div class="progress-step" id="step3">
-                    <div class="step-icon" id="step3Icon">⏳</div>
-                    <div class="step-content">
-                        <div class="step-title">步骤 3: 区块链确认</div>
-                        <div class="step-description" id="step3Desc">等待转账完成...</div>
-                    </div>
-                    <div class="loading-spinner" id="step3Spinner" style="display: none;"></div>
-                </div>
-
-                <!-- 步骤4: 更新余额 -->
-                <div class="progress-step" id="step4">
-                    <div class="step-icon" id="step4Icon">🔁</div>
-                    <div class="step-content">
-                        <div class="step-title">步骤 4: 更新游戏余额</div>
-                        <div class="step-description" id="step4Desc">等待确认...</div>
-                    </div>
-                    <div class="loading-spinner" id="step4Spinner" style="display: none;"></div>
-                </div>
-
-                <!-- 步骤5: 充值成功 -->
-                <div class="progress-step" id="step5">
-                    <div class="step-icon" id="step5Icon">🎉</div>
-                    <div class="step-content">
-                        <div class="step-title">步骤 5: 充值完成</div>
-                        <div class="step-description" id="step5Desc">等待余额更新...</div>
-                    </div>
-                </div>
+            <div class="progress-step-inline" id="step2">
+                <div class="step-icon-inline" id="step2Icon">💸</div>
+                <div class="step-text-inline">转账</div>
+            </div>
+            <div class="progress-step-inline" id="step3">
+                <div class="step-icon-inline" id="step3Icon">⏳</div>
+                <div class="step-text-inline">确认</div>
+            </div>
+            <div class="progress-step-inline" id="step4">
+                <div class="step-icon-inline" id="step4Icon">🔁</div>
+                <div class="step-text-inline">更新余额</div>
+            </div>
+            <div class="progress-step-inline" id="step5">
+                <div class="step-icon-inline" id="step5Icon">🎉</div>
+                <div class="step-text-inline">完成</div>
             </div>
         </div>
+        
+        <div class="progress-description" id="progressDescription">等待开始...</div>
     </div>
 
     <!-- 用户信息查看弹窗 -->
@@ -1116,13 +1095,15 @@
         
         function showDepositProgress(amount) {
             document.getElementById('progressAmount').textContent = amount + ' DP';
-            document.getElementById('depositProgressModal').classList.add('active');
+            document.getElementById('depositProgressBar').classList.add('active');
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressDescription').textContent = '准备充值...';
             resetProgressSteps();
         }
 
         function hideDepositProgress() {
             setTimeout(() => {
-                document.getElementById('depositProgressModal').classList.remove('active');
+                document.getElementById('depositProgressBar').classList.remove('active');
             }, 2000);
         }
 
@@ -1130,33 +1111,49 @@
             for (let i = 1; i <= 5; i++) {
                 const step = document.getElementById(`step${i}`);
                 step.classList.remove('active', 'completed', 'error');
-                document.getElementById(`step${i}Spinner`).style.display = 'none';
             }
         }
 
         function updateProgressStep(stepNum, status, description, icon = null) {
             const step = document.getElementById(`step${stepNum}`);
-            const desc = document.getElementById(`step${stepNum}Desc`);
-            const spinner = document.getElementById(`step${stepNum}Spinner`);
             const stepIcon = document.getElementById(`step${stepNum}Icon`);
+            const progressFill = document.getElementById('progressFill');
+            const progressDesc = document.getElementById('progressDescription');
             
-            // 移除所有状态
-            step.classList.remove('active', 'completed', 'error');
-            spinner.style.display = 'none';
+            // 移除所有步骤的状态
+            for (let i = 1; i <= 5; i++) {
+                const s = document.getElementById(`step${i}`);
+                s.classList.remove('active', 'completed', 'error');
+            }
             
-            // 设置新状态
+            // 设置当前步骤状态
             if (status === 'active') {
                 step.classList.add('active');
-                spinner.style.display = 'block';
+                // 更新进度条
+                const progress = (stepNum - 1) * 20; // 每个步骤20%
+                progressFill.style.width = progress + '%';
             } else if (status === 'completed') {
                 step.classList.add('completed');
                 if (icon) stepIcon.textContent = icon;
+                // 标记之前的步骤为完成
+                for (let i = 1; i < stepNum; i++) {
+                    document.getElementById(`step${i}`).classList.add('completed');
+                }
+                // 更新进度条
+                const progress = stepNum * 20;
+                progressFill.style.width = progress + '%';
             } else if (status === 'error') {
                 step.classList.add('error');
                 if (icon) stepIcon.textContent = icon;
             }
             
-            desc.textContent = description;
+            // 更新描述
+            progressDesc.textContent = description;
+            if (status === 'active') {
+                progressDesc.classList.add('active');
+            } else {
+                progressDesc.classList.remove('active');
+            }
         }
 
         // 充值到游戏
@@ -1249,7 +1246,7 @@
                 console.error('充值失败:', error);
                 updateProgressStep(1, 'error', '充值失败: ' + (error.reason || error.message), '❌');
                 setTimeout(() => {
-                    document.getElementById('depositProgressModal').classList.remove('active');
+                    document.getElementById('depositProgressBar').classList.remove('active');
                 }, 3000);
                 showToast('充值失败: ' + (error.reason || error.message), 'error');
             } finally {
@@ -1268,7 +1265,7 @@
                     updateProgressStep(3, 'error', '确认超时，请手动刷新页面', '❌');
                     showToast('充值确认超时，请手动刷新页面', 'error');
                     setTimeout(() => {
-                        document.getElementById('depositProgressModal').classList.remove('active');
+                        document.getElementById('depositProgressBar').classList.remove('active');
                     }, 3000);
                     return;
                 }
@@ -1317,7 +1314,7 @@
                         updateProgressStep(4, 'error', '充值失败: ' + (data.error || data.message), '❌');
                         showToast(`充值失败: ${data.error || data.message}`, 'error');
                         setTimeout(() => {
-                            document.getElementById('depositProgressModal').classList.remove('active');
+                            document.getElementById('depositProgressBar').classList.remove('active');
                         }, 3000);
                     }
                 } catch (error) {
