@@ -1145,7 +1145,7 @@
             <div class="user-info-display" id="userInfoDisplay" style="display: none;" onclick="showUserInfoModal()">
                 <span id="usernameDisplay">👤 --</span>
             </div>
-            <div class="balance-display" id="balanceDisplay" onclick="openBalanceModal()"><span data-i18n="gamePlatform.balance">余额: </span>-- DP</div>
+            <div class="balance-display" id="balanceDisplay" onclick="openBalanceModal()"><span data-i18n="gamePlatform.balance">Balance: </span>-- DP</div>
             <!-- Language Switcher -->
             <div class="lang-switcher">
                 <button class="lang-btn">EN</button>
@@ -1158,7 +1158,7 @@
                     </div>
                 </div>
             </div>
-            <button class="connect-btn" id="connectBtn" onclick="connectWallet()" data-i18n="nav.connect">连接钱包</button>
+            <button class="connect-btn" id="connectBtn" onclick="connectWallet()" data-i18n="nav.connect">Connect Wallet</button>
             <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Toggle menu">
                 <span></span>
                 <span></span>
@@ -1172,12 +1172,12 @@
 
     <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
-        <div class="mobile-menu-close" data-i18n="gamePlatform.title">💎 游戏平台</div>
+        <div class="mobile-menu-close" data-i18n="gamePlatform.title">💎 Game Platform</div>
         <div class="user-info-display" id="mobileUserInfoDisplay" style="display: none; margin-bottom: 15px;" onclick="showUserInfoModal(); toggleMobileMenu();">
             <span id="mobileUsernameDisplay">👤 --</span>
         </div>
-        <div class="balance-display" id="mobileBalanceDisplay" style="margin-bottom: 15px;" onclick="openBalanceModal(); toggleMobileMenu();"><span data-i18n="gamePlatform.balance">余额: </span>-- DP</div>
-        <button class="connect-btn" id="mobileConnectBtn" onclick="connectWallet(); toggleMobileMenu();" style="width: 100%; margin-bottom: 20px;" data-i18n="nav.connect">连接钱包</button>
+        <div class="balance-display" id="mobileBalanceDisplay" style="margin-bottom: 15px;" onclick="openBalanceModal(); toggleMobileMenu();"><span data-i18n="gamePlatform.balance">Balance: </span>-- DP</div>
+        <button class="connect-btn" id="mobileConnectBtn" onclick="connectWallet(); toggleMobileMenu();" style="width: 100%; margin-bottom: 20px;" data-i18n="nav.connect">Connect Wallet</button>
         <!-- Mobile Language Selection -->
         <div class="mobile-lang-selector">
             <div class="lang-option" data-lang="en" onclick="window.i18n?.setLanguage('en')">
@@ -1194,36 +1194,36 @@
         <!-- Header -->
         <div class="header">
             <h1 data-i18n="gamePlatform.header">🎮 Play to Earn</h1>
-            <p data-i18n="gamePlatform.subtitle">充值 DP Token 开始游戏，赢取獎励后可提现到钱包</p>
+            <p data-i18n="gamePlatform.subtitle">Deposit DP Token to start playing, win rewards and withdraw to wallet</p>
         </div>
 
 
         <!-- Game Demo Section -->
         <div class="game-section">
-            <h2 data-i18n="gamePlatform.gameDemo">🎲 示例游戏: 猜大小</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 20px;" data-i18n="gamePlatform.gameDesc">选择投注金额，猜对翻倍獎励！</p>
+            <h2 data-i18n="gamePlatform.gameDemo">🎲 Demo Game: Guess Big or Small</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;" data-i18n="gamePlatform.gameDesc">Choose bet amount, guess correctly to double your reward!</p>
 
             <div class="game-demo">
                 <div class="game-icon">🎰</div>
                 <div id="gameStatus" style="font-size: 20px; color: var(--text-secondary); margin-bottom: 20px;" data-i18n="gamePlatform.gameStatus">
-                    选择大小开始游戏
+                    Choose Big or Small to start
                 </div>
                 
                 <!-- 投注金额输入框 -->
                 <div class="form-group" style="width: 300px; margin-bottom: 20px;">
-                    <label class="form-label" data-i18n="gamePlatform.betAmount">投注金额 (DP)</label>
-                    <input type="number" class="form-input" id="betAmount" data-i18n-placeholder="gamePlatform.enterBet" placeholder="输入投注金额" min="1" step="0.01" value="1">
+                    <label class="form-label" data-i18n="gamePlatform.betAmount">Bet Amount (DP)</label>
+                    <input type="number" class="form-input" id="betAmount" data-i18n-placeholder="gamePlatform.enterBet" placeholder="Enter bet amount" min="1" step="0.01" value="1">
                 </div>
                 
                 <div class="game-controls">
-                    <button class="game-btn" onclick="playGame('big')" id="bigBtn" data-i18n="gamePlatform.guessBig">猜大 (6-12)</button>
-                    <button class="game-btn" onclick="playGame('small')" id="smallBtn" data-i18n="gamePlatform.guessSmall">猜小 (1-5)</button>
+                    <button class="game-btn" onclick="playGame('big')" id="bigBtn" data-i18n="gamePlatform.guessBig">Guess Big (6-12)</button>
+                    <button class="game-btn" onclick="playGame('small')" id="smallBtn" data-i18n="gamePlatform.guessSmall">Guess Small (1-5)</button>
                 </div>
                 <div class="game-result" id="gameResult"></div>
             </div>
 
             <p style="color: var(--text-secondary); font-size: 14px; margin-top: 20px;" data-i18n="gamePlatform.tip">
-                💡 提示: 这只是一个简单示例，你可以开发更复杂的游戏！
+                💡 Tip: This is just a simple demo, you can develop more complex games!
             </p>
         </div>
     </div>
@@ -1232,17 +1232,17 @@
     <div class="modal-overlay" id="balanceModal">
         <div class="modal">
             <div class="modal-header">
-                <h2 data-i18n="balance.title">💰 余额管理</h2>
-                <p data-i18n="balance.subtitle">充值和提现您的 DP Token</p>
+                <h2 data-i18n="balance.title">💰 Balance Management</h2>
+                <p data-i18n="balance.subtitle">Deposit and withdraw your DP Token</p>
             </div>
 
             <!-- Tab 切换 -->
             <div class="balance-modal-tabs">
                 <div class="balance-tab active" onclick="switchBalanceTab('deposit')" data-i18n="balance.depositTab">
-                    💵 充值
+                    💵 Deposit
                 </div>
                 <div class="balance-tab" onclick="switchBalanceTab('withdraw')" data-i18n="balance.withdrawTab">
-                    💸 提现
+                    💸 Withdraw
                 </div>
             </div>
 
@@ -1250,26 +1250,26 @@
             <div class="balance-tab-content active" id="depositTab">
                 <div class="info-box" style="margin-bottom: 20px;">
                     <div class="info-row">
-                        <span class="info-label" data-i18n="balance.walletBalance">钱包余额:</span>
+                        <span class="info-label" data-i18n="balance.walletBalance">Wallet Balance:</span>
                         <span class="info-value" id="modalWalletBalance">-- DP</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label" data-i18n="balance.gameBalance">游戏余额:</span>
+                        <span class="info-label" data-i18n="balance.gameBalance">Game Balance:</span>
                         <span class="info-value" id="modalGameBalance">-- DP</span>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" data-i18n="balance.depositAmount">充值数量 (DP)</label>
-                    <input type="number" class="form-input" id="depositAmount" data-i18n-placeholder="balance.enterDeposit" placeholder="输入充值数量" min="1" step="0.01">
+                    <label class="form-label" data-i18n="balance.depositAmount">Deposit Amount (DP)</label>
+                    <input type="number" class="form-input" id="depositAmount" data-i18n-placeholder="balance.enterDeposit" placeholder="Enter deposit amount" min="1" step="0.01">
                 </div>
 
-                <button class="modal-btn primary" onclick="depositToGame()" id="depositBtn" style="width: 100%;" data-i18n="balance.depositButton">充值到游戏平台</button>
+                <button class="modal-btn primary" onclick="depositToGame()" id="depositBtn" style="width: 100%;" data-i18n="balance.depositButton">Deposit to Game Platform</button>
                 
                 <!-- 充值进度条 -->
                 <div class="deposit-progress-bar" id="depositProgressBar">
                     <div class="progress-info">
-                        <div class="progress-title" data-i18n="deposit.progress.title">💰 正在充值</div>
+                        <div class="progress-title" data-i18n="deposit.progress.title">💰 Depositing</div>
                         <div class="progress-amount" id="progressAmount">0 DP</div>
                     </div>
                     
@@ -1280,27 +1280,27 @@
                     <div class="progress-steps-inline">
                         <div class="progress-step-inline" id="step1">
                             <div class="step-icon-inline" id="step1Icon">🔑</div>
-                            <div class="step-text-inline" data-i18n="deposit.step.approve">授权</div>
+                            <div class="step-text-inline" data-i18n="deposit.step.approve">Approve</div>
                         </div>
                         <div class="progress-step-inline" id="step2">
                             <div class="step-icon-inline" id="step2Icon">💸</div>
-                            <div class="step-text-inline" data-i18n="deposit.step.transfer">转账</div>
+                            <div class="step-text-inline" data-i18n="deposit.step.transfer">Transfer</div>
                         </div>
                         <div class="progress-step-inline" id="step3">
                             <div class="step-icon-inline" id="step3Icon">⏳</div>
-                            <div class="step-text-inline" data-i18n="deposit.step.confirm">确认</div>
+                            <div class="step-text-inline" data-i18n="deposit.step.confirm">Confirm</div>
                         </div>
                         <div class="progress-step-inline" id="step4">
                             <div class="step-icon-inline" id="step4Icon">🔁</div>
-                            <div class="step-text-inline" data-i18n="deposit.step.updateBalance">更新余额</div>
+                            <div class="step-text-inline" data-i18n="deposit.step.updateBalance">Update Balance</div>
                         </div>
                         <div class="progress-step-inline" id="step5">
                             <div class="step-icon-inline" id="step5Icon">🎉</div>
-                            <div class="step-text-inline" data-i18n="deposit.step.complete">完成</div>
+                            <div class="step-text-inline" data-i18n="deposit.step.complete">Complete</div>
                         </div>
                     </div>
                     
-                    <div class="progress-description" id="progressDescription" data-i18n="deposit.progress.waiting">等待开始...</div>
+                    <div class="progress-description" id="progressDescription" data-i18n="deposit.progress.waiting">Waiting to start...</div>
                 </div>
             </div>
 
@@ -1308,30 +1308,30 @@
             <div class="balance-tab-content" id="withdrawTab">
                 <div class="info-box" style="margin-bottom: 20px;">
                     <div class="info-row">
-                        <span class="info-label" data-i18n="balance.withdrawableBalance">可提现余额:</span>
+                        <span class="info-label" data-i18n="balance.withdrawableBalance">Withdrawable Balance:</span>
                         <span class="info-value" id="modalWithdrawableBalance">-- DP</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label" data-i18n="balance.minWithdraw">最小提现:</span>
+                        <span class="info-label" data-i18n="balance.minWithdraw">Min Withdraw:</span>
                         <span class="info-value">1 DP</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label" data-i18n="balance.withdrawFee">提现手续费:</span>
+                        <span class="info-label" data-i18n="balance.withdrawFee">Withdraw Fee:</span>
                         <span class="info-value">0 DP</span>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" data-i18n="balance.withdrawAmount">提现数量 (DP)</label>
-                    <input type="number" class="form-input" id="withdrawAmount" data-i18n-placeholder="balance.enterWithdraw" placeholder="输入提现数量" min="1" step="0.01">
+                    <label class="form-label" data-i18n="balance.withdrawAmount">Withdraw Amount (DP)</label>
+                    <input type="number" class="form-input" id="withdrawAmount" data-i18n-placeholder="balance.enterWithdraw" placeholder="Enter withdraw amount" min="1" step="0.01">
                 </div>
 
-                <button class="modal-btn primary" onclick="withdrawFromGame()" id="withdrawBtn" style="width: 100%;" data-i18n="balance.withdrawButton">提现到钱包</button>
+                <button class="modal-btn primary" onclick="withdrawFromGame()" id="withdrawBtn" style="width: 100%;" data-i18n="balance.withdrawButton">Withdraw to Wallet</button>
                 
                 <!-- 提现进度条 -->
                 <div class="deposit-progress-bar" id="withdrawProgressBar">
                     <div class="progress-info">
-                        <div class="progress-title" data-i18n="withdraw.progress.title">💸 正在提现</div>
+                        <div class="progress-title" data-i18n="withdraw.progress.title">💸 Withdrawing</div>
                         <div class="progress-amount" id="withdrawProgressAmount">0 DP</div>
                     </div>
                     
@@ -1342,28 +1342,28 @@
                     <div class="progress-steps-inline">
                         <div class="progress-step-inline" id="withdrawStep1">
                             <div class="step-icon-inline" id="withdrawStep1Icon">📋</div>
-                            <div class="step-text-inline" data-i18n="withdraw.step.verify">验证</div>
+                            <div class="step-text-inline" data-i18n="withdraw.step.verify">Verify</div>
                         </div>
                         <div class="progress-step-inline" id="withdrawStep2">
                             <div class="step-icon-inline" id="withdrawStep2Icon">💰</div>
-                            <div class="step-text-inline" data-i18n="withdraw.step.process">处理</div>
+                            <div class="step-text-inline" data-i18n="withdraw.step.process">Process</div>
                         </div>
                         <div class="progress-step-inline" id="withdrawStep3">
                             <div class="step-icon-inline" id="withdrawStep3Icon">🔁</div>
-                            <div class="step-text-inline" data-i18n="withdraw.step.updateBalance">更新余额</div>
+                            <div class="step-text-inline" data-i18n="withdraw.step.updateBalance">Update Balance</div>
                         </div>
                         <div class="progress-step-inline" id="withdrawStep4">
                             <div class="step-icon-inline" id="withdrawStep4Icon">🎉</div>
-                            <div class="step-text-inline" data-i18n="withdraw.step.complete">完成</div>
+                            <div class="step-text-inline" data-i18n="withdraw.step.complete">Complete</div>
                         </div>
                     </div>
                     
-                    <div class="progress-description" id="withdrawProgressDescription" data-i18n="withdraw.progress.waiting">等待开始...</div>
+                    <div class="progress-description" id="withdrawProgressDescription" data-i18n="withdraw.progress.waiting">Waiting to start...</div>
                 </div>
             </div>
 
             <div class="modal-buttons" style="margin-top: 20px;">
-                <button class="modal-btn secondary" onclick="closeBalanceModal()" style="width: 100%;" data-i18n="balance.close">关闭</button>
+                <button class="modal-btn secondary" onclick="closeBalanceModal()" style="width: 100%;" data-i18n="balance.close">Close</button>
             </div>
         </div>
     </div>
@@ -1404,52 +1404,52 @@
     <div class="modal-overlay" id="userInfoModal">
         <div class="modal">
             <div class="modal-header">
-                <h2 data-i18n="userInfo.title">👤 用户信息</h2>
+                <h2 data-i18n="userInfo.title">👤 User Information</h2>
             </div>
 
             <div class="info-box" style="margin-bottom: 15px;">
-                <div style="font-weight: 700; color: var(--neon-cyan); margin-bottom: 10px; text-align: center;" data-i18n="userInfo.basicInfo">📋 基本信息</div>
+                <div style="font-weight: 700; color: var(--neon-cyan); margin-bottom: 10px; text-align: center;" data-i18n="userInfo.basicInfo">📋 Basic Information</div>
                 <div class="info-row">
                     <span class="info-label" data-i18n="userInfo.uid">UID:</span>
                     <span class="info-value" id="modalUid" style="font-size: 12px;">--</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label" data-i18n="userInfo.username">用户名:</span>
+                    <span class="info-label" data-i18n="userInfo.username">Username:</span>
                     <span class="info-value" id="modalUsername">--</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label" data-i18n="userInfo.wallet">钱包地址:</span>
+                    <span class="info-label" data-i18n="userInfo.wallet">Wallet Address:</span>
                     <span class="info-value" id="modalAddress" style="font-size: 11px;">--</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label" data-i18n="userInfo.registered">注册时间:</span>
+                    <span class="info-label" data-i18n="userInfo.registered">Registration Time:</span>
                     <span class="info-value" id="modalCreatedAt">--</span>
                 </div>
             </div>
 
             <div class="info-box" style="margin-bottom: 0;">
-                <div style="font-weight: 700; color: var(--neon-cyan); margin-bottom: 10px; text-align: center;" data-i18n="userInfo.statistics">📊 账户统计</div>
+                <div style="font-weight: 700; color: var(--neon-cyan); margin-bottom: 10px; text-align: center;" data-i18n="userInfo.statistics">📊 Account Statistics</div>
                 <div class="info-row">
-                    <span class="info-label" data-i18n="userInfo.totalDeposit">总充值:</span>
+                    <span class="info-label" data-i18n="userInfo.totalDeposit">Total Deposit:</span>
                     <span class="info-value" id="totalDeposit">-- DP</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label" data-i18n="userInfo.totalWithdraw">总提现:</span>
+                    <span class="info-label" data-i18n="userInfo.totalWithdraw">Total Withdraw:</span>
                     <span class="info-value" id="totalWithdraw">-- DP</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label" data-i18n="userInfo.gameSpend">游戏消费:</span>
+                    <span class="info-label" data-i18n="userInfo.gameSpend">Game Spend:</span>
                     <span class="info-value" id="totalSpend">-- DP</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label" data-i18n="userInfo.gameReward">游戏奖励:</span>
+                    <span class="info-label" data-i18n="userInfo.gameReward">Game Reward:</span>
                     <span class="info-value" id="totalReward">-- DP</span>
                 </div>
             </div>
 
             <div class="modal-buttons" style="margin-top: 20px;">
-                <button class="modal-btn secondary" onclick="loadAllData()" style="flex: 1;" data-i18n="userInfo.refresh">刷新数据</button>
-                <button class="modal-btn primary" onclick="closeUserInfoModal()" style="flex: 1;" data-i18n="balance.close">关闭</button>
+                <button class="modal-btn secondary" onclick="loadAllData()" style="flex: 1;" data-i18n="userInfo.refresh">Refresh Data</button>
+                <button class="modal-btn primary" onclick="closeUserInfoModal()" style="flex: 1;" data-i18n="balance.close">Close</button>
             </div>
         </div>
     </div>
