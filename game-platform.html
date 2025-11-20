@@ -1580,6 +1580,9 @@
                     await loadAllData();
                     await loadUserInfo();
                     
+                    // 更新模态窗口中的余额显示
+                    await updateBalanceModalData();
+                    
                     hideDepositProgress();
                     showToast('充值成功! 可以开始游戏了 🎮', 'success');
                     
@@ -1817,6 +1820,10 @@
                     updateWithdrawProgressStep(3, 'active', '正在更新余额...');
                     document.getElementById('withdrawAmount').value = '';
                     await loadAllData();
+                    
+                    // 更新模态窗口中的余额显示
+                    await updateBalanceModalData();
+                    
                     updateWithdrawProgressStep(3, 'completed', '余额更新完成✅', '✅');
                     
                     // Step 4: 完成
