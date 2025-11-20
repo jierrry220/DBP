@@ -1119,7 +1119,8 @@
 
         function verifyPassword() {
             if (currentPassword === CORRECT_PASSWORD) {
-                // Correct password - redirect
+                // Correct password - set session flag and redirect
+                sessionStorage.setItem('gamePlatformAuth', 'true');
                 closePasswordModal();
                 window.location.href = 'game-platform.html';
             } else {
