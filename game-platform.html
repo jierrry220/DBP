@@ -960,15 +960,15 @@
                     document.getElementById('depositAmount').value = '';
                     await loadAllData();
                     
-                    // 检查是否需要设置用户名
+                    // 先加载用户信息
+                    await loadUserInfo();
+                    
+                    // 检查是否需要设置用户名（使用返回的数据判断）
                     if ((data.isFirstDeposit || data.isOldUserUpgrade) && data.user && !data.user.username) {
                         setTimeout(() => {
-                            openUsernameModal();
+                            openUsernameModal(true); // 传入 true 强制打开
                         }, 1500);
                     }
-                    
-                    // 加载用户信息
-                    await loadUserInfo();
                 } else if (data.pending) {
                     // 确认数不足，显示充值中状态
                     showToast(`🔄 充值中: ${data.confirmations}/${data.requiredConfirmations} 确认 - 请稍候...`, 'info');
@@ -1018,15 +1018,15 @@
                         showToast('✅ 充值成功! 可以开始游戏了 🎮', 'success');
                         await loadAllData();
                         
-                        // 检查是否需要设置用户名
+                        // 先加载用户信息
+                        await loadUserInfo();
+                        
+                        // 检查是否需要设置用户名（使用返回的数据判断）
                         if ((data.isFirstDeposit || data.isOldUserUpgrade) && data.user && !data.user.username) {
                             setTimeout(() => {
-                                openUsernameModal();
+                                openUsernameModal(true); // 传入 true 强制打开
                             }, 1500);
                         }
-                        
-                        // 加载用户信息
-                        await loadUserInfo();
                     } else if (data.pending) {
                         // 还在等待确认，显示进度
                         const progress = Math.floor((data.confirmations / data.requiredConfirmations) * 100);
@@ -1244,9 +1244,16 @@
         }
 
         // 打开用户名设置弹窗
-        function openUsernameModal() {
-            if (currentUserInfo && currentUserInfo.username) {
+        function openUsernameModal(forceOpen = false) {
+            // 如果不是强制打开，检查是否已设置用户名
+            if (!forceOpen && currentUserInfo && currentUserInfo.username) {
                 showToast('你已经设置过用户名了', 'info');
+                return;
+            }
+            
+            // 强制打开时，再次验证当前用户信息
+            if (forceOpen && currentUserInfo && currentUserInfo.username) {
+                console.log('用户已设置用户名，跳过弹窗');
                 return;
             }
             
