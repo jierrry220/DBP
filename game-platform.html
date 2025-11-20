@@ -480,13 +480,20 @@
         <!-- Game Demo Section -->
         <div class="game-section">
             <h2>🎲 示例游戏: 猜大小</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 20px;">每次游戏消耗 1 DP，猜对翻倍奖励！</p>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">选择投注金额，猜对翻倍奖励！</p>
 
             <div class="game-demo">
                 <div class="game-icon">🎰</div>
                 <div id="gameStatus" style="font-size: 20px; color: var(--text-secondary); margin-bottom: 20px;">
                     选择大小开始游戏
                 </div>
+                
+                <!-- 投注金额输入框 -->
+                <div class="form-group" style="width: 300px; margin-bottom: 20px;">
+                    <label class="form-label">投注金额 (DP)</label>
+                    <input type="number" class="form-input" id="betAmount" placeholder="输入投注金额" min="1" step="0.01" value="1">
+                </div>
+                
                 <div class="game-controls">
                     <button class="game-btn" onclick="playGame('big')" id="bigBtn">猜大 (6-12)</button>
                     <button class="game-btn" onclick="playGame('small')" id="smallBtn">猜小 (1-5)</button>
@@ -829,19 +836,26 @@
 
             if (gameInProgress) return;
 
+            // 获取用户输入的投注金额
+            const betAmount = parseFloat(document.getElementById('betAmount').value);
+            if (!betAmount || betAmount < 1) {
+                showToast('投注金额不能少于 1 DP', 'error');
+                return;
+            }
+
             try {
                 gameInProgress = true;
                 document.getElementById('bigBtn').disabled = true;
                 document.getElementById('smallBtn').disabled = true;
                 document.getElementById('gameResult').textContent = '';
 
-                // 扣除 1 DP
+                // 扣除投注金额
                 const spendResponse = await fetch(`${CONFIG.API_BASE}?action=spend`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         address: userAddress,
-                        amount: 1,
+                        amount: betAmount,
                         gameId: 'dice-game',
                         description: '猜大小游戏'
                     })
@@ -864,13 +878,14 @@
                 document.getElementById('gameStatus').textContent = `骰子点数: ${dice}`;
 
                 if (won) {
-                    // 赢了，获得 2 DP
+                    // 赢了，获得投注金额的2倍
+                    const rewardAmount = betAmount * 2;
                     const rewardResponse = await fetch(`${CONFIG.API_BASE}?action=reward`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             address: userAddress,
-                            amount: 2,
+                            amount: rewardAmount,
                             gameId: 'dice-game',
                             description: '猜大小获胜'
                         })
@@ -878,14 +893,14 @@
 
                     const rewardData = await rewardResponse.json();
                     if (rewardData.success) {
-                        document.getElementById('gameResult').textContent = '🎉 恭喜！你赢了 2 DP!';
+                        document.getElementById('gameResult').textContent = `🎉 恭喜！你赢了 ${rewardAmount.toFixed(2)} DP!`;
                         document.getElementById('gameResult').style.color = '#4caf50';
-                        showToast('恭喜获胜! +2 DP 🎉', 'success');
+                        showToast(`恭喜获胜! +${rewardAmount.toFixed(2)} DP 🎉`, 'success');
                     }
                 } else {
                     document.getElementById('gameResult').textContent = '😢 很遗憾，你输了！';
                     document.getElementById('gameResult').style.color = '#f44336';
-                    showToast('很遗憾输了 -1 DP', 'error');
+                    showToast(`很遗憾输了 -${betAmount.toFixed(2)} DP`, 'error');
                 }
 
                 await loadAllData();
@@ -899,8 +914,24 @@
             }
         }
 
+        // 验证访问权限
+        function checkAccess() {
+            const hasAuth = sessionStorage.getItem('gamePlatformAuth');
+            if (!hasAuth) {
+                // 没有权限,重定向回 gamefi.html
+                window.location.href = 'gamefi.html';
+                return false;
+            }
+            return true;
+        }
+
         // 页面加载完成
         window.addEventListener('load', () => {
+            // 先检查访问权限
+            if (!checkAccess()) {
+                return;
+            }
+
             const walletProvider = window.okxwallet || window.ethereum;
             if (walletProvider) {
                 walletProvider.request({ method: 'eth_accounts' }).then(accounts => {
