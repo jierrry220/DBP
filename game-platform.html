@@ -1167,6 +1167,39 @@
                 </div>
 
                 <button class="modal-btn primary" onclick="withdrawFromGame()" id="withdrawBtn" style="width: 100%;">提现到钱包</button>
+                
+                <!-- 提现进度条 -->
+                <div class="deposit-progress-bar" id="withdrawProgressBar">
+                    <div class="progress-info">
+                        <div class="progress-title">💸 正在提现</div>
+                        <div class="progress-amount" id="withdrawProgressAmount">0 DP</div>
+                    </div>
+                    
+                    <div class="progress-track">
+                        <div class="progress-fill" id="withdrawProgressFill"></div>
+                    </div>
+                    
+                    <div class="progress-steps-inline">
+                        <div class="progress-step-inline" id="withdrawStep1">
+                            <div class="step-icon-inline" id="withdrawStep1Icon">📋</div>
+                            <div class="step-text-inline">验证</div>
+                        </div>
+                        <div class="progress-step-inline" id="withdrawStep2">
+                            <div class="step-icon-inline" id="withdrawStep2Icon">💰</div>
+                            <div class="step-text-inline">处理</div>
+                        </div>
+                        <div class="progress-step-inline" id="withdrawStep3">
+                            <div class="step-icon-inline" id="withdrawStep3Icon">🔁</div>
+                            <div class="step-text-inline">更新余额</div>
+                        </div>
+                        <div class="progress-step-inline" id="withdrawStep4">
+                            <div class="step-icon-inline" id="withdrawStep4Icon">🎉</div>
+                            <div class="step-text-inline">完成</div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-description" id="withdrawProgressDescription">等待开始...</div>
+                </div>
             </div>
 
             <div class="modal-buttons" style="margin-top: 20px;">
@@ -1680,6 +1713,66 @@
             setTimeout(checkConfirmation, interval);
         }
 
+        // 提现进度条控制
+        function showWithdrawProgress(amount) {
+            document.getElementById('withdrawProgressAmount').textContent = amount + ' DP';
+            document.getElementById('withdrawProgressBar').classList.add('active');
+            document.getElementById('withdrawProgressFill').style.width = '0%';
+            document.getElementById('withdrawProgressDescription').textContent = '准备提现...';
+            resetWithdrawProgressSteps();
+        }
+
+        function hideWithdrawProgress() {
+            setTimeout(() => {
+                document.getElementById('withdrawProgressBar').classList.remove('active');
+            }, 2000);
+        }
+
+        function resetWithdrawProgressSteps() {
+            for (let i = 1; i <= 4; i++) {
+                const step = document.getElementById(`withdrawStep${i}`);
+                step.classList.remove('active', 'completed', 'error');
+            }
+        }
+
+        function updateWithdrawProgressStep(stepNum, status, description, icon = null) {
+            const step = document.getElementById(`withdrawStep${stepNum}`);
+            const stepIcon = document.getElementById(`withdrawStep${stepNum}Icon`);
+            const progressFill = document.getElementById('withdrawProgressFill');
+            const progressDesc = document.getElementById('withdrawProgressDescription');
+            
+            // 移除所有步骤的状态
+            for (let i = 1; i <= 4; i++) {
+                const s = document.getElementById(`withdrawStep${i}`);
+                s.classList.remove('active', 'completed', 'error');
+            }
+            
+            // 设置当前步骤状态
+            if (status === 'active') {
+                step.classList.add('active');
+                const progress = (stepNum - 1) * 25; // 每个步骤25%
+                progressFill.style.width = progress + '%';
+            } else if (status === 'completed') {
+                step.classList.add('completed');
+                if (icon) stepIcon.textContent = icon;
+                for (let i = 1; i < stepNum; i++) {
+                    document.getElementById(`withdrawStep${i}`).classList.add('completed');
+                }
+                const progress = stepNum * 25;
+                progressFill.style.width = progress + '%';
+            } else if (status === 'error') {
+                step.classList.add('error');
+                if (icon) stepIcon.textContent = icon;
+            }
+            
+            progressDesc.textContent = description;
+            if (status === 'active') {
+                progressDesc.classList.add('active');
+            } else {
+                progressDesc.classList.remove('active');
+            }
+        }
+
         // 从游戏提现
         async function withdrawFromGame() {
             if (!signer || !userAddress) {
@@ -1697,7 +1790,16 @@
                 const withdrawBtn = document.getElementById('withdrawBtn');
                 withdrawBtn.disabled = true;
 
-                showToast('正在处理提现...', 'info');
+                // 显示进度条
+                showWithdrawProgress(amount);
+
+                // Step 1: 验证
+                updateWithdrawProgressStep(1, 'active', '验证提现信息...');
+                await new Promise(resolve => setTimeout(resolve, 500));
+                updateWithdrawProgressStep(1, 'completed', '验证完成✅', '✅');
+
+                // Step 2: 处理
+                updateWithdrawProgressStep(2, 'active', '正在处理提现请求...');
                 const response = await fetch(`${CONFIG.API_BASE}?action=withdraw`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1709,9 +1811,19 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    showToast('提现成功! DP 已转入钱包 💰', 'success');
+                    updateWithdrawProgressStep(2, 'completed', '处理完成✅', '✅');
+                    
+                    // Step 3: 更新余额
+                    updateWithdrawProgressStep(3, 'active', '正在更新余额...');
                     document.getElementById('withdrawAmount').value = '';
                     await loadAllData();
+                    updateWithdrawProgressStep(3, 'completed', '余额更新完成✅', '✅');
+                    
+                    // Step 4: 完成
+                    updateWithdrawProgressStep(4, 'completed', '🎉 提现成功！DP 已转入钱包', '🎉');
+                    
+                    hideWithdrawProgress();
+                    showToast('提现成功! DP 已转入钱包 💰', 'success');
                     
                     // 关闭模态窗口
                     closeBalanceModal();
@@ -1720,6 +1832,10 @@
                 }
             } catch (error) {
                 console.error('提现失败:', error);
+                updateWithdrawProgressStep(1, 'error', '提现失败: ' + error.message, '❌');
+                setTimeout(() => {
+                    document.getElementById('withdrawProgressBar').classList.remove('active');
+                }, 3000);
                 showToast('提现失败: ' + error.message, 'error');
             } finally {
                 document.getElementById('withdrawBtn').disabled = false;
