@@ -1235,14 +1235,15 @@
                         currentUserInfo: currentUserInfo
                     });
                     
-                    if ((data.isFirstDeposit || data.isOldUserUpgrade) && data.user && !data.user.username) {
-                        console.error('✅ [DEBUG] 需要设置用户名，2.5秒后弹出...');
+                    // 只要用户名未设置就弹窗（不需要检查isFirstDeposit）
+                    if (data.user && !data.user.username) {
+                        console.error('✅ [DEBUG] 用户名未设置，2.5秒后弹出...');
                         setTimeout(() => {
                             console.error('👉 [DEBUG] 打开用户名设置弹窗');
                             openUsernameModal(true);
                         }, 2500);
                     } else {
-                        console.error('❌ [DEBUG] 不需要设置用户名');
+                        console.error('❌ [DEBUG] 用户名已设置或用户不存在');
                     }
                 } else if (data.pending) {
                     // 确认数不足
@@ -1318,14 +1319,15 @@
                             currentUserInfo: currentUserInfo
                         });
                         
-                        if ((data.isFirstDeposit || data.isOldUserUpgrade) && data.user && !data.user.username) {
-                            console.error('✅ [DEBUG] [轮询] 需要设置用户名，2.5秒后弹出...');
+                        // 只要用户名未设置就弹窗（不需要检查isFirstDeposit）
+                        if (data.user && !data.user.username) {
+                            console.error('✅ [DEBUG] [轮询] 用户名未设置，2.5秒后弹出...');
                             setTimeout(() => {
                                 console.error('👉 [DEBUG] [轮询] 打开用户名设置弹窗');
                                 openUsernameModal(true);
                             }, 2500);
                         } else {
-                            console.error('❌ [DEBUG] [轮询] 不需要设置用户名');
+                            console.error('❌ [DEBUG] [轮询] 用户名已设置或用户不存在');
                         }
                     } else if (data.pending) {
                         // 还在等待确认，更新进度
