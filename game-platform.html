@@ -1763,7 +1763,7 @@
                     
                     // 只要用户名未设置就弹窗（不需要检查isFirstDeposit）
                     if (data.user && !data.user.username) {
-                        console.error('✅ [DEBUG] 用户名未设置，2.5秒后弹出...');
+                        console.error('✅ [DEBUG] Username not set, popup in 2.5s...');
                         setTimeout(() => {
                             console.error('👉 [DEBUG] 打开用户名设置弹窗');
                             openUsernameModal(true);
@@ -1847,7 +1847,7 @@
                         
                         // 只要用户名未设置就弹窗（不需要检查isFirstDeposit）
                         if (data.user && !data.user.username) {
-                            console.error('✅ [DEBUG] [轮询] 用户名未设置，2.5秒后弹出...');
+                            console.error('✅ [DEBUG] [Poll] Username not set, popup in 2.5s...');
                             setTimeout(() => {
                                 console.error('👉 [DEBUG] [轮询] 打开用户名设置弹窗');
                                 openUsernameModal(true);
@@ -2163,7 +2163,7 @@
                 usernameDisplay.textContent = `👤 ${currentUserInfo.username}`;
                 userInfoDisplay.style.display = 'flex';
             } else {
-                usernameDisplay.textContent = '👤 未设置';
+                usernameDisplay.textContent = '👤 null';
                 userInfoDisplay.style.display = 'flex';
             }
         }
@@ -2288,7 +2288,7 @@
             }
             
             document.getElementById('modalUid').textContent = currentUserInfo.uid || '--';
-            document.getElementById('modalUsername').textContent = currentUserInfo.username || '未设置';
+            document.getElementById('modalUsername').textContent = currentUserInfo.username || 'null';
             document.getElementById('modalAddress').textContent = currentUserInfo.address;
             document.getElementById('modalCreatedAt').textContent = currentUserInfo.createdAt ? 
                 new Date(currentUserInfo.createdAt).toLocaleString('zh-CN') : '--';
