@@ -1508,7 +1508,7 @@
             try {
                 const walletProvider = window.okxwallet || window.ethereum;
                 if (!walletProvider) {
-                    showToast('请安装 MetaMask 或 OKX Wallet!', 'error');
+                    showToast(window.i18n?.t('toast.wallet.noProvider') || '请安装 MetaMask 或 OKX Wallet!', 'error');
                     return;
                 }
 
@@ -1522,7 +1522,7 @@
                             params: [{ chainId: CONFIG.CHAIN_ID }]
                         });
                     } catch (error) {
-                        showToast('请切换到 Berachain 主网', 'error');
+                        showToast(window.i18n?.t('toast.wallet.switchNetwork') || '请切换到 Berachain 主网', 'error');
                         return;
                     }
                 }
@@ -1535,12 +1535,12 @@
                 document.getElementById('connectBtn').textContent = shortAddr;
                 document.getElementById('connectBtn').disabled = true;
 
-                showToast('钱包连接成功!', 'success');
+                showToast(window.i18n?.t('toast.wallet.connected') || '钱包连接成功!', 'success');
                 await loadAllData();
                 await loadUserInfo(); // 加载用户信息
             } catch (error) {
                 console.error('连接钱包失败:', error);
-                showToast('连接钱包失败: ' + error.message, 'error');
+                showToast((window.i18n?.t('toast.wallet.failed') || '连接钱包失败') + ': ' + error.message, 'error');
             }
         }
 
@@ -1572,7 +1572,8 @@
             
             if (data.success) {
                 const balance = data.data.balance.toFixed(2);
-                document.getElementById('balanceDisplay').textContent = '余额: ' + balance + ' DP';
+                const balanceText = (window.i18n?.t('gamePlatform.balance') || '余额: ') + balance + ' DP';
+                document.getElementById('balanceDisplay').innerHTML = `<span data-i18n="gamePlatform.balance">${window.i18n?.t('gamePlatform.balance') || '余额: '}</span>${balance} DP`;
             }
         }
 
@@ -1676,13 +1677,13 @@
         // 充值到游戏
         async function depositToGame() {
             if (!signer || !userAddress) {
-                showToast('请先连接钱包', 'error');
+                showToast(window.i18n?.t('game.msg.connectWallet') || '请先连接钱包', 'error');
                 return;
             }
 
             const amount = document.getElementById('depositAmount').value;
             if (!amount || parseFloat(amount) < 1) {
-                showToast('充值金额不能少于 1 DP', 'error');
+                showToast(window.i18n?.t('game.msg.invalidBet') || '充值金额不能少于 1 DP', 'error');
                 return;
             }
 
@@ -1744,7 +1745,7 @@
                     await updateBalanceModalData();
                     
                     hideDepositProgress();
-                    showToast('充值成功! 可以开始游戏了 🎮', 'success');
+                    showToast(window.i18n?.t('game.msg.depositSuccess') || '充值成功! 可以开始游戏了 🎮', 'success');
                     
                     // 关闭模态窗口
                     closeBalanceModal();
@@ -1784,7 +1785,7 @@
                 setTimeout(() => {
                     document.getElementById('depositProgressBar').classList.remove('active');
                 }, 3000);
-                showToast('充值失败: ' + (error.reason || error.message), 'error');
+                showToast((window.i18n?.t('game.msg.depositFailed') || '充值失败') + ': ' + (error.reason || error.message), 'error');
             } finally {
                 document.getElementById('depositBtn').disabled = false;
             }
@@ -1831,7 +1832,7 @@
                         await loadUserInfo();
                         
                         hideDepositProgress();
-                        showToast('✅ 充值成功! 可以开始游戏了 🎮', 'success');
+                        showToast(window.i18n?.t('game.msg.depositSuccess') || '✅ 充值成功! 可以开始游戏了 🎮', 'success');
                         
                         // 检查是否需要设置用户名
                         console.error('👤 [DEBUG] [轮询] 检查用户名设置:', {
@@ -1939,13 +1940,13 @@
         // 从游戏提现
         async function withdrawFromGame() {
             if (!signer || !userAddress) {
-                showToast('请先连接钱包', 'error');
+                showToast(window.i18n?.t('game.msg.connectWallet') || '请先连接钱包', 'error');
                 return;
             }
 
             const amount = document.getElementById('withdrawAmount').value;
             if (!amount || parseFloat(amount) < 1) {
-                showToast('提现金额不能少于 1 DP', 'error');
+                showToast(window.i18n?.t('game.msg.invalidBet') || '提现金额不能少于 1 DP', 'error');
                 return;
             }
 
@@ -1990,7 +1991,7 @@
                     updateWithdrawProgressStep(4, 'completed', '🎉 提现成功！DP 已转入钱包', '🎉');
                     
                     hideWithdrawProgress();
-                    showToast('提现成功! DP 已转入钱包 💰', 'success');
+                    showToast(window.i18n?.t('game.msg.withdrawSuccess') || '提现成功! DP 已转入钱包 💰', 'success');
                     
                     // 关闭模态窗口
                     closeBalanceModal();
@@ -2003,7 +2004,7 @@
                 setTimeout(() => {
                     document.getElementById('withdrawProgressBar').classList.remove('active');
                 }, 3000);
-                showToast('提现失败: ' + error.message, 'error');
+                showToast((window.i18n?.t('game.msg.withdrawFailed') || '提现失败') + ': ' + error.message, 'error');
             } finally {
                 document.getElementById('withdrawBtn').disabled = false;
             }
@@ -2012,7 +2013,7 @@
         // 游戏: 猜大小
         async function playGame(choice) {
             if (!userAddress) {
-                showToast('请先连接钱包', 'error');
+                showToast(window.i18n?.t('game.msg.connectWallet') || '请先连接钱包', 'error');
                 return;
             }
 
@@ -2021,7 +2022,7 @@
             // 获取用户输入的投注金额
             const betAmount = parseFloat(document.getElementById('betAmount').value);
             if (!betAmount || betAmount < 1) {
-                showToast('投注金额不能少于 1 DP', 'error');
+                showToast(window.i18n?.t('game.msg.invalidBet') || '投注金额不能少于 1 DP', 'error');
                 return;
             }
 
@@ -2049,7 +2050,7 @@
                 }
 
                 // 模拟摇骰子
-                document.getElementById('gameStatus').textContent = '摇骰子中...';
+                document.getElementById('gameStatus').textContent = window.i18n?.t('game.msg.playing') || '摇骰子中...';
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
                 // 生成随机数 1-12
@@ -2057,7 +2058,8 @@
                 const isBig = dice >= 6;
                 const won = (choice === 'big' && isBig) || (choice === 'small' && !isBig);
 
-                document.getElementById('gameStatus').textContent = `骰子点数: ${dice}`;
+                const resultText = window.i18n?.t('game.msg.result') || '骰子点数';
+                document.getElementById('gameStatus').textContent = `${resultText}: ${dice}`;
 
                 if (won) {
                     // 赢了，获得投注金额的2倍
@@ -2075,14 +2077,16 @@
 
                     const rewardData = await rewardResponse.json();
                     if (rewardData.success) {
-                        document.getElementById('gameResult').textContent = `🎉 恭喜！你赢了 ${rewardAmount.toFixed(2)} DP!`;
+                        const winText = window.i18n?.t('game.msg.win') || '恭喜！你赢了';
+                        document.getElementById('gameResult').textContent = `🎉 ${winText} ${rewardAmount.toFixed(2)} DP!`;
                         document.getElementById('gameResult').style.color = '#4caf50';
-                        showToast(`恭喜获胜! +${rewardAmount.toFixed(2)} DP 🎉`, 'success');
+                        showToast(`${winText}! +${rewardAmount.toFixed(2)} DP 🎉`, 'success');
                     }
                 } else {
-                    document.getElementById('gameResult').textContent = '😢 很遗憾，你输了！';
+                    const loseText = window.i18n?.t('game.msg.lose') || '很遗憾，你输了';
+                    document.getElementById('gameResult').textContent = `😢 ${loseText}！`;
                     document.getElementById('gameResult').style.color = '#f44336';
-                    showToast(`很遗憾输了 -${betAmount.toFixed(2)} DP`, 'error');
+                    showToast(`${loseText} -${betAmount.toFixed(2)} DP`, 'error');
                 }
 
                 await loadAllData();
