@@ -143,6 +143,15 @@
             padding: 8px 20px;
             color: var(--neon-cyan);
             font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .balance-display:hover {
+            background: rgba(0, 196, 239, 0.2);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 196, 239, 0.4);
+            transform: translateY(-2px);
         }
 
         .connect-btn {
@@ -760,6 +769,46 @@
             border-color: rgba(0, 196, 239, 0.5);
         }
 
+        /* ========== Balance Modal ========== */
+        .balance-modal-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .balance-tab {
+            flex: 1;
+            padding: 12px;
+            background: rgba(0, 196, 239, 0.05);
+            border: 2px solid rgba(0, 196, 239, 0.2);
+            border-radius: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .balance-tab:hover {
+            background: rgba(0, 196, 239, 0.1);
+            border-color: rgba(0, 196, 239, 0.4);
+        }
+
+        .balance-tab.active {
+            background: rgba(0, 196, 239, 0.2);
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 196, 239, 0.3);
+        }
+
+        .balance-tab-content {
+            display: none;
+        }
+
+        .balance-tab-content.active {
+            display: block;
+        }
+
         /* ========== Footer ========== */
         .footer {
             padding: 60px 5% 30px;
@@ -963,7 +1012,7 @@
             <div class="user-info-display" id="userInfoDisplay" style="display: none;" onclick="showUserInfoModal()">
                 <span id="usernameDisplay">👤 --</span>
             </div>
-            <div class="balance-display" id="balanceDisplay">余额: -- DP</div>
+            <div class="balance-display" id="balanceDisplay" onclick="openBalanceModal()">余额: -- DP</div>
             <button class="connect-btn" id="connectBtn" onclick="connectWallet()">连接钱包</button>
             <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Toggle menu">
                 <span></span>
@@ -996,58 +1045,6 @@
 
         <!-- Balance Management Cards -->
         <div class="cards-grid">
-            <!-- 充值卡片 -->
-            <div class="card">
-                <h2>💰 充值 DP Token</h2>
-                <div class="info-box">
-                    <div class="info-row">
-                        <span class="info-label">钱包余额:</span>
-                        <span class="info-value" id="walletBalance">-- DP</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">游戏余额:</span>
-                        <span class="info-value" id="gameBalance">-- DP</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">平台地址:</span>
-                        <span class="info-value" style="font-size: 11px;">0xE332...0FB</span>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">充值数量 (DP)</label>
-                    <input type="number" class="form-input" id="depositAmount" placeholder="输入充值数量" min="1" step="0.01">
-                </div>
-
-                <button class="action-btn" onclick="depositToGame()" id="depositBtn">充值到游戏平台</button>
-            </div>
-
-            <!-- 提现卡片 -->
-            <div class="card">
-                <h2>💎 提现到钱包</h2>
-                <div class="info-box">
-                    <div class="info-row">
-                        <span class="info-label">可提现余额:</span>
-                        <span class="info-value" id="withdrawableBalance">-- DP</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">最小提现:</span>
-                        <span class="info-value">1 DP</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">提现手续费:</span>
-                        <span class="info-value">0 DP</span>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">提现数量 (DP)</label>
-                    <input type="number" class="form-input" id="withdrawAmount" placeholder="输入提现数量" min="1" step="0.01">
-                </div>
-
-                <button class="action-btn secondary" onclick="withdrawFromGame()" id="withdrawBtn">提现到钱包</button>
-            </div>
-
             <!-- 统计卡片 -->
             <div class="card">
                 <h2>📊 账户统计</h2>
@@ -1101,6 +1098,76 @@
             <p style="color: var(--text-secondary); font-size: 14px; margin-top: 20px;">
                 💡 提示: 这只是一个简单示例，你可以开发更复杂的游戏！
             </p>
+        </div>
+    </div>
+
+    <!-- 充值/提现模态窗口 -->
+    <div class="modal-overlay" id="balanceModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>💰 余额管理</h2>
+                <p>充值和提现您的 DP Token</p>
+            </div>
+
+            <!-- Tab 切换 -->
+            <div class="balance-modal-tabs">
+                <div class="balance-tab active" onclick="switchBalanceTab('deposit')">
+                    💵 充值
+                </div>
+                <div class="balance-tab" onclick="switchBalanceTab('withdraw')">
+                    💸 提现
+                </div>
+            </div>
+
+            <!-- 充值 Tab -->
+            <div class="balance-tab-content active" id="depositTab">
+                <div class="info-box" style="margin-bottom: 20px;">
+                    <div class="info-row">
+                        <span class="info-label">钱包余额:</span>
+                        <span class="info-value" id="modalWalletBalance">-- DP</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">游戏余额:</span>
+                        <span class="info-value" id="modalGameBalance">-- DP</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">充值数量 (DP)</label>
+                    <input type="number" class="form-input" id="depositAmount" placeholder="输入充值数量" min="1" step="0.01">
+                </div>
+
+                <button class="modal-btn primary" onclick="depositToGame()" id="depositBtn" style="width: 100%;">充值到游戏平台</button>
+            </div>
+
+            <!-- 提现 Tab -->
+            <div class="balance-tab-content" id="withdrawTab">
+                <div class="info-box" style="margin-bottom: 20px;">
+                    <div class="info-row">
+                        <span class="info-label">可提现余额:</span>
+                        <span class="info-value" id="modalWithdrawableBalance">-- DP</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">最小提现:</span>
+                        <span class="info-value">1 DP</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">提现手续费:</span>
+                        <span class="info-value">0 DP</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">提现数量 (DP)</label>
+                    <input type="number" class="form-input" id="withdrawAmount" placeholder="输入提现数量" min="1" step="0.01">
+                </div>
+
+                <button class="modal-btn primary" onclick="withdrawFromGame()" id="withdrawBtn" style="width: 100%;">提现到钱包</button>
+            </div>
+
+            <div class="modal-buttons" style="margin-top: 20px;">
+                <button class="modal-btn secondary" onclick="closeBalanceModal()" style="width: 100%;">关闭</button>
+            </div>
         </div>
     </div>
 
@@ -1314,10 +1381,7 @@
 
         // 加载钱包余额
         async function loadWalletBalance() {
-            const dpToken = new ethers.Contract(CONFIG.DP_TOKEN, DP_TOKEN_ABI, provider);
-            const balance = await dpToken.balanceOf(userAddress);
-            const formatted = parseFloat(ethers.utils.formatEther(balance)).toFixed(2);
-            document.getElementById('walletBalance').textContent = formatted + ' DP';
+            // 仅用于内部计算，不再显示在页面上
         }
 
         // 加载游戏余额
@@ -1327,9 +1391,7 @@
             
             if (data.success) {
                 const balance = data.data.balance.toFixed(2);
-                document.getElementById('gameBalance').textContent = balance + ' DP';
                 document.getElementById('balanceDisplay').textContent = '余额: ' + balance + ' DP';
-                document.getElementById('withdrawableBalance').textContent = balance + ' DP';
             }
         }
 
@@ -1500,6 +1562,9 @@
                     hideDepositProgress();
                     showToast('充值成功! 可以开始游戏了 🎮', 'success');
                     
+                    // 关闭模态窗口
+                    closeBalanceModal();
+                    
                     // 检查是否需要设置用户名
                     console.error('👤 [DEBUG] 检查用户名设置:', {
                         isFirstDeposit: data.isFirstDeposit,
@@ -1659,6 +1724,9 @@
                     showToast('提现成功! DP 已转入钱包 💰', 'success');
                     document.getElementById('withdrawAmount').value = '';
                     await loadAllData();
+                    
+                    // 关闭模态窗口
+                    closeBalanceModal();
                 } else {
                     throw new Error(data.error);
                 }
@@ -1968,6 +2036,74 @@
         document.getElementById('userInfoModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeUserInfoModal();
+            }
+        });
+
+        // ========== 余额管理模态窗口 ==========
+        
+        // 打开余额模态窗口
+        function openBalanceModal() {
+            if (!userAddress) {
+                showToast('请先连接钱包', 'error');
+                return;
+            }
+            
+            // 更新模态窗口中的余额显示
+            updateBalanceModalData();
+            
+            const modal = document.getElementById('balanceModal');
+            modal.classList.add('active');
+        }
+
+        // 关闭余额模态窗口
+        function closeBalanceModal() {
+            const modal = document.getElementById('balanceModal');
+            modal.classList.remove('active');
+        }
+
+        // 切换余额 Tab
+        function switchBalanceTab(tab) {
+            // 移除所有 active 类
+            document.querySelectorAll('.balance-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.balance-tab-content').forEach(c => c.classList.remove('active'));
+            
+            // 添加 active 类
+            if (tab === 'deposit') {
+                document.querySelector('.balance-tab:first-child').classList.add('active');
+                document.getElementById('depositTab').classList.add('active');
+            } else {
+                document.querySelector('.balance-tab:last-child').classList.add('active');
+                document.getElementById('withdrawTab').classList.add('active');
+            }
+        }
+
+        // 更新模态窗口数据
+        async function updateBalanceModalData() {
+            try {
+                // 更新钱包余额
+                const dpToken = new ethers.Contract(CONFIG.DP_TOKEN, DP_TOKEN_ABI, provider);
+                const balance = await dpToken.balanceOf(userAddress);
+                const formatted = parseFloat(ethers.utils.formatEther(balance)).toFixed(2);
+                document.getElementById('modalWalletBalance').textContent = formatted + ' DP';
+                
+                // 更新游戏余额
+                const response = await fetch(`${CONFIG.API_BASE}?action=getBalance&address=${userAddress}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const gameBalance = data.data.balance.toFixed(2);
+                    document.getElementById('modalGameBalance').textContent = gameBalance + ' DP';
+                    document.getElementById('modalWithdrawableBalance').textContent = gameBalance + ' DP';
+                }
+            } catch (error) {
+                console.error('更新模态窗口数据失败:', error);
+            }
+        }
+
+        // 点击弹窗外部关闭
+        document.getElementById('balanceModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeBalanceModal();
             }
         });
 
