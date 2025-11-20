@@ -1372,8 +1372,8 @@
     <div class="modal-overlay" id="usernameModal">
         <div class="modal">
             <div class="modal-header">
-                <h2>🎉 设置你的游戏用户名</h2>
-                <p>欢迎来到 Debear Party！请设置一个永久的用户名</p>
+                <h2 data-i18n="username.title">🎉 Set Your Game Username</h2>
+                <p data-i18n="username.subtitle">Welcome to Debear Party! Please set a permanent username</p>
             </div>
 
             <div class="username-input-group">
@@ -1381,21 +1381,22 @@
                     type="text" 
                     class="username-input" 
                     id="usernameInput" 
-                    placeholder="输入3-20个字符的用户名"
+                    data-i18n-placeholder="username.placeholder"
+                    placeholder="Enter 3-20 characters username"
                     maxlength="20"
                     oninput="validateUsernameInput()"
                 >
-                <div class="username-hint">
-                    • 支持字母、数字、下划线、中文<br>
-                    • 长度 3-20 个字符<br>
-                    • <strong>一旦设置，永久不可修改</strong>
+                <div class="username-hint" id="usernameHint">
+                    <span data-i18n="username.hint1">• Support letters, numbers, underscores, Chinese characters</span><br>
+                    <span data-i18n="username.hint2">• Length 3-20 characters</span><br>
+                    <span data-i18n="username.hint3">• <strong>Once set, it cannot be changed</strong></span>
                 </div>
                 <div class="validation-message" id="validationMessage" style="display: none;"></div>
             </div>
 
             <div class="modal-buttons">
-                <button class="modal-btn secondary" onclick="closeUsernameModal()">稍后设置</button>
-                <button class="modal-btn primary" id="confirmUsernameBtn" onclick="confirmUsername()" disabled>确认设置</button>
+                <button class="modal-btn secondary" onclick="closeUsernameModal()" data-i18n="username.later">Set Later</button>
+                <button class="modal-btn primary" id="confirmUsernameBtn" onclick="confirmUsername()" disabled data-i18n="username.confirm">Confirm</button>
             </div>
         </div>
     </div>
@@ -1699,29 +1700,29 @@
                 const dpToken = new ethers.Contract(CONFIG.DP_TOKEN, DP_TOKEN_ABI, signer);
 
                 // Step 1: 授权
-                updateProgressStep(1, 'active', '正在检查授权...');
+                updateProgressStep(1, 'active', window.i18n?.t('deposit.progress.checkingApproval') || 'Checking approval...');
                 const allowance = await dpToken.allowance(userAddress, CONFIG.PLATFORM_RECEIVER);
 
                 if (allowance.lt(amountWei)) {
-                    updateProgressStep(1, 'active', '请在钱包中确认授权...');
+                    updateProgressStep(1, 'active', window.i18n?.t('deposit.progress.confirmInWallet') || 'Please confirm in wallet...');
                     const approveTx = await dpToken.approve(CONFIG.PLATFORM_RECEIVER, ethers.constants.MaxUint256);
-                    updateProgressStep(1, 'active', '等待授权交易确认...');
+                    updateProgressStep(1, 'active', window.i18n?.t('deposit.progress.waitingApproval') || 'Waiting for approval transaction...');
                     await approveTx.wait();
                 }
-                updateProgressStep(1, 'completed', '授权完成✅', '✅');
+                updateProgressStep(1, 'completed', window.i18n?.t('deposit.progress.approvalComplete') || 'Approval complete✅', '✅');
 
                 // Step 2: 转账到平台
-                updateProgressStep(2, 'active', '请在钱包中确认转账...');
+                updateProgressStep(2, 'active', window.i18n?.t('deposit.progress.confirmInWallet') || 'Please confirm in wallet...');
                 const transferTx = await dpToken.transfer(CONFIG.PLATFORM_RECEIVER, amountWei);
-                updateProgressStep(2, 'active', '等待转账交易确认...');
+                updateProgressStep(2, 'active', window.i18n?.t('deposit.progress.waitingTransfer') || 'Waiting for transfer transaction...');
                 await transferTx.wait();
-                updateProgressStep(2, 'completed', '转账完成✅', '✅');
+                updateProgressStep(2, 'completed', window.i18n?.t('deposit.progress.transferComplete') || 'Transfer complete✅', '✅');
 
                 // Step 3: 区块链确认
-                updateProgressStep(3, 'active', '等待区块链确认 (0/3)...');
+                updateProgressStep(3, 'active', window.i18n?.t('deposit.progress.waitingConfirmation') || 'Waiting for blockchain confirmation...');
                 
                 // Step 4: 更新游戏余额
-                updateProgressStep(4, 'active', '正在验证充值交易...');
+                updateProgressStep(4, 'active', window.i18n?.t('deposit.progress.verifyingDeposit') || 'Verifying deposit transaction...');
                 const response = await fetch(`${CONFIG.API_BASE}?action=deposit`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1734,9 +1735,9 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    updateProgressStep(3, 'completed', '区块链确认完成✅', '✅');
-                    updateProgressStep(4, 'completed', '余额更新完成✅', '✅');
-                    updateProgressStep(5, 'completed', '🎉 充值成功！可以开始游戏了', '🎉');
+                    updateProgressStep(3, 'completed', window.i18n?.t('deposit.progress.transferComplete') || 'Transfer complete✅', '✅');
+                    updateProgressStep(4, 'completed', window.i18n?.t('deposit.progress.balanceUpdated') || 'Balance updated complete✅', '✅');
+                    updateProgressStep(5, 'completed', window.i18n?.t('deposit.progress.success') || '🎉 Deposit successful! You can start playing now', '🎉');
                     
                     document.getElementById('depositAmount').value = '';
                     await loadAllData();
@@ -1782,7 +1783,7 @@
                 }
             } catch (error) {
                 console.error('充值失败:', error);
-                updateProgressStep(1, 'error', '充值失败: ' + (error.reason || error.message), '❌');
+                updateProgressStep(1, 'error', (window.i18n?.t('deposit.progress.failed') || 'Deposit failed') + ': ' + (error.reason || error.message), '❌');
                 setTimeout(() => {
                     document.getElementById('depositProgressBar').classList.remove('active');
                 }, 3000);
@@ -1883,7 +1884,7 @@
             document.getElementById('withdrawProgressAmount').textContent = amount + ' DP';
             document.getElementById('withdrawProgressBar').classList.add('active');
             document.getElementById('withdrawProgressFill').style.width = '0%';
-            document.getElementById('withdrawProgressDescription').textContent = '准备提现...';
+            document.getElementById('withdrawProgressDescription').textContent = window.i18n?.t('withdraw.progress.waiting') || 'Waiting to start...';
             resetWithdrawProgressSteps();
         }
 
@@ -1959,12 +1960,12 @@
                 showWithdrawProgress(amount);
 
                 // Step 1: 验证
-                updateWithdrawProgressStep(1, 'active', '验证提现信息...');
+                updateWithdrawProgressStep(1, 'active', window.i18n?.t('withdraw.progress.verifying') || 'Verifying withdrawal info...');
                 await new Promise(resolve => setTimeout(resolve, 500));
-                updateWithdrawProgressStep(1, 'completed', '验证完成✅', '✅');
+                updateWithdrawProgressStep(1, 'completed', window.i18n?.t('withdraw.progress.verifyComplete') || 'Verification complete✅', '✅');
 
                 // Step 2: 处理
-                updateWithdrawProgressStep(2, 'active', '正在处理提现请求...');
+                updateWithdrawProgressStep(2, 'active', window.i18n?.t('withdraw.progress.processing') || 'Processing withdrawal request...');
                 const response = await fetch(`${CONFIG.API_BASE}?action=withdraw`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1976,20 +1977,20 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    updateWithdrawProgressStep(2, 'completed', '处理完成✅', '✅');
+                    updateWithdrawProgressStep(2, 'completed', window.i18n?.t('withdraw.progress.processComplete') || 'Processing complete✅', '✅');
                     
                     // Step 3: 更新余额
-                    updateWithdrawProgressStep(3, 'active', '正在更新余额...');
+                    updateWithdrawProgressStep(3, 'active', window.i18n?.t('withdraw.progress.updatingBalance') || 'Updating balance...');
                     document.getElementById('withdrawAmount').value = '';
                     await loadAllData();
                     
                     // 更新模态窗口中的余额显示
                     await updateBalanceModalData();
                     
-                    updateWithdrawProgressStep(3, 'completed', '余额更新完成✅', '✅');
+                    updateWithdrawProgressStep(3, 'completed', window.i18n?.t('withdraw.progress.balanceUpdated') || 'Balance updated complete✅', '✅');
                     
                     // Step 4: 完成
-                    updateWithdrawProgressStep(4, 'completed', '🎉 提现成功！DP 已转入钱包', '🎉');
+                    updateWithdrawProgressStep(4, 'completed', window.i18n?.t('withdraw.progress.success') || '🎉 Withdraw successful! DP transferred to wallet', '🎉');
                     
                     hideWithdrawProgress();
                     showToast(window.i18n?.t('game.msg.withdrawSuccess') || '提现成功! DP 已转入钱包 💰', 'success');
@@ -2001,7 +2002,7 @@
                 }
             } catch (error) {
                 console.error('提现失败:', error);
-                updateWithdrawProgressStep(1, 'error', '提现失败: ' + error.message, '❌');
+                updateWithdrawProgressStep(1, 'error', (window.i18n?.t('withdraw.progress.failed') || 'Withdraw failed') + ': ' + error.message, '❌');
                 setTimeout(() => {
                     document.getElementById('withdrawProgressBar').classList.remove('active');
                 }, 3000);
