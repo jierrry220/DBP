@@ -208,7 +208,6 @@
             padding: var(--spacing-xl);
             transition: all 0.35s;
             position: relative;
-            overflow: hidden;
         }
 
         .card::before {
@@ -221,10 +220,17 @@
             background: radial-gradient(circle, rgba(233, 0, 233, 0.12) 0%, transparent 70%);
             opacity: 0;
             transition: opacity 0.35s;
+            pointer-events: none;
+            z-index: 0;
         }
 
         .card:hover::before {
             opacity: 1;
+        }
+
+        .card > * {
+            position: relative;
+            z-index: 1;
         }
 
         .card:hover {
