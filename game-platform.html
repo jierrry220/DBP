@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <script src="js/disable-console.js"></script>
+    <script src="js/i18n.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GameFi Platform - Debear Party</title>
@@ -136,6 +137,26 @@
             align-items: center;
         }
 
+        .user-info-display {
+            display: flex;
+            align-items: center;
+            background: rgba(233, 0, 233, 0.1);
+            border: 2px solid rgba(233, 0, 233, 0.3);
+            border-radius: 20px;
+            padding: 8px 20px;
+            color: var(--neon-pink);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .user-info-display:hover {
+            background: rgba(233, 0, 233, 0.2);
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 15px rgba(233, 0, 233, 0.4);
+            transform: translateY(-2px);
+        }
+
         .balance-display {
             background: rgba(0, 196, 239, 0.1);
             border: 2px solid rgba(0, 196, 239, 0.3);
@@ -152,6 +173,75 @@
             border-color: var(--neon-cyan);
             box-shadow: 0 0 15px rgba(0, 196, 239, 0.4);
             transform: translateY(-2px);
+        }
+
+        /* Language Switcher */
+        .lang-switcher {
+            position: relative;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            background: rgba(0, 196, 239, 0.1);
+            border: 2px solid rgba(0, 196, 239, 0.3);
+            border-radius: 20px;
+            color: var(--neon-cyan);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            min-width: 50px;
+        }
+
+        .lang-btn:hover {
+            background: rgba(0, 196, 239, 0.2);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 12px rgba(0, 196, 239, 0.4);
+        }
+
+        .lang-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: rgba(10, 14, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(0, 196, 239, 0.3);
+            border-radius: 12px;
+            padding: 8px;
+            min-width: 140px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 0 8px 24px rgba(0, 196, 239, 0.2);
+        }
+
+        .lang-switcher:hover .lang-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .lang-option {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .lang-option:hover {
+            background: rgba(0, 196, 239, 0.1);
+            color: var(--neon-cyan);
+        }
+
+        .lang-option.active {
+            background: rgba(0, 196, 239, 0.15);
+            color: var(--neon-cyan);
+            font-weight: 600;
         }
 
         .connect-btn {
@@ -958,6 +1048,32 @@
             font-weight: 700;
         }
 
+        /* Mobile Language Selector */
+        .mobile-lang-selector {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(0, 196, 239, 0.2);
+        }
+
+        .mobile-lang-selector .lang-option {
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            background: rgba(0, 196, 239, 0.05);
+            border: 2px solid rgba(0, 196, 239, 0.2);
+            transition: all 0.3s;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .mobile-lang-selector .lang-option:hover,
+        .mobile-lang-selector .lang-option.active {
+            background: rgba(0, 196, 239, 0.15);
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 196, 239, 0.3);
+        }
+
         /* ========== Responsive ========== */
         @media (max-width: 768px) {
             .navbar {
@@ -1028,8 +1144,20 @@
             <div class="user-info-display" id="userInfoDisplay" style="display: none;" onclick="showUserInfoModal()">
                 <span id="usernameDisplay">👤 --</span>
             </div>
-            <div class="balance-display" id="balanceDisplay" onclick="openBalanceModal()">余额: -- DP</div>
-            <button class="connect-btn" id="connectBtn" onclick="connectWallet()">连接钱包</button>
+            <div class="balance-display" id="balanceDisplay" onclick="openBalanceModal()"><span data-i18n="gamePlatform.balance">余额: </span>-- DP</div>
+            <!-- Language Switcher -->
+            <div class="lang-switcher">
+                <button class="lang-btn">EN</button>
+                <div class="lang-dropdown">
+                    <div class="lang-option active" data-lang="en" onclick="window.i18n?.setLanguage('en')">
+                        <span data-i18n="lang.en">English</span>
+                    </div>
+                    <div class="lang-option" data-lang="zh-TW" onclick="window.i18n?.setLanguage('zh-TW')">
+                        <span data-i18n="lang.zh">繁體中文</span>
+                    </div>
+                </div>
+            </div>
+            <button class="connect-btn" id="connectBtn" onclick="connectWallet()" data-i18n="nav.connect">连接钱包</button>
             <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Toggle menu">
                 <span></span>
                 <span></span>
@@ -1043,12 +1171,21 @@
 
     <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
-        <div class="mobile-menu-close">💎 游戏平台</div>
+        <div class="mobile-menu-close" data-i18n="gamePlatform.title">💎 游戏平台</div>
         <div class="user-info-display" id="mobileUserInfoDisplay" style="display: none; margin-bottom: 15px;" onclick="showUserInfoModal(); toggleMobileMenu();">
             <span id="mobileUsernameDisplay">👤 --</span>
         </div>
-        <div class="balance-display" id="mobileBalanceDisplay" style="margin-bottom: 15px;" onclick="openBalanceModal(); toggleMobileMenu();">余额: -- DP</div>
-        <button class="connect-btn" id="mobileConnectBtn" onclick="connectWallet(); toggleMobileMenu();" style="width: 100%; margin-bottom: 20px;">连接钱包</button>
+        <div class="balance-display" id="mobileBalanceDisplay" style="margin-bottom: 15px;" onclick="openBalanceModal(); toggleMobileMenu();"><span data-i18n="gamePlatform.balance">余额: </span>-- DP</div>
+        <button class="connect-btn" id="mobileConnectBtn" onclick="connectWallet(); toggleMobileMenu();" style="width: 100%; margin-bottom: 20px;" data-i18n="nav.connect">连接钱包</button>
+        <!-- Mobile Language Selection -->
+        <div class="mobile-lang-selector">
+            <div class="lang-option" data-lang="en" onclick="window.i18n?.setLanguage('en')">
+                <span data-i18n="lang.en">English</span>
+            </div>
+            <div class="lang-option" data-lang="zh-TW" onclick="window.i18n?.setLanguage('zh-TW')">
+                <span data-i18n="lang.zh">繁體中文</span>
+            </div>
+        </div>
     </div>
 
     <!-- Main Content -->
