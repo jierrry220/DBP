@@ -361,6 +361,171 @@
             color: var(--neon-cyan);
         }
 
+        /* ========== User System Modal ========== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(255, 0, 255, 0.15) 100%);
+            border: 2px solid rgba(0, 212, 255, 0.4);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-header h2 {
+            font-size: 28px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .modal-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .username-input-group {
+            margin-bottom: 20px;
+        }
+
+        .username-input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0, 196, 239, 0.1);
+            border: 2px solid rgba(0, 196, 239, 0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .username-input:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(0, 196, 239, 0.4);
+        }
+
+        .username-hint {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .validation-message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .validation-message.success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4caf50;
+            color: #4caf50;
+        }
+
+        .validation-message.error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+            color: #f44336;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-btn.primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .modal-btn.primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
+        }
+
+        .modal-btn.primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .user-info-display {
+            background: rgba(0, 196, 239, 0.1);
+            border: 2px solid rgba(0, 196, 239, 0.3);
+            border-radius: 15px;
+            padding: 8px 15px;
+            color: var(--neon-cyan);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-info-display:hover {
+            background: rgba(0, 196, 239, 0.15);
+            border-color: rgba(0, 196, 239, 0.5);
+        }
+
         /* ========== Responsive ========== */
         @media (max-width: 768px) {
             .header h1 {
@@ -374,6 +539,15 @@
             .game-controls {
                 flex-direction: column;
             }
+
+            .modal {
+                padding: 30px 20px;
+            }
+
+            .nav-right {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
 </head>
@@ -384,6 +558,9 @@
     <nav class="navbar">
         <a href="index.html" class="logo">🐻 Debear Party GameFi</a>
         <div class="nav-right">
+            <div class="user-info-display" id="userInfoDisplay" style="display: none;" onclick="showUserInfoModal()">
+                <span id="usernameDisplay">👤 --</span>
+            </div>
             <div class="balance-display" id="balanceDisplay">余额: -- DP</div>
             <button class="connect-btn" id="connectBtn" onclick="connectWallet()">连接钱包</button>
         </div>
@@ -507,6 +684,70 @@
         </div>
     </div>
 
+    <!-- 用户名设置弹窗 -->
+    <div class="modal-overlay" id="usernameModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>🎉 设置你的游戏用户名</h2>
+                <p>欢迎来到 Debear Party！请设置一个永久的用户名</p>
+            </div>
+
+            <div class="username-input-group">
+                <input 
+                    type="text" 
+                    class="username-input" 
+                    id="usernameInput" 
+                    placeholder="输入3-20个字符的用户名"
+                    maxlength="20"
+                    oninput="validateUsernameInput()"
+                >
+                <div class="username-hint">
+                    • 支持字母、数字、下划线、中文<br>
+                    • 长度 3-20 个字符<br>
+                    • <strong>一旦设置，永久不可修改</strong>
+                </div>
+                <div class="validation-message" id="validationMessage" style="display: none;"></div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeUsernameModal()">稍后设置</button>
+                <button class="modal-btn primary" id="confirmUsernameBtn" onclick="confirmUsername()" disabled>确认设置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户信息查看弹窗 -->
+    <div class="modal-overlay" id="userInfoModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>👤 用户信息</h2>
+            </div>
+
+            <div class="info-box" style="margin-bottom: 0;">
+                <div class="info-row">
+                    <span class="info-label">UID:</span>
+                    <span class="info-value" id="modalUid" style="font-size: 12px;">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">用户名:</span>
+                    <span class="info-value" id="modalUsername">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">钱包地址:</span>
+                    <span class="info-value" id="modalAddress" style="font-size: 11px;">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">注册时间:</span>
+                    <span class="info-value" id="modalCreatedAt">--</span>
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="modal-btn primary" onclick="closeUserInfoModal()" style="flex: none; width: 100%;">关闭</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="js/libs/particles.min.js"></script>
     <script src="js/libs/ethers-5.7.2.umd.min.js"></script>
@@ -591,6 +832,7 @@
 
                 showToast('钱包连接成功!', 'success');
                 await loadAllData();
+                await loadUserInfo(); // 加载用户信息
             } catch (error) {
                 console.error('连接钱包失败:', error);
                 showToast('连接钱包失败: ' + error.message, 'error');
@@ -605,7 +847,8 @@
                 await Promise.all([
                     loadWalletBalance(),
                     loadGameBalance(),
-                    loadStatistics()
+                    loadStatistics(),
+                    loadUserInfo() // 加载用户信息
                 ]);
             } catch (error) {
                 console.error('加载数据失败:', error);
@@ -716,6 +959,16 @@
                     showToast('充值成功! 可以开始游戏了 🎮', 'success');
                     document.getElementById('depositAmount').value = '';
                     await loadAllData();
+                    
+                    // 检查是否需要设置用户名
+                    if ((data.isFirstDeposit || data.isOldUserUpgrade) && data.user && !data.user.username) {
+                        setTimeout(() => {
+                            openUsernameModal();
+                        }, 1500);
+                    }
+                    
+                    // 加载用户信息
+                    await loadUserInfo();
                 } else if (data.pending) {
                     // 确认数不足，显示充值中状态
                     showToast(`🔄 充值中: ${data.confirmations}/${data.requiredConfirmations} 确认 - 请稍候...`, 'info');
@@ -764,6 +1017,16 @@
                         // 充值成功
                         showToast('✅ 充值成功! 可以开始游戏了 🎮', 'success');
                         await loadAllData();
+                        
+                        // 检查是否需要设置用户名
+                        if ((data.isFirstDeposit || data.isOldUserUpgrade) && data.user && !data.user.username) {
+                            setTimeout(() => {
+                                openUsernameModal();
+                            }, 1500);
+                        }
+                        
+                        // 加载用户信息
+                        await loadUserInfo();
                     } else if (data.pending) {
                         // 还在等待确认，显示进度
                         const progress = Math.floor((data.confirmations / data.requiredConfirmations) * 100);
@@ -939,6 +1202,185 @@
                         connectWallet();
                     }
                 });
+            }
+        });
+
+        // ========== 用户系统功能 ==========
+        
+        let currentUserInfo = null;
+        let usernameValidationTimeout = null;
+
+        // 加载用户信息
+        async function loadUserInfo() {
+            if (!userAddress) return;
+            
+            try {
+                const response = await fetch(`${CONFIG.API_BASE}?action=getUserInfo&address=${userAddress}`);
+                const data = await response.json();
+                
+                if (data.success && data.data.exists) {
+                    currentUserInfo = data.data;
+                    updateUserDisplay();
+                }
+            } catch (error) {
+                console.error('加载用户信息失败:', error);
+            }
+        }
+
+        // 更新用户显示
+        function updateUserDisplay() {
+            if (!currentUserInfo) return;
+            
+            const usernameDisplay = document.getElementById('usernameDisplay');
+            const userInfoDisplay = document.getElementById('userInfoDisplay');
+            
+            if (currentUserInfo.username) {
+                usernameDisplay.textContent = `👤 ${currentUserInfo.username}`;
+                userInfoDisplay.style.display = 'flex';
+            } else {
+                usernameDisplay.textContent = '👤 未设置';
+                userInfoDisplay.style.display = 'flex';
+            }
+        }
+
+        // 打开用户名设置弹窗
+        function openUsernameModal() {
+            if (currentUserInfo && currentUserInfo.username) {
+                showToast('你已经设置过用户名了', 'info');
+                return;
+            }
+            
+            const modal = document.getElementById('usernameModal');
+            modal.classList.add('active');
+            document.getElementById('usernameInput').value = '';
+            document.getElementById('validationMessage').style.display = 'none';
+            document.getElementById('confirmUsernameBtn').disabled = true;
+        }
+
+        // 关闭用户名设置弹窗
+        function closeUsernameModal() {
+            const modal = document.getElementById('usernameModal');
+            modal.classList.remove('active');
+        }
+
+        // 实时验证用户名
+        async function validateUsernameInput() {
+            const input = document.getElementById('usernameInput');
+            const message = document.getElementById('validationMessage');
+            const confirmBtn = document.getElementById('confirmUsernameBtn');
+            const username = input.value.trim();
+            
+            // 清除之前的定时器
+            if (usernameValidationTimeout) {
+                clearTimeout(usernameValidationTimeout);
+            }
+            
+            if (!username) {
+                message.style.display = 'none';
+                confirmBtn.disabled = true;
+                return;
+            }
+            
+            // 防抖，500ms后才检查
+            usernameValidationTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(`${CONFIG.API_BASE}?action=checkUsername&username=${encodeURIComponent(username)}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        if (data.data.available) {
+                            message.textContent = '✅ 用户名可用！';
+                            message.className = 'validation-message success';
+                            message.style.display = 'block';
+                            confirmBtn.disabled = false;
+                        } else {
+                            const reason = data.data.reason === 'already_taken' ? '该用户名已被使用' : data.data.error;
+                            message.textContent = '❌ ' + reason;
+                            message.className = 'validation-message error';
+                            message.style.display = 'block';
+                            confirmBtn.disabled = true;
+                        }
+                    }
+                } catch (error) {
+                    console.error('验证用户名失败:', error);
+                }
+            }, 500);
+        }
+
+        // 确认设置用户名
+        async function confirmUsername() {
+            const username = document.getElementById('usernameInput').value.trim();
+            const confirmBtn = document.getElementById('confirmUsernameBtn');
+            
+            if (!username) {
+                showToast('请输入用户名', 'error');
+                return;
+            }
+            
+            try {
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = '设置中...';
+                
+                const response = await fetch(`${CONFIG.API_BASE}?action=setUsername`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        address: userAddress,
+                        username: username
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast(`🎉 用户名设置成功：${username}`, 'success');
+                    closeUsernameModal();
+                    await loadUserInfo();
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                console.error('设置用户名失败:', error);
+                showToast('设置失败: ' + error.message, 'error');
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '确认设置';
+            }
+        }
+
+        // 显示用户信息弹窗
+        function showUserInfoModal() {
+            if (!currentUserInfo) {
+                showToast('正在加载用户信息...', 'info');
+                return;
+            }
+            
+            document.getElementById('modalUid').textContent = currentUserInfo.uid || '--';
+            document.getElementById('modalUsername').textContent = currentUserInfo.username || '未设置';
+            document.getElementById('modalAddress').textContent = currentUserInfo.address;
+            document.getElementById('modalCreatedAt').textContent = currentUserInfo.createdAt ? 
+                new Date(currentUserInfo.createdAt).toLocaleString('zh-CN') : '--';
+            
+            const modal = document.getElementById('userInfoModal');
+            modal.classList.add('active');
+        }
+
+        // 关闭用户信息弹窗
+        function closeUserInfoModal() {
+            const modal = document.getElementById('userInfoModal');
+            modal.classList.remove('active');
+        }
+
+        // 点击弹窗外部关闭
+        document.getElementById('usernameModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeUsernameModal();
+            }
+        });
+
+        document.getElementById('userInfoModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeUserInfoModal();
             }
         });
     </script>
