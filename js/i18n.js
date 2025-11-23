@@ -319,6 +319,7 @@ const translations = {
         'username.setSuccess': '🎉 Username set successfully',
         'username.enterUsername': 'Please enter username',
         'username.setFailed': 'Failed to set',
+        'username.lengthError': 'Username length must be between 3-20 characters',
         
         // Toast Messages
         'game.msg.connectWallet': 'Please connect wallet first',
@@ -653,6 +654,7 @@ const translations = {
         'username.setSuccess': '🎉 用戶名設置成功',
         'username.enterUsername': '請輸入用戶名',
         'username.setFailed': '設置失敗',
+        'username.lengthError': '用戶名長度必須在3-20個字符之間',
         
         // Toast 消息
         'game.msg.connectWallet': '請先連接錢包',

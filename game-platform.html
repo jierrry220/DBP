@@ -2139,6 +2139,16 @@
         let currentUserInfo = null;
         let usernameValidationTimeout = null;
 
+        // 用户名错误消息映射
+        function translateUsernameError(errorMsg) {
+            // 尝试匹配常见的中文错误消息
+            if (errorMsg.includes('用户名长度') || errorMsg.includes('3-20') || errorMsg.includes('字符之间')) {
+                return window.i18n?.t('username.lengthError') || 'Username length must be between 3-20 characters';
+            }
+            // 如果没有匹配，返回原消息
+            return errorMsg;
+        }
+
         // 加载用户信息
         async function loadUserInfo() {
             if (!userAddress) return;
@@ -2230,9 +2240,12 @@
                             message.style.display = 'block';
                             confirmBtn.disabled = false;
                         } else {
-                            const reason = data.data.reason === 'already_taken' ? 
-                                (window.i18n?.t('username.taken') || 'This username is already taken') : 
-                                data.data.error;
+                            let reason;
+                            if (data.data.reason === 'already_taken') {
+                                reason = window.i18n?.t('username.taken') || 'This username is already taken';
+                            } else {
+                                reason = translateUsernameError(data.data.error);
+                            }
                             message.textContent = '❌ ' + reason;
                             message.className = 'validation-message error';
                             message.style.display = 'block';
