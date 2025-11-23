@@ -1773,8 +1773,9 @@
                     }
                 } else if (data.pending) {
                     // 确认数不足
-                    updateProgressStep(3, 'active', `等待确认 (${data.confirmations}/${data.requiredConfirmations})...`);
-                    updateProgressStep(4, 'active', '等待确认完成...');
+                    const confirmText = window.i18n?.t('deposit.progress.waitingConfirm') || 'Waiting for confirmation';
+                    updateProgressStep(3, 'active', `${confirmText} (${data.confirmations}/${data.requiredConfirmations})...`);
+                    updateProgressStep(4, 'active', window.i18n?.t('deposit.progress.waitingComplete') || 'Waiting for completion...');
                     document.getElementById('depositAmount').value = '';
                     // 开始轮询
                     pollDepositConfirmation(transferTx.hash, amount, data.confirmations);
@@ -1801,8 +1802,9 @@
 
             const checkConfirmation = async () => {
                 if (attempts >= maxAttempts) {
-                    updateProgressStep(3, 'error', '确认超时，请手动刷新页面', '❌');
-                    showToast('充值确认超时，请手动刷新页面', 'error');
+                    const timeoutMsg = window.i18n?.t('deposit.progress.confirmTimeout') || 'Confirmation timeout, please refresh manually';
+                    updateProgressStep(3, 'error', timeoutMsg, '❌');
+                    showToast(timeoutMsg, 'error');
                     setTimeout(() => {
                         document.getElementById('depositProgressBar').classList.remove('active');
                     }, 3000);
@@ -1826,9 +1828,9 @@
 
                     if (data.success) {
                         // 充值成功
-                        updateProgressStep(3, 'completed', '区块链确认完成✅', '✅');
-                        updateProgressStep(4, 'completed', '余额更新完成✅', '✅');
-                        updateProgressStep(5, 'completed', '🎉 充值成功！可以开始游戏了', '🎉');
+                        updateProgressStep(3, 'completed', window.i18n?.t('deposit.progress.blockchainConfirmed') || 'Blockchain confirmed✅', '✅');
+                        updateProgressStep(4, 'completed', window.i18n?.t('deposit.progress.balanceUpdated') || 'Balance updated complete✅', '✅');
+                        updateProgressStep(5, 'completed', window.i18n?.t('deposit.progress.success') || '🎉 Deposit successful! You can start playing now', '🎉');
                         
                         await loadAllData();
                         await loadUserInfo();
@@ -1858,13 +1860,15 @@
                     } else if (data.pending) {
                         // 还在等待确认，更新进度
                         const progress = Math.floor((data.confirmations / data.requiredConfirmations) * 100);
-                        updateProgressStep(3, 'active', `等待确认 (${data.confirmations}/${data.requiredConfirmations}) - ${progress}%`);
+                        const confirmText = window.i18n?.t('deposit.progress.waitingConfirm') || 'Waiting for confirmation';
+                        updateProgressStep(3, 'active', `${confirmText} (${data.confirmations}/${data.requiredConfirmations}) - ${progress}%`);
                         console.log(`充值进度: ${data.confirmations}/${data.requiredConfirmations} (${progress}%)`);
                         setTimeout(checkConfirmation, interval);
                     } else {
                         // 其他错误
-                        updateProgressStep(4, 'error', '充值失败: ' + (data.error || data.message), '❌');
-                        showToast(`充值失败: ${data.error || data.message}`, 'error');
+                        const failedMsg = window.i18n?.t('deposit.progress.failed') || 'Deposit failed';
+                        updateProgressStep(4, 'error', `${failedMsg}: ` + (data.error || data.message), '❌');
+                        showToast(`${failedMsg}: ${data.error || data.message}`, 'error');
                         setTimeout(() => {
                             document.getElementById('depositProgressBar').classList.remove('active');
                         }, 3000);
@@ -2172,7 +2176,7 @@
         function openUsernameModal(forceOpen = false) {
             // 如果不是强制打开，检查是否已设置用户名
             if (!forceOpen && currentUserInfo && currentUserInfo.username) {
-                showToast('你已经设置过用户名了', 'info');
+                showToast(window.i18n?.t('username.alreadySet') || 'You have already set a username', 'info');
                 return;
             }
             
@@ -2221,12 +2225,14 @@
                     
                     if (data.success) {
                         if (data.data.available) {
-                            message.textContent = '✅ 用户名可用！';
+                            message.textContent = window.i18n?.t('username.available') || '✅ Username available!';
                             message.className = 'validation-message success';
                             message.style.display = 'block';
                             confirmBtn.disabled = false;
                         } else {
-                            const reason = data.data.reason === 'already_taken' ? '该用户名已被使用' : data.data.error;
+                            const reason = data.data.reason === 'already_taken' ? 
+                                (window.i18n?.t('username.taken') || 'This username is already taken') : 
+                                data.data.error;
                             message.textContent = '❌ ' + reason;
                             message.className = 'validation-message error';
                             message.style.display = 'block';
@@ -2245,13 +2251,13 @@
             const confirmBtn = document.getElementById('confirmUsernameBtn');
             
             if (!username) {
-                showToast('请输入用户名', 'error');
+                showToast(window.i18n?.t('username.enterUsername') || 'Please enter username', 'error');
                 return;
             }
             
             try {
                 confirmBtn.disabled = true;
-                confirmBtn.textContent = '设置中...';
+                confirmBtn.textContent = window.i18n?.t('username.setting') || 'Setting...';
                 
                 const response = await fetch(`${CONFIG.API_BASE}?action=setUsername`, {
                     method: 'POST',
@@ -2265,7 +2271,8 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast(`🎉 用户名设置成功：${username}`, 'success');
+                    const successMsg = window.i18n?.t('username.setSuccess') || '🎉 Username set successfully';
+                    showToast(`${successMsg}: ${username}`, 'success');
                     closeUsernameModal();
                     await loadUserInfo();
                 } else {
@@ -2273,10 +2280,11 @@
                 }
             } catch (error) {
                 console.error('设置用户名失败:', error);
-                showToast('设置失败: ' + error.message, 'error');
+                const failedMsg = window.i18n?.t('username.setFailed') || 'Failed to set';
+                showToast(`${failedMsg}: ` + error.message, 'error');
             } finally {
                 confirmBtn.disabled = false;
-                confirmBtn.textContent = '确认设置';
+                confirmBtn.textContent = window.i18n?.t('username.confirm') || 'Confirm';
             }
         }
 
