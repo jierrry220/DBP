@@ -1719,13 +1719,13 @@
                 }
                 
                 // 获取Pass NFT信息 (ERC1155)
-                let passLevel = '未持有 Pass';
+                let passLevel = window.i18n?.t('tengine.noPass') || 'No Pass';
                 try {
                     // 先检查合约代码是否存在
                     const code = await provider.getCode(CONTRACTS.debearPass);
                     if (code === '0x' || code === '0x0') {
                         console.log('DebearPass 合约未部署，使用默认奖励率');
-                        passLevel = '未持有 Pass (合约未部署)';
+                        passLevel = (window.i18n?.t('tengine.noPass') || 'No Pass') + ' (Contract not deployed)';
                     } else {
                         // ERC1155: tokenId 1 = Standard, 2 = Premium, 3 = Exclusive
                         const exclusiveBalance = await passNFT.balanceOf(userAddress, 3);
@@ -1742,7 +1742,7 @@
                     }
                 } catch (passError) {
                     console.warn('获取Pass信息失败，使用默认奖励率:', passError.message);
-                    passLevel = '未持有 Pass';
+                    passLevel = window.i18n?.t('tengine.noPass') || 'No Pass';
                 }
                 
                 // 获取新增数据：加速释放（发出+收到） + 邀请人数

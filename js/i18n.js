@@ -128,6 +128,7 @@ const translations = {
         'tengine.rewardRate': 'Current Reward Rate:',
         'tengine.acceleratedRelease': '💨 Accelerated Release:',
         'tengine.myReferrals': '👥 My Referrals:',
+        'tengine.noPass': 'No Pass',
         
         // T-Engine 输入框
         'tengine.inputPlaceholder': 'Enter stake amount',
@@ -463,6 +464,7 @@ const translations = {
         'tengine.rewardRate': '当前邀请奖励率:',
         'tengine.acceleratedRelease': '💨 加速释放:',
         'tengine.myReferrals': '👥 我的邀请人数:',
+        'tengine.noPass': '未持有 Pass',
         
         // T-Engine 输入框
         'tengine.inputPlaceholder': '输入质押数量',
