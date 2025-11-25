@@ -17,7 +17,7 @@ class DPPriceChart {
     async init() {
         // Check if API is configured
         if (!this.aveAPI.isConfigured()) {
-            this.showError('请配置 Ave API Key');
+            this.hidePriceCard();
             return;
         }
         
@@ -25,7 +25,13 @@ class DPPriceChart {
         this.createChart();
         
         // Load initial data
-        await this.updatePriceData();
+        const success = await this.updatePriceData();
+        
+        if (!success) {
+            // 如果初始加载失败，隐藏价格模块
+            this.hidePriceCard();
+            return;
+        }
         
         // Start auto-update
         this.startAutoUpdate();
@@ -149,9 +155,16 @@ class DPPriceChart {
             // Update chart
             this.updateChart();
             
+            return true; // 成功
         } catch (error) {
             console.error('Failed to update price data:', error);
+            // 如果是初次加载，返回 false
+            if (this.priceHistory.length === 0) {
+                return false;
+            }
+            // 如果已经有数据，只显示错误不隐藏
             this.showError('无法获取价格数据');
+            return true;
         }
     }
     
@@ -232,6 +245,14 @@ class DPPriceChart {
         if (errorElement) {
             errorElement.textContent = message;
             errorElement.style.display = 'block';
+        }
+    }
+    
+    hidePriceCard() {
+        const priceCard = document.getElementById('priceChartCard');
+        if (priceCard) {
+            priceCard.style.display = 'none';
+            console.log('🙈 DP Price module hidden - unable to fetch price data');
         }
     }
     
