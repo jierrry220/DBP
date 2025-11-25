@@ -956,6 +956,15 @@
                         <span class="stat-label" data-i18n="tengine.myReferrals">👥 My Referrals:</span>
                         <span class="stat-value" id="myReferralCount" style="color: #ffd700;">--</span>
                     </div>
+                    <!-- 邀请链接生成 -->
+                    <div class="stat" style="flex-direction: column; gap: 10px; padding: 20px 0; border-bottom: none;">
+                        <span class="stat-label" style="margin-bottom: 10px;">🔗 My Referral Link:</span>
+                        <div style="display: flex; gap: 10px; width: 100%;">
+                            <input type="text" id="referralLinkInput" readonly style="flex: 1; padding: 12px; background: rgba(0, 212, 255, 0.1); border: 2px solid rgba(0, 212, 255, 0.3); border-radius: 10px; color: var(--neon-cyan); font-size: 13px; cursor: pointer;" value="Connect wallet to generate link" onclick="this.select()">
+                            <button onclick="copyReferralLink()" style="padding: 12px 24px; background: var(--primary-gradient); border: none; border-radius: 10px; color: white; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 212, 255, 0.5)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 15px rgba(0, 212, 255, 0.3)'">📋 Copy</button>
+                        </div>
+                        <span style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">💡 Share this link with friends to earn referral rewards!</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1104,6 +1113,7 @@
         let userInviter = null;
         let pendingStakeAmount = null;
         let autoRefreshEnabled = false; // 默认关闭自动刷新
+        let referralAddressFromURL = null; // 从 URL 获取的邀请人地址
 
         // ========== 连接钱包 ==========
         async function connectWallet() {
@@ -1159,6 +1169,9 @@
                 }
                 
                 showMessage(window.i18n?.t('tengine.msg.walletConnected') || 'Wallet connected successfully!', 'success');
+                
+                // 更新邀请链接显示
+                updateReferralLinkDisplay();
             } catch (error) {
                 const failMsg = window.i18n?.t('tengine.msg.walletFailed') || 'Failed to connect wallet: ';
                 showMessage(failMsg + error.message, 'error');
@@ -1198,6 +1211,9 @@
                 await refreshData();
                 await refreshDPBalance();
                 await refreshInviteInfo(); // 初始化邀请信息
+                
+                // 更新邀请链接显示
+                updateReferralLinkDisplay();
                 // 不启动自动刷新
                 } else {
                     localStorage.removeItem('walletConnected');
@@ -1212,8 +1228,61 @@
 
         // 页面加载时检查钱包连接
         window.addEventListener('load', () => {
+            // 读取 URL 中的邀请人参数
+            readReferralFromURL();
             checkWalletConnection();
         });
+        
+        // ========== 读取 URL 邀请参数 ==========
+        function readReferralFromURL() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const refParam = urlParams.get('ref');
+                
+                if (refParam && ethers.utils.isAddress(refParam)) {
+                    referralAddressFromURL = refParam;
+                    console.log('🔗 检测到邀请链接:', referralAddressFromURL);
+                    
+                    // 显示提示消息
+                    showMessage('🎉 Referral link detected! You will be automatically connected to your referrer.', 'success');
+                }
+            } catch (error) {
+                console.error('读取邀请链接失败:', error);
+            }
+        }
+        
+        // ========== 生成邀请链接 ==========
+        function generateReferralLink() {
+            if (!userAddress) {
+                return 'Connect wallet to generate link';
+            }
+            
+            // 获取当前页面的 base URL（不包含查询参数）
+            const baseURL = window.location.origin + window.location.pathname;
+            return `${baseURL}?ref=${userAddress}`;
+        }
+        
+        // ========== 更新邀请链接显示 ==========
+        function updateReferralLinkDisplay() {
+            const linkInput = document.getElementById('referralLinkInput');
+            if (linkInput) {
+                const link = generateReferralLink();
+                linkInput.value = link;
+            }
+        }
+        
+        // ========== 复制邀请链接 ==========
+        function copyReferralLink() {
+            const linkInput = document.getElementById('referralLinkInput');
+            if (!userAddress) {
+                showMessage('Please connect wallet first', 'error');
+                return;
+            }
+            
+            linkInput.select();
+            document.execCommand('copy');
+            showMessage('🎉 Referral link copied to clipboard!', 'success');
+        }
 
         // ========== 检查邀请关系 ==========
         async function checkInviter() {
@@ -1257,8 +1326,17 @@
             
             // 检查是否是新用户（链上没有邀请人）
             if (userInviter === ethers.constants.AddressZero) {
-                console.log('ℹ️ 新用户，显示邀请人弹窗');
-                // 显示弹窗让用户输入邀请人
+                console.log('ℹ️ 新用户，检查邀请链接');
+                
+                // 如果有 URL 邀请链接，直接使用
+                if (referralAddressFromURL) {
+                    console.log('✅ 使用 URL 邀请人:', referralAddressFromURL);
+                    await executeStake(amount, referralAddressFromURL);
+                    return;
+                }
+                
+                // 否则显示弹窗让用户输入邀请人
+                console.log('ℹ️ 显示邀请人弹窗');
                 pendingStakeAmount = amount;
                 showInviteModal();
                 return;

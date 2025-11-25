@@ -633,7 +633,7 @@
 
         .nft-image {
             width: 100%;
-            height: 320px;
+            height: auto;
             object-fit: contain;
             border-radius: 15px;
             margin-bottom: 15px;
@@ -1059,7 +1059,7 @@
     <!-- 邀请人弹窗 -->
     <div class="modal-overlay" id="inviteModal">
         <div class="modal">
-            <h3 data-i18n="pass.inviteTitle">🎁 Enter Referrer Address</h3>
+            <h3 data-i18n="pass.inviteTitle">Enter Referrer Address</h3>
             <p data-i18n="pass.inviteDesc">You are detected as a new user. Please enter referrer address to get rewards, or skip to use default referrer.</p>
             <input type="text" class="modal-input" id="modalInviterInput" placeholder="0x... (选填)">
             <div class="modal-buttons">
@@ -1073,7 +1073,7 @@
     <div class="modal-overlay" id="sendModal">
         <div class="modal">
             <div class="send-modal-content">
-                <h3 data-i18n="pass.sendNFT">📤 Send Pass NFT</h3>
+                <h3 data-i18n="pass.sendNFT">Send Pass NFT</h3>
                 <div class="send-info">
                     <div class="send-info-item">
                         <span data-i18n="pass.passType">Pass Type:</span>
@@ -1097,7 +1097,7 @@
     <!-- 主内容 -->
     <div class="container">
         <div class="page-title">
-            <h1 data-i18n="pass.title">🎫 Pass NFT</h1>
+            <h1 data-i18n="pass.title">Pass NFT</h1>
             <p data-i18n="pass.subtitle">Purchase Exclusive Pass to Start Your Debear Party Journey</p>
         </div>
 
@@ -1137,7 +1137,7 @@
         <div id="tab-mining" class="tab-content">
             <!-- NFT橱窗展示 -->
             <div class="nft-showcase" id="nftShowcase">
-                <h2 class="showcase-title" data-i18n="pass.myCollection">🎨 My Pass NFT Collection</h2>
+                <h2 class="showcase-title" data-i18n="pass.myCollection">My Pass NFT Collection</h2>
                 <div class="nft-grid" id="nftGrid">
                     <!-- 动态生成NFT卡片 -->
                 </div>
@@ -1147,12 +1147,12 @@
                 <div class="mining-card">
                     <!-- 初始化覆盖层 -->
                     <div class="init-overlay" id="initOverlay">
-                        <h4 data-i18n="pass.initMining">✨ Start NFT Mining</h4>
+                        <h4 data-i18n="pass.initMining">Start NFT Mining</h4>
                         <p data-i18n="pass.initDescription">You need to initialize the mining system first to start earning DP Token rewards</p>
                         <button class="btn-primary" onclick="initNFTMining()" style="width: 200px;" data-i18n="pass.initialize">Initialize</button>
                     </div>
                     
-                    <h3 data-i18n="pass.nftMining">🎨 NFT Pass Mining</h3>
+                    <h3 data-i18n="pass.nftMining">NFT Pass Mining</h3>
                     <div class="alert info" data-i18n="pass.autoMining">
                         Holding Pass automatically mines, no staking needed! Daily output calculated automatically based on Pass level.
                     </div>
@@ -1259,6 +1259,7 @@
         let refreshInterval = null;
         let pendingSendPassLevel = null;
         let pendingSendPassName = null;
+        let referralAddressFromURL = null; // 从 URL 获取的邀请人地址
 
         // Switch tab
         function switchTab(tab) {
@@ -1364,6 +1365,9 @@
 
         // Initialize on page load
         window.addEventListener('load', async () => {
+            // 读取 URL 中的邀请人参数
+            readReferralFromURL();
+            
             // Check if wallet is already connected
             const walletRestored = await checkWalletConnection();
             
@@ -1377,6 +1381,24 @@
                 }
             }
         });
+        
+        // ========== 读取 URL 邀请参数 ==========
+        function readReferralFromURL() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const refParam = urlParams.get('ref');
+                
+                if (refParam && ethers.utils.isAddress(refParam)) {
+                    referralAddressFromURL = refParam;
+                    console.log('🔗 检测到邀请链接:', referralAddressFromURL);
+                    
+                    // 显示提示消息
+                    showMessage('🎉 Referral link detected! You will be automatically connected to your referrer.', 'success');
+                }
+            } catch (error) {
+                console.error('读取邀请链接失败:', error);
+            }
+        }
 
         // Check inviter relationship
         async function checkInviter() {
@@ -1413,8 +1435,17 @@
             
             // Check if is new user (no inviter on chain)
             if (userInviter === ethers.constants.AddressZero) {
-                console.log('ℹ️ New user, showing inviter modal');
+                console.log('ℹ️ New user, checking referral link');
+                
+                // 如果有 URL 邀请链接，直接使用
+                if (referralAddressFromURL) {
+                    console.log('✅ Using URL referrer:', referralAddressFromURL);
+                    await executeBuyPass(level, referralAddressFromURL);
+                    return;
+                }
+                
                 // Show modal for user to enter inviter
+                console.log('ℹ️ Showing inviter modal');
                 pendingPassLevel = level;
                 showInviteModal();
                 return;
