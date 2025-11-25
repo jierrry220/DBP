@@ -1241,10 +1241,19 @@
                 
                 if (refParam && ethers.utils.isAddress(refParam)) {
                     referralAddressFromURL = refParam;
+                    // 存储到 sessionStorage 以便跨页面使用
+                    sessionStorage.setItem('referralAddress', refParam);
                     console.log('🔗 检测到邀请链接:', referralAddressFromURL);
                     
                     // 显示提示消息
                     showMessage('🎉 Referral link detected! You will be automatically connected to your referrer.', 'success');
+                } else {
+                    // 如果 URL 中没有，尝试从 sessionStorage 读取
+                    const savedRef = sessionStorage.getItem('referralAddress');
+                    if (savedRef && ethers.utils.isAddress(savedRef)) {
+                        referralAddressFromURL = savedRef;
+                        console.log('💾 从缓存读取邀请人:', referralAddressFromURL);
+                    }
                 }
             } catch (error) {
                 console.error('读取邀请链接失败:', error);
@@ -1384,6 +1393,9 @@
                 
                 // 更新邀请关系
                 userInviter = inviter;
+                
+                // 清除 sessionStorage 中的邀请人（已经绑定）
+                sessionStorage.removeItem('referralAddress');
                 
                 document.getElementById('stakeAmount').value = '';
                 
