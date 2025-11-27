@@ -2575,7 +2575,8 @@
             currentBet: 0,
             players: [],
             history: [],
-            timer: null
+            timer: null,
+            isBetting: false // 防止重复下注
         };
         
         // 初始化游戏
@@ -3085,13 +3086,28 @@
         
         // 下注
         async function placeBet(amount) {
+            // 防止重复下注
+            if (partyCrisisGame.isBetting) {
+                console.log('[派对危机] 正在下注中，请稍候...');
+                return;
+            }
+            
             if (!amount || amount < 1 || amount > 500) {
                 showToast('投注金额无效', 'error');
                 return;
             }
             
+            // 设置下注中状态
+            partyCrisisGame.isBetting = true;
+            
+            // 禁用所有下注按钮
+            const betButtons = ['bet1Btn', 'bet10Btn', 'bet50Btn', 'bet100Btn', 'betMaxBtn'];
+            betButtons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) btn.disabled = true;
+            });
+            
             try {
-                
                 // 调用后端API下注
                 const response = await fetch(`${PARTY_CRISIS_API.BASE_URL}/bet`, {
                     method: 'POST',
@@ -3129,6 +3145,13 @@
             } catch (error) {
                 console.error('[派对危机] 下注失败:', error);
                 showToast('下注失败: ' + error.message, 'error');
+            } finally {
+                // 恢复下注状态和按钮
+                partyCrisisGame.isBetting = false;
+                betButtons.forEach(btnId => {
+                    const btn = document.getElementById(btnId);
+                    if (btn) btn.disabled = false;
+                });
             }
         }
         
