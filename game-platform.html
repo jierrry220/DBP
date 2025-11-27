@@ -1692,10 +1692,7 @@
 
         <!-- Party Crisis Game -->
         <div class="game-section">
-            <h2>🔫 派对危机 (Party Crisis)</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 15px; font-size: 14px;">
-                选择房间躲藏并下注，避开杀手刺杀，幸存者瓜分奖池！
-            </p>
+            <h2>Party Crisis</h2>
 
             <!-- 游戏容器 -->
             <div class="party-crisis-container">
@@ -2947,9 +2944,6 @@
             }
             mapInner.appendChild(killer);
             console.log('[杀手动画] 杀手已创建，初始位置:', PARTY_CRISIS.ENTRANCE);
-            
-            // 不显示目标房间，让玩家通过观察杀手移动来猜测
-            showToast('🚨 杀手出现了！', 'error');
             
             setTimeout(() => {
                 const room = PARTY_CRISIS.ROOMS[targetRoom];
