@@ -3072,9 +3072,9 @@
                 return;
             }
             
-            // 获取当前余额，最大500
+            // 获取当前余额，全部投入
             const balance = parseFloat(document.getElementById('balanceDisplay').textContent.replace(/[^0-9.]/g, '')) || 0;
-            const amount = Math.min(balance, 500);
+            const amount = balance; // 移除500的限制
             
             if (amount < 1) {
                 showToast('余额不足', 'error');
@@ -3092,7 +3092,7 @@
                 return;
             }
             
-            if (!amount || amount < 1 || amount > 500) {
+            if (!amount || amount < 1) {
                 showToast('投注金额无效', 'error');
                 return;
             }
