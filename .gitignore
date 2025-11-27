@@ -21,3 +21,19 @@ Thumbs.db
 # Owner specific files (keep folder but ignore contents)
 owner/*
 !owner/.gitignore
+
+# Test pages
+test-*.html
+test.html
+room-debug.html
+advanced-debug.html
+t-engine.html
+
+# API integration test files
+party-crisis-api-integration.js
+
+# Temporary documentation
+*_GUIDE.md
+*_README.md
+FRONTEND_UPDATE.md
+DEPLOY.md

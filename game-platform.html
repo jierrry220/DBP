@@ -431,80 +431,572 @@
             color: var(--neon-cyan);
         }
 
-        /* ========== Game Demo Section ========== */
+        /* ========== Party Crisis Game ========== */
         .game-section {
             background: linear-gradient(135deg, rgba(233, 0, 233, 0.05) 0%, rgba(0, 196, 239, 0.08) 100%);
             border: 2px solid rgba(233, 0, 233, 0.25);
             border-radius: 20px;
-            padding: 40px;
+            padding: 20px;
             text-align: center;
         }
 
         .game-section h2 {
-            font-size: 32px;
+            font-size: 28px;
             background: var(--primary-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
-        .game-demo {
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(0, 196, 239, 0.2);
+        /* 游戏信息栏（移动到地图内部顶部） */
+        .game-info-bar {
+            position: absolute;
+            top: 2%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 600px;
+            z-index: 50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 196, 239, 0.4);
+            border-radius: 12px;
+            padding: 12px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .game-info-bar > div:first-child {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .game-timer {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px rgba(0, 196, 239, 0.8);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .game-status-text {
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .game-info-bar {
+                padding: 6px 10px;
+                top: 1%;
+                width: 96%;
+                gap: 6px;
+                flex-wrap: nowrap;
+            }
+            
+            .game-timer {
+                font-size: 14px;
+                min-width: 70px;
+            }
+            
+            .game-status-text {
+                font-size: 11px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .game-info-bar {
+                padding: 5px 8px;
+                gap: 4px;
+            }
+            
+            .game-timer {
+                font-size: 12px;
+                min-width: 60px;
+            }
+            
+            .game-status-text {
+                font-size: 9px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .game-info-bar {
+                padding: 4px 6px;
+            }
+            
+            .game-timer {
+                font-size: 11px;
+                min-width: 55px;
+            }
+            
+            .game-status-text {
+                font-size: 8px;
+            }
+        }
+
+        /* 游戏容器 */
+        .party-crisis-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.6);
             border-radius: 15px;
-            padding: 40px;
-            margin: 30px 0;
-            min-height: 300px;
+            overflow: hidden;
+        }
+
+        /* 地图容器 */
+        .game-map {
+            position: relative;
+            width: 100%;
+            padding-bottom: 133%; /* 3:4 比例 */
+            background-image: url('map.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .game-map-inner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 房间区域 */
+        .room-zone {
+            position: absolute;
+            width: 15%;
+            height: 12%;
+            border: 3px solid rgba(0, 196, 239, 0.5);
+            border-radius: 12px;
+            background: rgba(0, 196, 239, 0.15);
+            cursor: pointer;
+            transition: all 0.3s;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            font-size: 11px;
         }
 
-        .game-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-            animation: bounce 2s infinite;
+        .room-zone:hover {
+            border-color: var(--neon-cyan);
+            background: rgba(0, 196, 239, 0.3);
+            box-shadow: 0 0 20px rgba(0, 196, 239, 0.5);
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+        .room-zone.selected {
+            border-color: var(--neon-pink);
+            background: rgba(233, 0, 233, 0.3);
+            box-shadow: 0 0 30px rgba(233, 0, 233, 0.7);
         }
 
-        .game-controls {
+        .room-zone.killed {
+            border-color: #f44336;
+            background: rgba(244, 67, 54, 0.4);
+            animation: death-pulse 0.5s ease;
+        }
+        
+        /* 中央舞池特殊样式 */
+        #room-8 {
+            width: 20%;
+            height: 16%;
+        }
+
+        @keyframes death-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .room-name {
+            font-weight: 700;
+            color: white;
+            margin-bottom: 3px;
+        }
+
+        .room-stats {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #ffd700;
+            font-weight: 700;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 3px 8px;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+
+        /* 角色 */
+        .character {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            font-size: 24px;
+            text-align: center;
+            line-height: 30px;
+            transition: all 3s ease;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            pointer-events: none;
+        }
+
+        .character.current-player {
+            z-index: 1000;
+            filter: drop-shadow(0 0 8px rgba(0, 196, 239, 0.8));
+        }
+
+        .character-name {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 10px;
+            white-space: nowrap;
+            font-weight: 700;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.9), 0 0 6px rgba(0, 0, 0, 0.7);
+        }
+
+        /* 杀手 */
+        .killer {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            font-size: 32px;
+            text-align: center;
+            line-height: 40px;
+            filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.8));
+            z-index: 2000;
+            pointer-events: none;
+        }
+
+        /* 金币动画 */
+        .coin {
+            position: absolute;
+            font-size: 20px;
+            pointer-events: none;
+            z-index: 1500;
+            animation: coin-fade 3s ease forwards;
+        }
+
+        @keyframes coin-fade {
+            0% { opacity: 1; transform: scale(1); }
+            80% { opacity: 1; }
+            100% { opacity: 0; transform: scale(0.5); }
+        }
+
+        /* 投注面板（移到地图内部底部） */
+        .bet-panel {
+            position: absolute;
+            bottom: 2%;
+            left: 5%;
+            width: 90%;
+            max-width: 600px;
+            z-index: 50;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 196, 239, 0.4);
+            border-radius: 0 0 12px 12px;
+            border-top: 2px solid rgba(233, 0, 233, 0.4);
+            padding: 10px 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* 信息窗口（已选房间、已投注） */
+        .bet-info-panel {
+            position: absolute;
+            bottom: calc(2% + 58px);
+            left: 5%;
+            width: 54%;
+            max-width: 360px;
+            z-index: 50;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(233, 0, 233, 0.4);
+            border-radius: 12px 12px 0 0;
+            border-bottom: none;
+            padding: 8px 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             display: flex;
-            gap: 15px;
-            margin-top: 20px;
+            justify-content: space-around;
+            gap: 20px;
+        }
+        
+        .bet-info-item {
+            text-align: center;
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+        
+        .bet-info-value {
+            display: block;
+            font-weight: 700;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        
+        .bet-amount-buttons {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .bet-amount-btn {
+            flex: 1;
+            padding: 8px 4px;
+            background: rgba(0, 196, 239, 0.15);
+            border: 2px solid rgba(0, 196, 239, 0.3);
+            border-radius: 8px;
+            color: var(--neon-cyan);
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .bet-amount-btn:hover:not(:disabled) {
+            background: rgba(0, 196, 239, 0.3);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 196, 239, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .bet-amount-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
         }
 
-        .game-btn {
-            padding: 12px 30px;
+        .bet-btn {
+            width: 100%;
+            padding: 10px;
             background: var(--primary-gradient);
             border: none;
-            border-radius: 12px;
+            border-radius: 8px;
             color: white;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
             transition: all 0.3s;
         }
 
-        .game-btn:hover:not(:disabled) {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
+        .bet-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 196, 239, 0.5);
         }
 
-        .game-btn:disabled {
+        .bet-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
+        
+        /* 移动端适配 - 投注面板 */
+        @media (max-width: 768px) {
+            .bet-panel {
+                padding: 8px 12px;
+                bottom: 1%;
+                left: 2%;
+                width: 96%;
+            }
+            
+            .bet-info-panel {
+                padding: 6px 10px;
+                bottom: calc(1% + 52px);
+                left: 2%;
+                width: 57.6%;
+                max-width: 345px;
+                gap: 10px;
+            }
+            
+            .bet-info-item {
+                font-size: 9px;
+            }
+            
+            .bet-info-value {
+                font-size: 10px;
+            }
+            
+            .bet-amount-buttons {
+                gap: 4px;
+                margin-bottom: 6px;
+            }
+            
+            .bet-amount-btn {
+                padding: 6px 2px;
+                font-size: 11px;
+            }
+            
+            .bet-btn {
+                padding: 8px;
+                font-size: 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .bet-panel {
+                padding: 6px 8px;
+            }
+            
+            .bet-info-panel {
+                padding: 5px 8px;
+                bottom: calc(1% + 48px);
+                left: 2%;
+                width: 57.6%;
+            }
+            
+            .bet-info-item {
+                font-size: 8px;
+            }
+            
+            .bet-info-value {
+                font-size: 9px;
+            }
+            
+            .bet-amount-btn {
+                padding: 5px 2px;
+                font-size: 10px;
+            }
+            
+            .bet-btn {
+                padding: 7px;
+                font-size: 11px;
+            }
+        }
 
-        .game-result {
-            margin-top: 20px;
-            font-size: 24px;
+        /* 历史记录（移到地图左上角空白区域） */
+        .history-bar {
+            position: absolute;
+            top: 12%;
+            left: 3%;
+            width: 165px;
+            z-index: 50;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(233, 0, 233, 0.4);
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .history-title {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .history-items {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .history-item {
+            width: 100%;
+            height: auto;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(233, 0, 233, 0.2);
+            border: 1px solid rgba(233, 0, 233, 0.4);
+            border-radius: 8px;
             font-weight: 700;
-            color: var(--neon-cyan);
+            color: var(--neon-pink);
+            font-size: 12px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* 移动端适配 - 历史记录 */
+        @media (max-width: 768px) {
+            .history-bar {
+                width: 135px;
+                padding: 8px;
+                top: 12%;
+                left: 2%;
+            }
+            
+            .history-title {
+                font-size: 10px;
+                margin-bottom: 6px;
+            }
+            
+            .history-items {
+                gap: 4px;
+            }
+            
+            .history-item {
+                padding: 5px 8px;
+                font-size: 11px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .history-bar {
+                width: 112px;
+                padding: 6px;
+            }
+            
+            .history-title {
+                font-size: 9px;
+            }
+            
+            .history-item {
+                padding: 4px 6px;
+                font-size: 10px;
+            }
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .game-section h2 {
+                font-size: 22px;
+            }
+            
+            .game-info-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .room-zone {
+                font-size: 8px;
+            }
+            
+            .character {
+                width: 20px;
+                height: 20px;
+                font-size: 16px;
+                line-height: 20px;
+            }
+            
+            .character-name {
+                font-size: 8px;
+                top: -14px;
+            }
+            
+            .killer {
+                width: 20px;
+                height: 20px;
+                font-size: 20px;
+                line-height: 20px;
+            }
         }
 
         /* ========== Toast ========== */
@@ -1198,33 +1690,61 @@
         </div>
 
 
-        <!-- Game Demo Section -->
+        <!-- Party Crisis Game -->
         <div class="game-section">
-            <h2 data-i18n="gamePlatform.gameDemo">🎲 Demo Game: Guess Big or Small</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 20px;" data-i18n="gamePlatform.gameDesc">Choose bet amount, guess correctly to double your reward!</p>
-
-            <div class="game-demo">
-                <div class="game-icon">🎰</div>
-                <div id="gameStatus" style="font-size: 20px; color: var(--text-secondary); margin-bottom: 20px;" data-i18n="gamePlatform.gameStatus">
-                    Choose Big or Small to start
-                </div>
-                
-                <!-- 投注金额输入框 -->
-                <div class="form-group" style="width: 300px; margin-bottom: 20px;">
-                    <label class="form-label" data-i18n="gamePlatform.betAmount">Bet Amount (DP)</label>
-                    <input type="number" class="form-input" id="betAmount" data-i18n-placeholder="gamePlatform.enterBet" placeholder="Enter bet amount" min="1" step="0.01" value="1">
-                </div>
-                
-                <div class="game-controls">
-                    <button class="game-btn" onclick="playGame('big')" id="bigBtn" data-i18n="gamePlatform.guessBig">Guess Big (6-12)</button>
-                    <button class="game-btn" onclick="playGame('small')" id="smallBtn" data-i18n="gamePlatform.guessSmall">Guess Small (1-5)</button>
-                </div>
-                <div class="game-result" id="gameResult"></div>
-            </div>
-
-            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 20px;" data-i18n="gamePlatform.tip">
-                💡 Tip: This is just a simple demo, you can develop more complex games!
+            <h2>🔫 派对危机 (Party Crisis)</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 15px; font-size: 14px;">
+                选择房间躲藏并下注，避开杀手刺杀，幸存者瓜分奖池！
             </p>
+
+            <!-- 游戏容器 -->
+            <div class="party-crisis-container">
+                <!-- 地图 -->
+                <div class="game-map">
+                    <div class="game-map-inner" id="gameMapInner">
+                        <!-- 游戏信息栏（移动到地图内部） -->
+                        <div class="game-info-bar">
+                            <div>
+                                <div class="game-status-text" id="gamePhaseText">等待游戏开始...</div>
+                            </div>
+                            <div class="game-timer" id="gameTimer">⏱️ --:--</div>
+                        </div>
+                        
+                        <!-- 信息窗口（已选房间、已投注） -->
+                        <div class="bet-info-panel">
+                            <div class="bet-info-item">
+                                已选房间
+                                <span class="bet-info-value" id="selectedRoomDisplay" style="color: var(--neon-cyan);">--</span>
+                            </div>
+                            <div class="bet-info-item">
+                                已投注
+                                <span class="bet-info-value" id="currentBetDisplay" style="color: var(--neon-pink);">0 DP</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 投注按钮窗口 -->
+                        <div class="bet-panel">
+                            <div class="bet-amount-buttons">
+                                <button class="bet-amount-btn" onclick="directBet(1)" id="bet1Btn">1</button>
+                                <button class="bet-amount-btn" onclick="directBet(10)" id="bet10Btn">10</button>
+                                <button class="bet-amount-btn" onclick="directBet(50)" id="bet50Btn">50</button>
+                                <button class="bet-amount-btn" onclick="directBet(100)" id="bet100Btn">100</button>
+                                <button class="bet-amount-btn" onclick="directBetMax()" id="betMaxBtn">MAX</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 历史记录（移到地图内部底部偏左） -->
+                        <div class="history-bar">
+                            <div class="history-title">刺杀记录</div>
+                            <div class="history-items" id="historyItems">
+                                <!-- 历史记录会动态生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 房间区域会动态生成 -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -2016,93 +2536,758 @@
             }
         }
 
-        // 游戏: 猜大小
-        async function playGame(choice) {
-            if (!userAddress) {
-                showToast(window.i18n?.t('game.msg.connectWallet') || '请先连接钱包', 'error');
-                return;
-            }
-
-            if (gameInProgress) return;
-
-            // 获取用户输入的投注金额
-            const betAmount = parseFloat(document.getElementById('betAmount').value);
-            if (!betAmount || betAmount < 1) {
-                showToast(window.i18n?.t('game.msg.invalidBet') || '投注金额不能少于 1 DP', 'error');
-                return;
-            }
-
+        // ========== 派对危机游戏 ==========
+        
+        // 游戏配置
+        const PARTY_CRISIS = {
+            ROOMS: {
+                1: { x: 12.5, y: 63.0, name: '办公区', centerX: 19.8, centerY: 69.1, path: [[7.5,50.5],[35.0,50.5],[34.8,64.2],[25.1,64.9],[19.8,69.1]] },
+                2: { x: 35.9, y: 15.6, name: '酒吧', centerX: 43.3, centerY: 22.0, path: [[7.5,50.5],[35.3,50.6],[35.4,31.9],[35.4,31.1],[42.1,31.0],[45.0,26.4],[43.3,22.0]] },
+                3: { x: 53.1, y: 15.6, name: '休息区', centerX: 60.5, centerY: 21.5, path: [[7.5,50.5],[35.1,50.3],[34.8,31.7],[55.9,31.3],[58.1,31.2],[58.8,25.3],[58.8,24.4],[59.2,23.2],[60.5,21.5]] },
+                4: { x: 73.5, y: 15.9, name: 'VIP包厢', centerX: 81.0, centerY: 22.1, path: [[7.5,50.5],[35.3,50.3],[35.2,31.5],[77.1,30.6],[82.1,25.6],[81.0,22.1]] },
+                5: { x: 74.7, y: 36.7, name: '餐饮区', centerX: 82.3, centerY: 42.5, path: [[7.5,50.5],[35.2,50.1],[35.3,30.9],[69.9,31.1],[69.2,47.1],[78.7,46.5],[82.3,42.5]] },
+                6: { x: 74.9, y: 55.1, name: '包厢区', centerX: 82.6, centerY: 61.1, path: [[7.5,50.5],[35.0,50.3],[35.0,69.3],[68.7,69.1],[70.0,69.1],[69.8,63.8],[76.5,64.0],[82.6,61.1]] },
+                7: { x: 71.5, y: 74.1, name: '餐厅', centerX: 78.8, centerY: 80.1, path: [[7.5,50.5],[34.8,50.7],[35.3,69.1],[69.3,68.9],[70.0,78.2],[78.8,80.1]] },
+                8: { x: 43.3, y: 44.5, name: '舞池', centerX: 53.1, centerY: 52.6, path: [[7.5,50.5],[34.8,50.5],[35.5,69.0],[48.9,69.3],[52.5,69.2],[55.9,61.0],[49.8,58.4],[53.1,52.6]] }
+            },
+            SPAWN_POINT: { x: 7.5, y: 50.5 },
+            ENTRANCE: { x: 7.5, y: 50.5 }
+        };
+        
+        // API 配置
+        const PARTY_CRISIS_API = {
+            BASE_URL: 'http://localhost:3000/api/party-crisis',
+            SYNC_INTERVAL: 1000
+        };
+        
+        let gameSyncTimer = null;
+        let lastKnownGameId = null;
+        let lastKnownPhase = null;
+        let settlingNotificationShown = false; // 追踪是否已显示结算通知
+        let renderedBots = new Set(); // 追踪已渲染的Bot ID
+        let botRenderQueue = []; // Bot渲染队列
+        let botRenderTimer = null; // Bot渐进式渲染定时器
+        
+        let partyCrisisGame = {
+            phase: 'waiting', // waiting, betting, killer_moving, settling
+            countdown: 0,
+            selectedRoom: null,
+            currentBet: 0,
+            players: [],
+            history: [],
+            timer: null
+        };
+        
+        // 初始化游戏
+        async function initPartyCrisisGame() {
+            createRoomZones();
+            await loadGameHistory();
+            
+            // 第一次同步前先获取当前状态
+            await syncGameState();
+            
+            // 初始化 lastKnownPhase（避免第一次被认为阶段变化）
+            lastKnownPhase = partyCrisisGame.phase;
+            
+            startGameSync();
+        }
+        
+        // 启动游戏状态同步
+        function startGameSync() {
+            if (gameSyncTimer) clearInterval(gameSyncTimer);
+            syncGameState();
+            gameSyncTimer = setInterval(syncGameState, PARTY_CRISIS_API.SYNC_INTERVAL);
+        }
+        
+        // 同步游戏状态
+        async function syncGameState() {
             try {
-                gameInProgress = true;
-                document.getElementById('bigBtn').disabled = true;
-                document.getElementById('smallBtn').disabled = true;
-                document.getElementById('gameResult').textContent = '';
-
-                // 扣除投注金额
-                const spendResponse = await fetch(`${CONFIG.API_BASE}?action=spend`, {
+                const response = await fetch(`${PARTY_CRISIS_API.BASE_URL}/status`);
+                const data = await response.json();
+                if (data.success && data.game) {
+                    updateGameState(data.game);
+                }
+            } catch (error) {
+                console.error('[派对危机] 同步失败:', error);
+            }
+        }
+        
+        // 更新游戏状态
+        function updateGameState(gameData) {
+            const game = gameData;
+            
+            console.log(`[派对危机] 同步状态: Game #${game.gameId}, 阶段: ${game.phase}, 倒计时: ${game.countdown}s`);
+            
+            // 检测游戏ID变化（新游戏开始）
+            if (lastKnownGameId !== null && lastKnownGameId !== game.gameId) {
+                console.log(`[派对危机] 检测到游戏ID变化: ${lastKnownGameId} -> ${game.gameId}，清理UI并重新加载数据`);
+                cleanupGameUI();
+                settlingNotificationShown = false; // 重置通知状态
+                renderedBots.clear(); // 清空已渲染Bot记录
+                botRenderQueue = []; // 清空渲染队列
+                if (botRenderTimer) {
+                    clearInterval(botRenderTimer);
+                    botRenderTimer = null;
+                }
+                // 重新加载余额和历史记录
+                if (userAddress) loadAllData();
+                
+                // 更新历史记录（从游戏数据中获取）
+                if (game.history && game.history.length > 0) {
+                    partyCrisisGame.history = game.history.slice(-4).map(h => h.killedRoom);
+                    updateHistoryDisplay();
+                    console.log('[派对危机] 更新历史记录:', partyCrisisGame.history);
+                }
+            }
+            lastKnownGameId = game.gameId;
+            
+            // 每次同步都更新历史记录（确保实时更新）
+            if (game.history && game.history.length > 0) {
+                const newHistory = game.history.slice(-4).map(h => h.killedRoom);
+                if (JSON.stringify(newHistory) !== JSON.stringify(partyCrisisGame.history)) {
+                    partyCrisisGame.history = newHistory;
+                    updateHistoryDisplay();
+                    console.log('[派对危机] 实时更新历史记录:', partyCrisisGame.history);
+                }
+            }
+            
+            // 检测阶段变化（只在已初始化后才检测）
+            const phaseChanged = lastKnownPhase !== null && lastKnownPhase !== game.phase;
+            if (phaseChanged) {
+                console.log(`[派对危机] 阶段切换: ${lastKnownPhase} -> ${game.phase}`);
+            }
+            lastKnownPhase = game.phase;
+            
+            // 更新游戏阶段
+            partyCrisisGame.phase = game.phase;
+            partyCrisisGame.countdown = game.countdown;
+            
+            // 更新倒计时显示
+            const minutes = Math.floor(game.countdown / 60);
+            const seconds = game.countdown % 60;
+            document.getElementById('gameTimer').textContent = `⏱️ ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // 更新阶段文本并显示详细信息
+            if (game.phase === 'betting') {
+                document.getElementById('gamePhaseText').textContent = '投注阶段 - 选择房间并下注';
+            } else if (game.phase === 'killer_moving') {
+                // 不显示目标房间，保持神秘感
+                document.getElementById('gamePhaseText').textContent = '🚨 杀手出现！';
+                
+                // 只在阶段刚切换时触发动画
+                if (phaseChanged) {
+                    console.log('[派对危机] 杀手阶段开始!', {
+                        targetRoom: game.targetRoom,
+                        countdown: game.countdown
+                    });
+                    
+                    if (game.targetRoom) {
+                        console.log('[派对危机] 触发杀手动画...');
+                        triggerKillerPhase(game.targetRoom);
+                    }
+                }
+                
+            } else if (game.phase === 'settling') {
+                document.getElementById('gamePhaseText').textContent = '结算中...';
+                
+                // 只在阶段刚切换时触发结算动画
+                if (phaseChanged) {
+                    // 触发幸存玩家返回动画
+                    triggerSurvivorsReturn();
+                    
+                    // 显示通知
+                    if (!settlingNotificationShown && game.result && userAddress) {
+                        settlingNotificationShown = true;
+                        
+                        const normalizedAddr = userAddress.toLowerCase();
+                        console.log('[派对危机] 结算阶段开始，检查玩家结果:', {
+                            address: normalizedAddr,
+                            result: game.result,
+                            survivors: game.result.survivors?.length,
+                            eliminated: game.result.eliminated?.length
+                        });
+                        
+                        const playerResult = game.result.survivors.find(p => p.address === normalizedAddr);
+                        const wasEliminated = game.result.eliminated.find(p => p.address === normalizedAddr);
+                        
+                        if (playerResult && playerResult.reward > 0) {
+                            setTimeout(() => {
+                                showToast(`🎉 恭喜！你幸存了！获得奖励 ${playerResult.reward.toFixed(2)} DP`, 'success');
+                                console.log('[派对危机] 显示胜利通知');
+                            }, 1500);
+                        } else if (wasEliminated) {
+                            setTimeout(() => {
+                                showToast(`💀 很遗憾，你被杀手消灭了...`, 'error');
+                                console.log('[派对危机] 显示消灭通知');
+                            }, 1500);
+                        } else {
+                            console.log('[派对危机] 玩家未参与此局游戏');
+                        }
+                    }
+                }
+            }
+            
+            // 更新房间统计（只统计已渲染的角色）
+            updateRoomStatsDisplay(game);
+            
+            // 渲染玩家角色
+            if (game.players && game.players.length > 0) {
+                game.players.forEach(player => {
+                    const charId = `char-${player.address}`;
+                    if (!document.getElementById(charId)) {
+                        createPlayerCharacter(player.address, player.username || 'Player', player.roomId, false);
+                    }
+                });
+            }
+            
+            // 渲染Bot角色（分批渐进）
+            if (game.phase === 'betting' && game.bots && game.bots.length > 0) {
+                // 只在投注阶段渐进式渲染Bot
+                
+                // 将未渲染的Bot加入队列
+                game.bots.forEach(bot => {
+                    if (!renderedBots.has(bot.id) && !botRenderQueue.find(b => b.id === bot.id)) {
+                        botRenderQueue.push(bot);
+                    }
+                });
+                
+                // 启动渐进式渲染定时器（如果还没启动）
+                if (!botRenderTimer && botRenderQueue.length > 0) {
+                    startGradualBotRendering();
+                }
+            } else if (game.phase !== 'betting') {
+                // 非投注阶段，停止渐进渲染，直接渲染所有Bot
+                if (botRenderTimer) {
+                    clearInterval(botRenderTimer);
+                    botRenderTimer = null;
+                }
+                
+                if (game.bots && game.bots.length > 0) {
+                    game.bots.forEach(bot => {
+                        const botId = `char-${bot.id}`;
+                        if (!document.getElementById(botId)) {
+                            createPlayerCharacter(bot.id, bot.name, bot.roomId, false);
+                            renderedBots.add(bot.id);
+                        }
+                    });
+                }
+            }
+        }
+        
+        // 更新房间统计显示（只统计已渲染的角色）
+        function updateRoomStatsDisplay(game) {
+            const roomBets = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 };
+            
+            // 统计真实玩家
+            if (game.players && game.players.length > 0) {
+                game.players.forEach(player => {
+                    roomBets[player.roomId] += player.amount;
+                });
+            }
+            
+            // 只统计已渲染的Bot
+            if (game.bots && game.bots.length > 0) {
+                game.bots.forEach(bot => {
+                    if (renderedBots.has(bot.id)) {
+                        roomBets[bot.roomId] += bot.amount;
+                    }
+                });
+            }
+            
+            // 更新显示
+            for (let i = 1; i <= 8; i++) {
+                document.getElementById(`room-${i}-stats`).textContent = `${roomBets[i].toFixed(0)} DP`;
+            }
+        }
+        
+        // 渐进式渲染Bot角色
+        function startGradualBotRendering() {
+            const totalBots = botRenderQueue.length;
+            if (totalBots === 0) return;
+            
+            // 每次渲染 2-5 个Bot，间隔 0.5-2 秒
+            const botsPerBatch = Math.floor(2 + Math.random() * 4); // 2-5
+            const intervalMs = 500 + Math.random() * 1500; // 0.5-2秒
+            
+            console.log(`[Bot渲染] 开始渐进式渲染 ${totalBots} 个Bot，每批 ${botsPerBatch} 个，间隔 ${intervalMs}ms`);
+            
+            botRenderTimer = setInterval(() => {
+                if (botRenderQueue.length === 0 || partyCrisisGame.phase !== 'betting') {
+                    clearInterval(botRenderTimer);
+                    botRenderTimer = null;
+                    console.log('[Bot渲染] 完成');
+                    return;
+                }
+                
+                // 渲染一批Bot
+                const batch = botRenderQueue.splice(0, botsPerBatch);
+                batch.forEach(bot => {
+                    const botId = `char-${bot.id}`;
+                    if (!document.getElementById(botId)) {
+                        createPlayerCharacter(bot.id, bot.name, bot.roomId, false);
+                        renderedBots.add(bot.id);
+                    }
+                });
+                
+                console.log(`[Bot渨染] 已渨染 ${batch.length} 个，剩余 ${botRenderQueue.length} 个`);
+            }, intervalMs);
+        }
+        
+        // 触发幸存玩家返回出生点动画
+        function triggerSurvivorsReturn() {
+            console.log('[结算动画] 幸存玩家返回出生点');
+            
+            // 找到所有未被杀的角色（不是金币的）
+            const survivors = document.querySelectorAll('.character:not(.coin)');
+            
+            survivors.forEach((char, index) => {
+                // 错开启动时间，但间隔很短，确保所有角色都能在结算期内完成
+                setTimeout(() => {
+                    // 获取角色的房间ID（从partyCrisisGame.players中查找）
+                    const charId = char.id.replace('char-', '');
+                    const playerData = partyCrisisGame.players.find(p => p.id === charId);
+                    
+                    if (playerData && playerData.roomId) {
+                        // 沿着进入时的路径原路返回
+                        const room = PARTY_CRISIS.ROOMS[playerData.roomId];
+                        if (room && room.path) {
+                            returnCharacterAlongPath(char, room.path);
+                        } else {
+                            // 没有路径数据，直接返回
+                            char.style.transition = 'all 0.6s ease-in-out';
+                            char.style.left = `${PARTY_CRISIS.SPAWN_POINT.x}%`;
+                            char.style.top = `${PARTY_CRISIS.SPAWN_POINT.y}%`;
+                        }
+                    } else {
+                        // Bot或未找到数据，直接返回
+                        char.style.transition = 'all 0.6s ease-in-out';
+                        char.style.left = `${PARTY_CRISIS.SPAWN_POINT.x}%`;
+                        char.style.top = `${PARTY_CRISIS.SPAWN_POINT.y}%`;
+                    }
+                }, index * 15); // 每个角色间隔5ms，更快
+            });
+            
+            console.log(`[结算动画] ${survivors.length} 个幸存者开始返回`);
+        }
+        
+        // 角色沿路径返回
+        function returnCharacterAlongPath(char, path) {
+            if (!path || path.length === 0) return;
+            
+            // 反向遍历路径
+            let currentStep = path.length - 1;
+            const stepDuration = 600 / path.length; // 总共0.6秒（大幅提速）
+            
+            function moveToNextStep() {
+                if (currentStep < 0) {
+                    // 返回完成
+                    return;
+                }
+                
+                const [x, y] = path[currentStep];
+                char.style.transition = `all ${stepDuration}ms linear`;
+                char.style.left = `${x}%`;
+                char.style.top = `${y}%`;
+                
+                currentStep--;
+                setTimeout(moveToNextStep, stepDuration);
+            }
+            
+            moveToNextStep();
+        }
+        
+        // 清理游戏UI
+        function cleanupGameUI() {
+            console.log('[派对危机] 清理UI...');
+            document.querySelectorAll('.character, .killer, .coin').forEach(el => el.remove());
+            document.querySelectorAll('.room-zone').forEach(z => z.classList.remove('selected', 'killed'));
+            partyCrisisGame.selectedRoom = null;
+            partyCrisisGame.currentBet = 0;
+            partyCrisisGame.players = [];
+            
+            // 安全更新显示元素
+            const selectedRoomEl = document.getElementById('selectedRoomDisplay');
+            const currentBetEl = document.getElementById('currentBetDisplay');
+            if (selectedRoomEl) selectedRoomEl.textContent = '--';
+            if (currentBetEl) currentBetEl.textContent = '0 DP';
+            
+            // 清理Bot渲染相关
+            if (botRenderTimer) {
+                clearInterval(botRenderTimer);
+                botRenderTimer = null;
+            }
+            renderedBots.clear();
+            botRenderQueue = [];
+            
+            console.log('[派对危机] UI清理完成');
+        }
+        
+        // 触发杀手阶段动画
+        function triggerKillerPhase(targetRoom) {
+            console.log(`[杀手动画] 开始创建杀手，目标房间: ${targetRoom}`);
+            
+            const killer = document.createElement('div');
+            killer.className = 'killer';
+            killer.id = 'killer';
+            killer.textContent = '💀';
+            killer.style.left = `${PARTY_CRISIS.ENTRANCE.x}%`;
+            killer.style.top = `${PARTY_CRISIS.ENTRANCE.y}%`;
+            killer.style.position = 'absolute';
+            // 响应式大小：移动端20px，桌面端40px
+            const isMobile = window.innerWidth <= 768;
+            killer.style.fontSize = isMobile ? '20px' : '40px';
+            killer.style.zIndex = '100';
+            killer.style.transform = 'translate(-50%, -50%)';
+            
+            const mapInner = document.getElementById('gameMapInner');
+            if (!mapInner) {
+                console.error('[杀手动画] 错误: 找不到 gameMapInner 元素');
+                return;
+            }
+            mapInner.appendChild(killer);
+            console.log('[杀手动画] 杀手已创建，初始位置:', PARTY_CRISIS.ENTRANCE);
+            
+            // 不显示目标房间，让玩家通过观察杀手移动来猜测
+            showToast('🚨 杀手出现了！', 'error');
+            
+            setTimeout(() => {
+                const room = PARTY_CRISIS.ROOMS[targetRoom];
+                const path = room.path;
+                const centerX = room.centerX;
+                const centerY = room.centerY;
+                
+                if (!path || path.length === 0) return;
+                
+                let currentStep = 0;
+                const totalSteps = path.length;
+                const stepDuration = 9000 / totalSteps;
+                
+                function moveKillerToNextStep() {
+                    if (currentStep >= totalSteps - 1) {
+                        killer.style.transition = `all ${stepDuration}ms linear`;
+                        killer.style.left = `${centerX}%`;
+                        killer.style.top = `${centerY}%`;
+                        setTimeout(() => {
+                            killPlayers(targetRoom);
+                            setTimeout(() => returnKillerToEntrance(), 1000);
+                        }, stepDuration);
+                        return;
+                    }
+                    currentStep++;
+                    const [x, y] = path[currentStep];
+                    killer.style.transition = `all ${stepDuration}ms linear`;
+                    killer.style.left = `${x}%`;
+                    killer.style.top = `${y}%`;
+                    setTimeout(moveKillerToNextStep, stepDuration);
+                }
+                
+                function returnKillerToEntrance() {
+                    let returnStep = path.length - 1;
+                    const returnStepDuration = 4000 / path.length;
+                    function moveKillerBack() {
+                        if (returnStep < 0) {
+                            killer.remove();
+                            return;
+                        }
+                        const [x, y] = path[returnStep];
+                        killer.style.transition = `all ${returnStepDuration}ms linear`;
+                        killer.style.left = `${x}%`;
+                        killer.style.top = `${y}%`;
+                        returnStep--;
+                        setTimeout(moveKillerBack, returnStepDuration);
+                    }
+                    moveKillerBack();
+                }
+                
+                moveKillerToNextStep();
+            }, 1000);
+        }
+        
+        // 创建房间区域
+        function createRoomZones() {
+            const mapInner = document.getElementById('gameMapInner');
+            
+            Object.entries(PARTY_CRISIS.ROOMS).forEach(([id, room]) => {
+                const zone = document.createElement('div');
+                zone.className = 'room-zone';
+                zone.id = `room-${id}`;
+                zone.style.left = `${room.x}%`;
+                zone.style.top = `${room.y}%`;
+                zone.innerHTML = `
+                    <div class="room-name">${room.name}</div>
+                    <div class="room-stats" id="room-${id}-stats">0 DP</div>
+                `;
+                zone.onclick = () => selectRoom(parseInt(id));
+                mapInner.appendChild(zone);
+            });
+        }
+        
+        // 选择房间
+        function selectRoom(roomId) {
+            if (partyCrisisGame.phase !== 'betting') {
+                showToast('现在不能选择房间', 'error');
+                return;
+            }
+            
+            if (partyCrisisGame.currentBet > 0) {
+                showToast('已下注，无法更换房间', 'error');
+                return;
+            }
+            
+            // 移除之前的选择
+            document.querySelectorAll('.room-zone').forEach(z => z.classList.remove('selected'));
+            
+            // 标记新选择
+            partyCrisisGame.selectedRoom = roomId;
+            document.getElementById(`room-${roomId}`).classList.add('selected');
+            const displayEl = document.getElementById('selectedRoomDisplay');
+            if (displayEl) displayEl.textContent = PARTY_CRISIS.ROOMS[roomId].name;
+        }
+        
+        // 点击按钮直接下注
+        async function directBet(amount) {
+            if (!userAddress) {
+                showToast('请先连接钱包', 'error');
+                return;
+            }
+            
+            if (!partyCrisisGame.selectedRoom) {
+                showToast('请先选择房间', 'error');
+                return;
+            }
+            
+            await placeBet(amount);
+        }
+        
+        // MAX按钮直接下注
+        async function directBetMax() {
+            if (!userAddress) {
+                showToast('请先连接钱包', 'error');
+                return;
+            }
+            
+            if (!partyCrisisGame.selectedRoom) {
+                showToast('请先选择房间', 'error');
+                return;
+            }
+            
+            // 获取当前余额，最大500
+            const balance = parseFloat(document.getElementById('balanceDisplay').textContent.replace(/[^0-9.]/g, '')) || 0;
+            const amount = Math.min(balance, 500);
+            
+            if (amount < 1) {
+                showToast('余额不足', 'error');
+                return;
+            }
+            
+            await placeBet(amount);
+        }
+        
+        // 下注
+        async function placeBet(amount) {
+            if (!amount || amount < 1 || amount > 500) {
+                showToast('投注金额无效', 'error');
+                return;
+            }
+            
+            try {
+                
+                // 调用后端API下注
+                const response = await fetch(`${PARTY_CRISIS_API.BASE_URL}/bet`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         address: userAddress,
-                        amount: betAmount,
-                        gameId: 'dice-game',
-                        description: '猜大小游戏'
+                        roomId: partyCrisisGame.selectedRoom,
+                        amount: amount
                     })
                 });
-
-                const spendData = await spendResponse.json();
-                if (!spendData.success) {
-                    throw new Error(spendData.error);
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || '下注失败');
                 }
-
-                // 模拟摇骰子
-                document.getElementById('gameStatus').textContent = window.i18n?.t('game.msg.playing') || '摇骰子中...';
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                // 生成随机数 1-12
-                const dice = Math.floor(Math.random() * 12) + 1;
-                const isBig = dice >= 6;
-                const won = (choice === 'big' && isBig) || (choice === 'small' && !isBig);
-
-                const resultText = window.i18n?.t('game.msg.result') || '骰子点数';
-                document.getElementById('gameStatus').textContent = `${resultText}: ${dice}`;
-
-                if (won) {
-                    // 赢了，获得投注金额的2倍
-                    const rewardAmount = betAmount * 2;
-                    const rewardResponse = await fetch(`${CONFIG.API_BASE}?action=reward`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            address: userAddress,
-                            amount: rewardAmount,
-                            gameId: 'dice-game',
-                            description: '猜大小获胜'
-                        })
-                    });
-
-                    const rewardData = await rewardResponse.json();
-                    if (rewardData.success) {
-                        const winText = window.i18n?.t('game.msg.win') || '恭喜！你赢了';
-                        document.getElementById('gameResult').textContent = `🎉 ${winText} ${rewardAmount.toFixed(2)} DP!`;
-                        document.getElementById('gameResult').style.color = '#4caf50';
-                        showToast(`${winText}! +${rewardAmount.toFixed(2)} DP 🎉`, 'success');
-                    }
-                } else {
-                    const loseText = window.i18n?.t('game.msg.lose') || '很遗憾，你输了';
-                    document.getElementById('gameResult').textContent = `😢 ${loseText}！`;
-                    document.getElementById('gameResult').style.color = '#f44336';
-                    showToast(`${loseText} -${betAmount.toFixed(2)} DP`, 'error');
+                
+                // 下注成功
+                partyCrisisGame.currentBet += amount;
+                document.getElementById('currentBetDisplay').textContent = `${partyCrisisGame.currentBet} DP`;
+                
+                // 创建玩家角色
+                const charId = `char-${userAddress}`;
+                if (!document.getElementById(charId)) {
+                    createPlayerCharacter(userAddress, currentUserInfo?.username || 'You', partyCrisisGame.selectedRoom, true);
                 }
-
-                await loadAllData();
+                
+                // 更新余额
+                if (data.balance !== undefined) {
+                    await loadAllData();
+                }
+                
+                showToast(`成功下注 ${amount} DP 到 ${PARTY_CRISIS.ROOMS[partyCrisisGame.selectedRoom].name}`, 'success');
+                
             } catch (error) {
-                console.error('游戏失败:', error);
-                showToast('游戏失败: ' + error.message, 'error');
-            } finally {
-                gameInProgress = false;
-                document.getElementById('bigBtn').disabled = false;
-                document.getElementById('smallBtn').disabled = false;
+                console.error('[派对危机] 下注失败:', error);
+                showToast('下注失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 创建角色
+        function createPlayerCharacter(id, name, roomId, isCurrentPlayer = false) {
+            const char = document.createElement('div');
+            char.className = 'character' + (isCurrentPlayer ? ' current-player' : '');
+            char.id = `char-${id}`;
+            char.innerHTML = '🐻<div class="character-name">' + name + '</div>';
+            
+            // 从出生点开始
+            char.style.left = `${PARTY_CRISIS.SPAWN_POINT.x}%`;
+            char.style.top = `${PARTY_CRISIS.SPAWN_POINT.y}%`;
+            
+            document.getElementById('gameMapInner').appendChild(char);
+            
+            // 移动到目标房间
+            setTimeout(() => moveCharacterToRoom(char, roomId), 100);
+            
+            partyCrisisGame.players.push({ id, name, roomId, isCurrentPlayer });
+        }
+        
+        // 移动角色到房间（沿路径移动，中心向外扩散站位）
+        function moveCharacterToRoom(char, roomId) {
+            const room = PARTY_CRISIS.ROOMS[roomId];
+            const path = room.path;
+            
+            if (!path || path.length === 0) {
+                return;
+            }
+            
+            // 计算最终站位
+            const playersInRoom = partyCrisisGame.players.filter(p => p.roomId === roomId);
+            const playerIndex = playersInRoom.length - 1;
+            let finalX, finalY;
+            
+            if (playerIndex === 0) {
+                // 第一个玩家在站位中心
+                finalX = room.centerX;
+                finalY = room.centerY;
+            } else {
+                // 中心向外扩散的同心圆排列
+                const layer = Math.floor((playerIndex - 1) / 8) + 1;
+                const posInLayer = (playerIndex - 1) % 8;
+                const playersInLayer = Math.min(8, playersInRoom.length - 1 - (layer - 1) * 8);
+                
+                const radius = layer * 2.5;
+                const angleStep = (Math.PI * 2) / playersInLayer;
+                const angle = posInLayer * angleStep + (layer * 0.2);
+                
+                const offsetX = Math.cos(angle) * radius;
+                const offsetY = Math.sin(angle) * radius;
+                
+                finalX = room.centerX + offsetX;
+                finalY = room.centerY + offsetY;
+            }
+            
+            // 沿路径移动
+            let currentStep = 0;
+            const totalSteps = path.length;
+            const stepDuration = 3000 / totalSteps; // 总共3秒
+            
+            function moveToNextStep() {
+                if (currentStep >= totalSteps - 1) {
+                    // 最后一步：移动到最终站位
+                    char.style.transition = `all ${stepDuration}ms linear`;
+                    char.style.left = `${finalX}%`;
+                    char.style.top = `${finalY}%`;
+                    return;
+                }
+                
+                currentStep++;
+                const [x, y] = path[currentStep];
+                char.style.transition = `all ${stepDuration}ms linear`;
+                char.style.left = `${x}%`;
+                char.style.top = `${y}%`;
+                
+                setTimeout(moveToNextStep, stepDuration);
+            }
+            
+            moveToNextStep();
+        }
+        
+        // 注意：这些函数已移除，由后端和 API 同步接管：
+        // - startNewGame() -> 由后端自动创建新游戏
+        // - generateBotPlayers() -> 由后端生成
+        // - updateRoomStats() -> 由 updateGameState() 同步
+        // - startCountdown() -> 由后端倒计时
+        // - startKillerPhase() -> 由 triggerKillerPhase() 触发
+        
+        // 刺杀玩家 - 由 triggerKillerPhase 调用
+        function killPlayers(roomId) {
+            console.log(`[杀手动画] 刺杀房间 ${roomId}:`, PARTY_CRISIS.ROOMS[roomId]?.name);
+            document.getElementById(`room-${roomId}`).classList.add('killed');
+            
+            // 只将被杀房间的玩家变成金币
+            const room = PARTY_CRISIS.ROOMS[roomId];
+            if (!room) return;
+            
+            // 获取在被刺杀房间的玩家
+            const playersInRoom = partyCrisisGame.players.filter(p => p.roomId === roomId);
+            console.log(`[杀手动画] 房间内玩家数: ${playersInRoom.length}`);
+            
+            // 将这些玩家变成金币
+            playersInRoom.forEach(player => {
+                const charElement = document.getElementById(`char-${player.id}`);
+                if (charElement) {
+                    charElement.textContent = '💰';
+                    charElement.classList.add('coin');
+                    console.log(`[杀手动画] ${player.name} 被消灭`);
+                }
+            });
+            
+            // 同时也要处理bot玩家（通过位置判断）
+            document.querySelectorAll('.character').forEach(char => {
+                const charId = char.id;
+                if (charId.startsWith('char-bot-')) {
+                    // 检查这个bot是否在被杀的房间
+                    // 简单方法：检查位置是否接近房间中心
+                    const left = parseFloat(char.style.left);
+                    const top = parseFloat(char.style.top);
+                    const distX = Math.abs(left - room.centerX);
+                    const distY = Math.abs(top - room.centerY);
+                    
+                    // 如果距离小于10%，认为在这个房间
+                    if (distX < 10 && distY < 10) {
+                        char.textContent = '💰';
+                        char.classList.add('coin');
+                        console.log(`[杀手动画] Bot ${charId} 被消灭`);
+                    }
+                }
+            });
+        }
+        
+        // 注意：settleGame 函数已移除，由后端自动结算
+        
+        // 更新历史记录显示（最新的在最上面）
+        function updateHistoryDisplay() {
+            const historyItems = document.getElementById('historyItems');
+            // 反转数组，让最新的记录在最上面
+            historyItems.innerHTML = [...partyCrisisGame.history].reverse().map(roomId => {
+                const roomName = PARTY_CRISIS.ROOMS[roomId]?.name || `房间${roomId}`;
+                return `<div class="history-item">${roomName}</div>`;
+            }).join('');
+        }
+        
+        // 加载历史记录
+        async function loadGameHistory() {
+            try {
+                const response = await fetch(`${PARTY_CRISIS_API.BASE_URL}/history`);
+                const data = await response.json();
+                if (data.success && data.history) {
+                    partyCrisisGame.history = data.history.slice(0, 8).map(h => h.killedRoom);
+                    updateHistoryDisplay();
+                }
+            } catch (error) {
+                console.error('[派对危机] 加载历史失败:', error);
+                partyCrisisGame.history = [];
+                updateHistoryDisplay();
             }
         }
 
@@ -2123,6 +3308,9 @@
             if (!checkAccess()) {
                 return;
             }
+
+            // 初始化派对危机游戏
+            initPartyCrisisGame();
 
             const walletProvider = window.okxwallet || window.ethereum;
             if (walletProvider) {
