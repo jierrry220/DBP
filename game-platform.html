@@ -3066,16 +3066,30 @@
                 return;
             }
             
-            // 获取当前余额，全部投入
-            const balance = parseFloat(document.getElementById('balanceDisplay').textContent.replace(/[^0-9.]/g, '')) || 0;
-            const amount = balance; // 移除500的限制
-            
-            if (amount < 1) {
-                showToast('余额不足', 'error');
-                return;
+            try {
+                // 从 API 获取实际余额，避免显示四舍五入的问题
+                const response = await fetch(`${CONFIG.API_BASE}?action=getBalance&address=${userAddress}`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    showToast('获取余额失败', 'error');
+                    return;
+                }
+                
+                // 只取整数部分，不投入小数部分
+                const balance = data.data.balance;
+                const amount = Math.floor(balance);
+                
+                if (amount < 1) {
+                    showToast('余额不足', 'error');
+                    return;
+                }
+                
+                await placeBet(amount);
+            } catch (error) {
+                console.error('MAX投注失败:', error);
+                showToast('获取余额失败', 'error');
             }
-            
-            await placeBet(amount);
         }
         
         // 下注
