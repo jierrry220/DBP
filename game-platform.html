@@ -2634,7 +2634,7 @@
                 
                 // 更新历史记录（从游戏数据中获取）
                 if (game.history && game.history.length > 0) {
-                    partyCrisisGame.history = game.history.slice(-4).map(h => h.killedRoom);
+                    partyCrisisGame.history = game.history.slice(-3).map(h => h.killedRoom);
                     updateHistoryDisplay();
                     console.log('[派对危机] 更新历史记录:', partyCrisisGame.history);
                 }
@@ -2643,7 +2643,7 @@
             
             // 每次同步都更新历史记录（确保实时更新）
             if (game.history && game.history.length > 0) {
-                const newHistory = game.history.slice(-4).map(h => h.killedRoom);
+                const newHistory = game.history.slice(-3).map(h => h.killedRoom);
                 if (JSON.stringify(newHistory) !== JSON.stringify(partyCrisisGame.history)) {
                     partyCrisisGame.history = newHistory;
                     updateHistoryDisplay();
@@ -3281,7 +3281,7 @@
                 const response = await fetch(`${PARTY_CRISIS_API.BASE_URL}/history`);
                 const data = await response.json();
                 if (data.success && data.history) {
-                    partyCrisisGame.history = data.history.slice(0, 8).map(h => h.killedRoom);
+                    partyCrisisGame.history = data.history.slice(-3).map(h => h.killedRoom);
                     updateHistoryDisplay();
                 }
             } catch (error) {
