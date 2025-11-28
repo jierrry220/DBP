@@ -4169,6 +4169,11 @@
             }
             
             const btn = document.getElementById('gameAudioBtn');
+            if (!btn) {
+                console.error('[音效] 找不到音频按钮');
+                return;
+            }
+            
             const isMuted = window.gameAudioManager.toggleMute();
             
             if (isMuted) {
