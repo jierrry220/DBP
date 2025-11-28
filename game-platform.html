@@ -3573,6 +3573,13 @@
         
         // 下注
         async function placeBet(amount) {
+            // 移动端：解锁所有音频（用户交互）
+            if (window.gameAudioManager && window.gameAudioManager.setupMobileAudioUnlock) {
+                // 强制触发解锁
+                const event = new Event('click');
+                document.dispatchEvent(event);
+            }
+            
             // 防止重复下注
             if (partyCrisisGame.isBetting) {
                 console.log('[派对危机] 正在下注中，请稍候...');
