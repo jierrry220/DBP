@@ -27,7 +27,6 @@ test-*.html
 test.html
 room-debug.html
 advanced-debug.html
-t-engine.html
 
 # API integration test files
 party-crisis-api-integration.js
