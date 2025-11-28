@@ -29,6 +29,7 @@ class GameAudioManager {
         this.countdownInterval = null;
         this.footstepIntervalId = null; // 接近脚步声定时器
         this._interactionListenerActive = false; // 用户交互监听器状态
+        this.audioUnlocked = false; // 移动端音频解锁状态
         
         // 音量设置
         this.volumes = {
@@ -38,6 +39,7 @@ class GameAudioManager {
         };
         
         this.init();
+        this.setupMobileAudioUnlock();
     }
     
     /**
@@ -116,6 +118,58 @@ class GameAudioManager {
         });
         
         console.log('[音效管理器] 📦 音频预加载已启动');
+    }
+    
+    /**
+     * 设置移动端音频解锁（监听用户首次交互）
+     */
+    setupMobileAudioUnlock() {
+        const unlockAudio = () => {
+            if (this.audioUnlocked) return;
+            
+            console.log('[音效管理器] 🔓 检测到用户交互，解锁所有音频...');
+            
+            // 解锁AudioContext
+            if (this.audioContext && this.audioContext.state === 'suspended') {
+                this.audioContext.resume();
+            }
+            
+            // 解锁所有HTML5音频（通过静音播放）
+            const audioElements = [
+                this.bgm,
+                this.cishaAudio,
+                this.jingdiAudio,
+                this.winAudio,
+                this.defeatAudio
+            ];
+            
+            audioElements.forEach(audio => {
+                if (audio) {
+                    const originalVolume = audio.volume;
+                    audio.volume = 0;
+                    audio.play().then(() => {
+                        audio.pause();
+                        audio.currentTime = 0;
+                        audio.volume = originalVolume;
+                    }).catch(() => {});
+                }
+            });
+            
+            this.audioUnlocked = true;
+            console.log('[音效管理器] ✅ 音频已解锁');
+            
+            // 移除监听器
+            document.removeEventListener('touchstart', unlockAudio);
+            document.removeEventListener('touchend', unlockAudio);
+            document.removeEventListener('click', unlockAudio);
+        };
+        
+        // 监听多种交互事件
+        document.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
+        document.addEventListener('touchend', unlockAudio, { once: true, passive: true });
+        document.addEventListener('click', unlockAudio, { once: true });
+        
+        console.log('[音效管理器] 📱 移动端音频解锁监听器已设置');
     }
     
     /**
