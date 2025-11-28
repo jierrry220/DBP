@@ -3,6 +3,7 @@
 <head>
     <script src="js/disable-console.js"></script>
     <script src="js/i18n.js"></script>
+    <script src="js/game-audio-manager.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GameFi Platform - Debear Party</title>
@@ -135,6 +136,35 @@
             display: flex;
             gap: 20px;
             align-items: center;
+        }
+
+        /* Audio Control Button */
+        .audio-control-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(0, 196, 239, 0.1);
+            border: 2px solid rgba(0, 196, 239, 0.3);
+            color: var(--neon-cyan);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .audio-control-btn:hover {
+            background: rgba(0, 196, 239, 0.2);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 196, 239, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .audio-control-btn.muted {
+            background: rgba(244, 67, 54, 0.1);
+            border-color: rgba(244, 67, 54, 0.3);
+            color: #f44336;
         }
 
         .user-info-display {
@@ -439,13 +469,46 @@
             padding: 20px;
             text-align: center;
         }
+        
+        .game-title-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            position: relative;
+        }
 
         .game-section h2 {
             font-size: 28px;
             background: var(--primary-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 15px;
+            margin: 0;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .game-audio-btn {
+            padding: 4px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            line-height: 1;
+            flex-shrink: 0;
+            opacity: 0.7;
+        }
+        
+        .game-audio-btn:hover {
+            color: var(--neon-cyan);
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .game-audio-btn.muted {
+            opacity: 0.4;
         }
 
         /* 游戏信息栏（移动到地图内部顶部） */
@@ -651,11 +714,31 @@
             transition: all 3s ease;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
             pointer-events: none;
+            z-index: 100;
         }
 
+        /* 当前玩家特效 */
         .character.current-player {
-            z-index: 1000;
-            filter: drop-shadow(0 0 8px rgba(0, 196, 239, 0.8));
+            z-index: 2500 !important; /* 比杀手还高 */
+            filter: drop-shadow(0 0 15px rgba(0, 196, 239, 1)) 
+                    drop-shadow(0 0 25px rgba(0, 196, 239, 0.6))
+                    drop-shadow(0 0 35px rgba(0, 196, 239, 0.4));
+            animation: playerPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes playerPulse {
+            0%, 100% { 
+                transform: scale(1);
+                filter: drop-shadow(0 0 15px rgba(0, 196, 239, 1)) 
+                        drop-shadow(0 0 25px rgba(0, 196, 239, 0.6))
+                        drop-shadow(0 0 35px rgba(0, 196, 239, 0.4));
+            }
+            50% { 
+                transform: scale(1.1);
+                filter: drop-shadow(0 0 20px rgba(0, 196, 239, 1)) 
+                        drop-shadow(0 0 30px rgba(0, 196, 239, 0.8))
+                        drop-shadow(0 0 40px rgba(0, 196, 239, 0.6));
+            }
         }
 
         .character-name {
@@ -668,6 +751,57 @@
             white-space: nowrap;
             font-weight: 700;
             text-shadow: 0 0 3px rgba(0, 0, 0, 0.9), 0 0 6px rgba(0, 0, 0, 0.7);
+            z-index: 1;
+        }
+
+        /* 当前玩家名字动态换色发光效果 */
+        .character.current-player .character-name {
+            font-size: 10px;
+            font-weight: 800;
+            animation: nameColorShift 3s ease-in-out infinite;
+        }
+
+        @keyframes nameColorShift {
+            0% { 
+                color: #ff6b35; /* 橙红色 */
+                text-shadow: 0 0 5px rgba(255, 107, 53, 1),
+                             0 0 10px rgba(255, 107, 53, 0.8),
+                             0 0 15px rgba(255, 107, 53, 0.6),
+                             0 0 20px rgba(255, 107, 53, 0.4),
+                             0 2px 4px rgba(0, 0, 0, 0.9);
+            }
+            25% { 
+                color: #ffd700; /* 金色 */
+                text-shadow: 0 0 5px rgba(255, 215, 0, 1),
+                             0 0 10px rgba(255, 215, 0, 0.8),
+                             0 0 15px rgba(255, 215, 0, 0.6),
+                             0 0 20px rgba(255, 215, 0, 0.4),
+                             0 2px 4px rgba(0, 0, 0, 0.9);
+            }
+            50% { 
+                color: #00ff88; /* 翠绿色 */
+                text-shadow: 0 0 5px rgba(0, 255, 136, 1),
+                             0 0 10px rgba(0, 255, 136, 0.8),
+                             0 0 15px rgba(0, 255, 136, 0.6),
+                             0 0 20px rgba(0, 255, 136, 0.4),
+                             0 2px 4px rgba(0, 0, 0, 0.9);
+            }
+            75% { 
+                color: #ff3366; /* 玄红色 */
+                text-shadow: 0 0 5px rgba(255, 51, 102, 1),
+                             0 0 10px rgba(255, 51, 102, 0.8),
+                             0 0 15px rgba(255, 51, 102, 0.6),
+                             0 0 20px rgba(255, 51, 102, 0.4),
+                             0 2px 4px rgba(0, 0, 0, 0.9);
+            }
+            100% { 
+                color: #ff6b35; /* 橙红色 */
+                text-shadow: 0 0 5px rgba(255, 107, 53, 1),
+                             0 0 10px rgba(255, 107, 53, 0.8),
+                             0 0 15px rgba(255, 107, 53, 0.6),
+                             0 0 20px rgba(255, 107, 53, 0.4),
+                             0 2px 4px rgba(0, 0, 0, 0.9);
+            }
         }
 
         /* 杀手 */
@@ -710,7 +844,7 @@
             backdrop-filter: blur(10px);
             border: 2px solid rgba(0, 196, 239, 0.4);
             border-radius: 0 0 12px 12px;
-            border-top: 2px solid rgba(233, 0, 233, 0.4);
+            border-top: 2px solid rgba(0, 196, 239, 0.4);
             padding: 10px 15px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
@@ -725,7 +859,7 @@
             z-index: 50;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(10px);
-            border: 2px solid rgba(233, 0, 233, 0.4);
+            border: 2px solid rgba(0, 196, 239, 0.4);
             border-radius: 12px 12px 0 0;
             border-bottom: none;
             padding: 8px 15px;
@@ -885,7 +1019,7 @@
             z-index: 50;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(10px);
-            border: 2px solid rgba(233, 0, 233, 0.4);
+            border: 2px solid rgba(0, 196, 239, 0.4);
             border-radius: 12px;
             padding: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
@@ -912,11 +1046,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(233, 0, 233, 0.2);
-            border: 1px solid rgba(233, 0, 233, 0.4);
+            background: rgba(0, 196, 239, 0.2);
+            border: 1px solid rgba(0, 196, 239, 0.4);
             border-radius: 8px;
             font-weight: 700;
-            color: var(--neon-pink);
+            color: var(--neon-cyan);
             font-size: 12px;
             text-align: center;
             white-space: nowrap;
@@ -1566,6 +1700,141 @@
             box-shadow: 0 0 15px rgba(0, 196, 239, 0.3);
         }
 
+        /* ========== 结算弹窗 ========== */
+        .game-result-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 50%;
+            max-width: 600px;
+            min-width: 320px;
+            background: linear-gradient(135deg, rgba(26, 10, 46, 0.98) 0%, rgba(10, 14, 26, 0.98) 100%);
+            border: 3px solid rgba(0, 196, 239, 0.5);
+            border-radius: 20px;
+            box-shadow: 0 20px 80px rgba(0, 196, 239, 0.4),
+                        inset 0 0 60px rgba(0, 196, 239, 0.1);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 150;
+            backdrop-filter: blur(20px);
+        }
+
+        .game-result-modal.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .result-content {
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .result-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(0, 196, 239, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .result-icon {
+            font-size: 120px;
+            margin-bottom: 20px;
+            animation: iconPulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(0, 196, 239, 0.6));
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .result-title {
+            font-size: 48px;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            text-shadow: 0 0 30px rgba(0, 196, 239, 0.5);
+        }
+
+        .result-message {
+            font-size: 24px;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .result-amount {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 25px;
+            background: rgba(0, 196, 239, 0.1);
+            border: 2px solid rgba(0, 196, 239, 0.3);
+            border-radius: 15px;
+            margin: 0 auto;
+            max-width: 400px;
+        }
+
+        .amount-label {
+            font-size: 18px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .amount-value {
+            font-size: 42px;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 196, 239, 0.6);
+            animation: amountGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes amountGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        /* 失败样式 */
+        .game-result-modal.defeat {
+            border-color: rgba(233, 0, 233, 0.5);
+            box-shadow: 0 20px 80px rgba(233, 0, 233, 0.4),
+                        inset 0 0 60px rgba(233, 0, 233, 0.1);
+        }
+
+        .game-result-modal.defeat .result-title {
+            background: linear-gradient(135deg, #e900e9 0%, #d91e5a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .game-result-modal.defeat .result-amount {
+            background: rgba(233, 0, 233, 0.1);
+            border-color: rgba(233, 0, 233, 0.3);
+        }
+
+        .game-result-modal.defeat .amount-value {
+            background: linear-gradient(135deg, #e900e9 0%, #d91e5a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         /* ========== Responsive ========== */
         @media (max-width: 768px) {
             .navbar {
@@ -1623,6 +1892,40 @@
             .user-info-display {
                 font-size: 11px;
                 padding: 5px 10px;
+            }
+            
+            /* 结算弹窗移动端 */
+            .game-result-modal {
+                width: 90%;
+                min-width: 280px;
+            }
+            
+            .result-content {
+                padding: 40px 20px;
+            }
+            
+            .result-icon {
+                font-size: 80px;
+            }
+            
+            .result-title {
+                font-size: 32px;
+            }
+            
+            .result-message {
+                font-size: 18px;
+            }
+            
+            .result-amount {
+                padding: 20px;
+            }
+            
+            .amount-label {
+                font-size: 16px;
+            }
+            
+            .amount-value {
+                font-size: 32px;
             }
         }
     </style>
@@ -1686,13 +1989,15 @@
         <!-- Header -->
         <div class="header">
             <h1 data-i18n="gamePlatform.header">🎮 Play to Earn</h1>
-            <p data-i18n="gamePlatform.subtitle">Deposit DP Token to start playing, win rewards and withdraw to wallet</p>
         </div>
 
 
         <!-- Party Crisis Game -->
         <div class="game-section">
-            <h2>Party Crisis</h2>
+            <div class="game-title-container">
+                <h2>Party Crisis</h2>
+                <button class="game-audio-btn" id="gameAudioBtn" onclick="toggleAudio()" title="音效控制">🔊</button>
+            </div>
 
             <!-- 游戏容器 -->
             <div class="party-crisis-container">
@@ -1704,7 +2009,7 @@
                             <div>
                                 <div class="game-status-text" id="gamePhaseText">等待游戏开始...</div>
                             </div>
-                            <div class="game-timer" id="gameTimer">⏱️ --:--</div>
+                            <div class="game-timer" id="gameTimer">--:--</div>
                         </div>
                         
                         <!-- 信息窗口（已选房间、已投注） -->
@@ -1735,6 +2040,19 @@
                             <div class="history-title">刺杀记录</div>
                             <div class="history-items" id="historyItems">
                                 <!-- 历史记录会动态生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 结算弹窗 -->
+                        <div class="game-result-modal" id="gameResultModal">
+                            <div class="result-content">
+                                <div class="result-icon" id="resultIcon">🎉</div>
+                                <div class="result-title" id="resultTitle">你太棒了！</div>
+                                <div class="result-message" id="resultMessage">成功躲过杀手</div>
+                                <div class="result-amount" id="resultAmount">
+                                    <span class="amount-label">本局获得</span>
+                                    <span class="amount-value" id="resultAmountValue">0 DP</span>
+                                </div>
                             </div>
                         </div>
                         
@@ -2588,6 +2906,11 @@
             // 初始化 lastKnownPhase（避免第一次被认为阶段变化）
             lastKnownPhase = partyCrisisGame.phase;
             
+            // 恢复音效状态（页面刷新后）
+            if (window.gameAudioManager) {
+                window.gameAudioManager.restoreGameState(partyCrisisGame.phase, partyCrisisGame.countdown);
+            }
+            
             startGameSync();
         }
         
@@ -2653,6 +2976,11 @@
             if (lastKnownGameId !== null && lastKnownGameId !== game.gameId) {
                 console.log(`[派对危机] 检测到游戏ID变化: ${lastKnownGameId} -> ${game.gameId}，清理UI并重新加载数据`);
                 cleanupGameUI();
+                
+                // 触发音效：游戏开始
+                if (window.gameAudioManager) {
+                    window.gameAudioManager.onGameStart();
+                }
                 settlingNotificationShown = false; // 重置通知状态
                 renderedBots.clear(); // 清空已渲染Bot记录
                 botRenderQueue = []; // 清空渲染队列
@@ -2696,7 +3024,12 @@
             // 更新倒计时显示
             const minutes = Math.floor(game.countdown / 60);
             const seconds = game.countdown % 60;
-            document.getElementById('gameTimer').textContent = `⏱️ ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('gameTimer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // 触发音效：倒计时更新
+            if (window.gameAudioManager && game.phase === 'betting') {
+                window.gameAudioManager.onCountdownUpdate(game.countdown);
+            }
             
             // 更新阶段文本并显示详细信息
             if (game.phase === 'betting') {
@@ -2712,6 +3045,11 @@
                         countdown: game.countdown
                     });
                     
+                    // 触发音效：杀手出现（全场静音）
+                    if (window.gameAudioManager) {
+                        window.gameAudioManager.onKillerAppear();
+                    }
+                    
                     if (game.targetRoom) {
                         console.log('[派对危机] 触发杀手动画...');
                         triggerKillerPhase(game.targetRoom);
@@ -2723,6 +3061,11 @@
                 
                 // 只在阶段刚切换时触发结算动画
                 if (phaseChanged) {
+                    // 触发音效：游戏结算
+                    if (window.gameAudioManager) {
+                        window.gameAudioManager.onGameSettling();
+                    }
+                    
                     // 触发幸存玩家返回动画
                     triggerSurvivorsReturn();
                     
@@ -2741,18 +3084,27 @@
                         const playerResult = game.result.survivors.find(p => p.address === normalizedAddr);
                         const wasEliminated = game.result.eliminated.find(p => p.address === normalizedAddr);
                         
+                        console.log('[派对危机] 玩家结果数据:', { playerResult, wasEliminated });
+                        
                         if (playerResult && playerResult.reward > 0) {
+                            // 显示胜利弹窗
                             setTimeout(() => {
-                                showToast(`🎉 恭喜！你幸存了！获得奖励 ${playerResult.reward.toFixed(2)} DP`, 'success');
-                                console.log('[派对危机] 显示胜利通知');
+                                showGameResult(true, playerResult.reward);
+                                console.log('[派对危机] 显示胜利弹窗');
                             }, 1500);
                         } else if (wasEliminated) {
+                            // 显示失败弹窗
+                            const lostAmount = wasEliminated.amount || wasEliminated.bet || 0;
                             setTimeout(() => {
-                                showToast(`💀 很遗憾，你被杀手消灭了...`, 'error');
-                                console.log('[派对危机] 显示消灭通知');
+                                showGameResult(false, lostAmount);
+                                console.log('[派对危机] 显示失败弹窗, 损失:', lostAmount);
                             }, 1500);
                         } else {
-                            console.log('[派对危机] 玩家未参与此局游戏');
+                            // 玩家未投注，显示鼓励弹窗
+                            console.log('[派对危机] 玩家未投注，显示鼓励弹窗');
+                            setTimeout(() => {
+                                showGameResult('no-bet', 0);
+                            }, 1500);
                         }
                     }
                 }
@@ -2764,9 +3116,16 @@
             // 渲染玩家角色
             if (game.players && game.players.length > 0) {
                 game.players.forEach(player => {
-                    const charId = `char-${player.address}`;
+                    // 统一使用小写地址作为ID
+                    const normalizedAddr = player.address.toLowerCase();
+                    const charId = `char-${normalizedAddr}`;
                     if (!document.getElementById(charId)) {
-                        createPlayerCharacter(player.address, player.username || 'Player', player.roomId, false);
+                        // 检查是否是当前玩家
+                        const isCurrentPlayer = userAddress && normalizedAddr === userAddress.toLowerCase();
+                        console.log(`[角色创建] 创建玩家: ${player.username}, 地址: ${normalizedAddr}, 当前玩家: ${isCurrentPlayer}`);
+                        createPlayerCharacter(normalizedAddr, player.username || 'Player', player.roomId, isCurrentPlayer);
+                    } else {
+                        console.log(`[角色创建] 角色已存在: ${charId}`);
                     }
                 });
             }
@@ -2927,6 +3286,83 @@
             moveToNextStep();
         }
         
+        // 显示结算弹窗
+        function showGameResult(isWin, amount) {
+            const modal = document.getElementById('gameResultModal');
+            const icon = document.getElementById('resultIcon');
+            const title = document.getElementById('resultTitle');
+            const message = document.getElementById('resultMessage');
+            const amountLabel = modal.querySelector('.amount-label');
+            const amountValue = document.getElementById('resultAmountValue');
+            
+            // 确保 amount 是有效数字
+            const safeAmount = typeof amount === 'number' ? amount : 0;
+            
+            // 移除旧样式
+            modal.classList.remove('defeat');
+            
+            if (isWin === 'no-bet') {
+                // 未投注，显示鼓励弹窗
+                icon.textContent = '🚀';
+                title.textContent = '下一局赢家就是你！';
+                message.textContent = '选择你躲藏的房间吧';
+                // 隐藏金额窗口
+                const amountBox = document.getElementById('resultAmount');
+                if (amountBox) amountBox.style.display = 'none';
+                
+                // 播放胜利音效
+                if (window.gameAudioManager) {
+                    window.gameAudioManager.playWinSound();
+                }
+            } else if (isWin) {
+                // 胜利
+                icon.textContent = '🎉';
+                title.textContent = '你太棒了！';
+                message.textContent = '成功躲过杀手';
+                amountLabel.textContent = '本局获得';
+                amountValue.textContent = `${safeAmount.toFixed(2)} DP`;
+                // 显示金额窗口
+                const amountBox = document.getElementById('resultAmount');
+                if (amountBox) amountBox.style.display = 'flex';
+                
+                // 播放胜利音效
+                if (window.gameAudioManager) {
+                    window.gameAudioManager.playWinSound();
+                }
+            } else {
+                // 失败
+                modal.classList.add('defeat');
+                icon.textContent = '💀';
+                title.textContent = '太遗憾了！';
+                message.textContent = '你被杀手击杀了！';
+                amountLabel.textContent = '本局损失';
+                amountValue.textContent = `${safeAmount.toFixed(2)} DP`;
+                // 显示金额窗口
+                const amountBox = document.getElementById('resultAmount');
+                if (amountBox) amountBox.style.display = 'flex';
+                
+                // 播放失败音效
+                if (window.gameAudioManager) {
+                    window.gameAudioManager.playDefeatSound();
+                }
+            }
+            
+            // 显示弹窗（从中心放大动画）
+            requestAnimationFrame(() => {
+                modal.classList.add('show');
+            });
+            
+            const resultType = isWin === 'no-bet' ? '鼓励' : (isWin ? '胜利' : '失败');
+            console.log(`[结算弹窗] 显示 ${resultType} 弹窗${isWin === 'no-bet' ? '' : ': ' + safeAmount.toFixed(2) + ' DP'}`);
+        }
+        
+        // 隐藏结算弹窗
+        function hideGameResult() {
+            const modal = document.getElementById('gameResultModal');
+            modal.classList.remove('show');
+            console.log('[结算弹窗] 关闭弹窗');
+        }
+        
         // 清理游戏UI
         function cleanupGameUI() {
             console.log('[派对危机] 清理UI...');
@@ -2949,6 +3385,9 @@
             }
             renderedBots.clear();
             botRenderQueue = [];
+            
+            // 关闭结算弹窗
+            hideGameResult();
             
             console.log('[派对危机] UI清理完成');
         }
@@ -2977,6 +3416,13 @@
             }
             mapInner.appendChild(killer);
             console.log('[杀手动画] 杀手已创建，初始位置:', PARTY_CRISIS.ENTRANCE);
+            
+            // 触发音效：杀手移动（脚步声）
+            if (window.gameAudioManager) {
+                const room = PARTY_CRISIS.ROOMS[targetRoom];
+                const steps = room.path ? room.path.length : 10;
+                window.gameAudioManager.onKillerMove(steps);
+            }
             
             setTimeout(() => {
                 const room = PARTY_CRISIS.ROOMS[targetRoom];
@@ -3170,10 +3616,14 @@
                 partyCrisisGame.currentBet += amount;
                 document.getElementById('currentBetDisplay').textContent = `${partyCrisisGame.currentBet} DP`;
                 
-                // 创建玩家角色
-                const charId = `char-${userAddress}`;
+                // 创建玩家角色（统一使用小写地址）
+                const normalizedAddr = userAddress.toLowerCase();
+                const charId = `char-${normalizedAddr}`;
                 if (!document.getElementById(charId)) {
-                    createPlayerCharacter(userAddress, currentUserInfo?.username || 'You', partyCrisisGame.selectedRoom, true);
+                    console.log(`[下注] 创建当前玩家角色: ${currentUserInfo?.username}`);
+                    createPlayerCharacter(normalizedAddr, currentUserInfo?.username || 'You', partyCrisisGame.selectedRoom, true);
+                } else {
+                    console.log(`[下注] 角色已存在，跳过创建`);
                 }
                 
                 // 更新余额
@@ -3709,6 +4159,27 @@
             // 同步连接按钮状态
             mobileConnectBtn.textContent = connectBtn.textContent;
             mobileConnectBtn.disabled = connectBtn.disabled;
+        }
+        
+        // ========== 音效控制 ==========
+        function toggleAudio() {
+            if (!window.gameAudioManager) {
+                console.warn('[音效] 音效管理器未初始化');
+                return;
+            }
+            
+            const btn = document.getElementById('gameAudioBtn');
+            const isMuted = window.gameAudioManager.toggleMute();
+            
+            if (isMuted) {
+                btn.textContent = '🔇';
+                btn.classList.add('muted');
+                btn.title = '点击开启音效';
+            } else {
+                btn.textContent = '🔊';
+                btn.classList.remove('muted');
+                btn.title = '点击关闭音效';
+            }
         }
     </script>
 </body>
