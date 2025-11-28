@@ -2057,6 +2057,7 @@
                 showToast(window.i18n?.t('toast.wallet.connected') || '钱包连接成功!', 'success');
                 await loadAllData();
                 await loadUserInfo(); // 加载用户信息
+                await restorePlayerBetState(); // 恢复投注状态（如果有）
             } catch (error) {
                 console.error('连接钱包失败:', error);
                 showToast((window.i18n?.t('toast.wallet.failed') || '连接钱包失败') + ': ' + error.message, 'error');
@@ -2588,6 +2589,38 @@
             lastKnownPhase = partyCrisisGame.phase;
             
             startGameSync();
+        }
+        
+        // 恢复玩家投注状态（刷新后）
+        async function restorePlayerBetState() {
+            if (!userAddress) return;
+            
+            try {
+                const response = await fetch(`${PARTY_CRISIS_API.BASE_URL}/my-game/${userAddress}`);
+                const data = await response.json();
+                
+                if (data.success && data.inGame && data.myBet) {
+                    const bet = data.myBet;
+                    console.log('[派对危机] 恢复玩家投注状态:', bet);
+                    
+                    // 恢复选中的房间
+                    partyCrisisGame.selectedRoom = bet.roomId;
+                    partyCrisisGame.currentBet = bet.amount;
+                    
+                    // 更新UI显示
+                    document.querySelectorAll('.room-zone').forEach(z => z.classList.remove('selected'));
+                    document.getElementById(`room-${bet.roomId}`).classList.add('selected');
+                    
+                    const selectedRoomEl = document.getElementById('selectedRoomDisplay');
+                    const currentBetEl = document.getElementById('currentBetDisplay');
+                    if (selectedRoomEl) selectedRoomEl.textContent = PARTY_CRISIS.ROOMS[bet.roomId].name;
+                    if (currentBetEl) currentBetEl.textContent = `${bet.amount} DP`;
+                    
+                    console.log('[派对危机] 投注状态已恢复: 房间', bet.roomId, '投注', bet.amount, 'DP');
+                }
+            } catch (error) {
+                console.error('[派对危机] 恢复投注状态失败:', error);
+            }
         }
         
         // 启动游戏状态同步
