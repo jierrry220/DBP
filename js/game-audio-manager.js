@@ -51,27 +51,35 @@ class GameAudioManager {
             this.bgm = new Audio('audio/game-bgm.mp3');
             this.bgm.loop = true;
             this.bgm.volume = this.volumes.bgm;
+            this.bgm.preload = 'auto'; // 移动端预加载
             console.log('[音效管理器] ✅ BGM音频元素已创建:', this.bgm.src);
             
             // 创建刺杀音效
             this.cishaAudio = new Audio('audio/cisha.mp3');
-            this.cishaAudio.volume = 0.6; // 刺杀音效音量
+            this.cishaAudio.volume = 0.6;
+            this.cishaAudio.preload = 'auto';
             console.log('[音效管理器] ✅ 刺杀音效已创建:', this.cishaAudio.src);
             
             // 创建惊笛音效（逃离）
             this.jingdiAudio = new Audio('audio/jingdi.mp3');
-            this.jingdiAudio.volume = 0.5; // 惊笛音效音量
+            this.jingdiAudio.volume = 0.5;
+            this.jingdiAudio.preload = 'auto';
             console.log('[音效管理器] ✅ 惊笛音效已创建:', this.jingdiAudio.src);
             
             // 创建胜利音效
             this.winAudio = new Audio('audio/win.mp3');
-            this.winAudio.volume = 0.6; // 胜利音效音量
+            this.winAudio.volume = 0.6;
+            this.winAudio.preload = 'auto';
             console.log('[音效管理器] ✅ 胜利音效已创建:', this.winAudio.src);
             
             // 创建失败音效
             this.defeatAudio = new Audio('audio/defeat.mp3');
-            this.defeatAudio.volume = 0.6; // 失败音效音量
+            this.defeatAudio.volume = 0.6;
+            this.defeatAudio.preload = 'auto';
             console.log('[音效管理器] ✅ 失败音效已创建:', this.defeatAudio.src);
+            
+            // 移动端：预加载所有音频
+            this.preloadAudio();
             
             // 创建音频上下文（用于生成音效）
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -87,6 +95,27 @@ class GameAudioManager {
         } catch (error) {
             console.error('[音效管理器] ❌ 初始化失败:', error);
         }
+    }
+    
+    /**
+     * 预加载音频（移动端优化）
+     */
+    preloadAudio() {
+        const audioElements = [
+            this.bgm,
+            this.cishaAudio,
+            this.jingdiAudio,
+            this.winAudio,
+            this.defeatAudio
+        ];
+        
+        audioElements.forEach(audio => {
+            if (audio) {
+                audio.load();
+            }
+        });
+        
+        console.log('[音效管理器] 📦 音频预加载已启动');
     }
     
     /**
@@ -287,6 +316,9 @@ class GameAudioManager {
             this.currentPhase = 'betting';
             return;
         }
+        
+        // 移动端：恢复AudioContext
+        this.resumeAudioContext();
         
         // 停止倒计时音效
         if (this.countdownInterval) {
@@ -516,6 +548,9 @@ class GameAudioManager {
             
             console.log('[音效] 🔪 播放刺杀音效');
             
+            // 移动端：恢复AudioContext
+            this.resumeAudioContext();
+            
             // 从头播放刺杀音效
             this.cishaAudio.currentTime = 0;
             const playPromise = this.cishaAudio.play();
@@ -547,6 +582,9 @@ class GameAudioManager {
         if (this.isMuted) return;
         
         console.log('[音效] 🚨 开始播放逃离音效（惊笛）');
+        
+        // 移动端：恢复AudioContext
+        this.resumeAudioContext();
         
         // 从头播放惊笛音效
         this.jingdiAudio.currentTime = 0;
@@ -592,12 +630,28 @@ class GameAudioManager {
     }
     
     /**
+     * 恢复AudioContext（移动端需要）
+     */
+    resumeAudioContext() {
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            this.audioContext.resume().then(() => {
+                console.log('[音效] AudioContext已恢复');
+            }).catch(err => {
+                console.warn('[音效] AudioContext恢复失败:', err);
+            });
+        }
+    }
+    
+    /**
      * 播放胜利音效
      */
     playWinSound() {
         if (this.isMuted || !this.winAudio) return;
         
         console.log('[音效] 🎉 播放胜利音效');
+        
+        // 移动端：恢复AudioContext
+        this.resumeAudioContext();
         
         this.winAudio.currentTime = 0;
         const playPromise = this.winAudio.play();
@@ -607,6 +661,10 @@ class GameAudioManager {
                 console.log('[音效] ✅ 胜利音效播放中');
             }).catch(err => {
                 console.warn('[音效] 胜利音效播放失败:', err);
+                // 移动端重试
+                setTimeout(() => {
+                    this.winAudio.play().catch(e => console.error('[音效] 重试失败:', e));
+                }, 100);
             });
         }
     }
@@ -619,6 +677,9 @@ class GameAudioManager {
         
         console.log('[音效] 💀 播放失败音效');
         
+        // 移动端：恢复AudioContext
+        this.resumeAudioContext();
+        
         this.defeatAudio.currentTime = 0;
         const playPromise = this.defeatAudio.play();
         
@@ -627,6 +688,10 @@ class GameAudioManager {
                 console.log('[音效] ✅ 失败音效播放中');
             }).catch(err => {
                 console.warn('[音效] 失败音效播放失败:', err);
+                // 移动端重试
+                setTimeout(() => {
+                    this.defeatAudio.play().catch(e => console.error('[音效] 重试失败:', e));
+                }, 100);
             });
         }
     }
