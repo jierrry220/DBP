@@ -240,20 +240,23 @@ class GameAudioManager {
     onGameStart() {
         console.log('[音效] 游戏开始，播放BGM');
         
-        if (this.isMuted) {
-            this.currentPhase = 'betting';
-            return;
-        }
-        
         // 停止倒计时
         if (this.countdownInterval) {
             clearInterval(this.countdownInterval);
             this.countdownInterval = null;
         }
         
+        this.currentPhase = 'betting';
+        
+        if (this.isMuted) {
+            return;
+        }
+        
+        // 重置BGM音量（防止上一局淡出后音量还是0）
+        this.gainNodes.bgm.gain.value = this.volumes.bgm;
+        
         // 播放BGM（循环）
         this.playSound('bgm', true);
-        this.currentPhase = 'betting';
     }
     
     /**
@@ -389,25 +392,30 @@ class GameAudioManager {
     restoreGameState(phase, countdown) {
         console.log(`[音效] 🔄 恢复游戏状态: ${phase}, 倒计时=${countdown}s`);
         
+        this.currentPhase = phase;
+        
         if (this.isMuted) {
-            this.currentPhase = phase;
             return;
         }
         
         if (phase === 'betting') {
             if (countdown <= 10 && countdown > 0) {
+                // 倒计时最后10秒，仅播放哔哔声
                 this.currentPhase = 'countdown_critical';
                 if (this.countdownInterval) clearInterval(this.countdownInterval);
                 this.countdownInterval = setInterval(() => {
                     this.playBeep();
                 }, 1000);
                 this.playBeep();
+                
+                // 计算当前BGM应有的音量（淡出进度）
+                const fadeProgress = (10 - countdown) / 9;
+                this.gainNodes.bgm.gain.value = this.volumes.bgm * (1 - fadeProgress);
             } else {
-                this.currentPhase = 'betting';
+                // 正常投注期，播放BGM
+                this.gainNodes.bgm.gain.value = this.volumes.bgm;
                 this.playSound('bgm', true);
             }
-        } else {
-            this.currentPhase = phase;
         }
     }
     
