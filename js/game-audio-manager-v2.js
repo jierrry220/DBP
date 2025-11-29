@@ -84,11 +84,11 @@ class GameAudioManager {
      */
     async loadAllAudio() {
         const audioFiles = [
-            { key: 'bgm', url: 'audio/game-bgm.mp3' },
-            { key: 'cisha', url: 'audio/cisha.mp3' },
-            { key: 'jingdi', url: 'audio/jingdi.mp3' },
-            { key: 'win', url: 'audio/win.mp3' },
-            { key: 'defeat', url: 'audio/defeat.mp3' }
+            { key: 'bgm', url: 'audio/game-bgm.aac' },
+            { key: 'cisha', url: 'audio/cisha.aac' },
+            { key: 'jingdi', url: 'audio/jingdi.aac' },
+            { key: 'win', url: 'audio/win.aac' },
+            { key: 'defeat', url: 'audio/defeat.aac' }
         ];
         
         console.log('[音效管理器] 📦 开始加载音频文件...');

@@ -84,11 +84,11 @@ class GameAudioManager {
      */
     async loadAllAudio() {
         const audioFiles = [
-            { key: 'bgm', url: 'audio/game-bgm.mp3' },
-            { key: 'cisha', url: 'audio/cisha.mp3' },
-            { key: 'jingdi', url: 'audio/jingdi.mp3' },
-            { key: 'win', url: 'audio/win.mp3' },
-            { key: 'defeat', url: 'audio/defeat.mp3' }
+            { key: 'bgm', url: 'audio/game-bgm.aac' },
+            { key: 'cisha', url: 'audio/cisha.aac' },
+            { key: 'jingdi', url: 'audio/jingdi.aac' },
+            { key: 'win', url: 'audio/win.aac' },
+            { key: 'defeat', url: 'audio/defeat.aac' }
         ];
         
         console.log('[音效管理器] 📦 开始加载音频文件...');
@@ -363,9 +363,10 @@ class GameAudioManager {
     }
     
     /**
-     * 播放哔哔声（倒计时音效）
+     * 播放哔哔声(倒计时音效)
+     * @param {boolean} silent - 是否静音模式(前50秒使用)
      */
-    playBeep() {
+    playBeep(silent = false) {
         if (this.isMuted) return;
         
         const duration = 0.15;
@@ -375,8 +376,10 @@ class GameAudioManager {
         oscillator.type = 'square';
         oscillator.frequency.setValueAtTime(800, this.audioContext.currentTime); // 高频哔声
         
-        gainNode.gain.setValueAtTime(this.volumes.countdown, this.audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+        // 如果是静音模式,音量设置为极小值(0.005),否则正常音量
+        const initialVolume = silent ? 0.005 : this.volumes.countdown;
+        gainNode.gain.setValueAtTime(initialVolume, this.audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
         
         oscillator.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
@@ -386,10 +389,10 @@ class GameAudioManager {
     }
     
     /**
-     * 游戏开始 - 播放BGM
+     * 游戏开始 - 播放BGM + 启动全程倒计时音效(前50秒静音)
      */
     onGameStart() {
-        console.log('[音效] 游戏开始，播放BGM');
+        console.log('[音效] 游戏开始,播放BGM + 启动全程倒计时(前50秒静音)');
         console.log('[音效] 当前静音状态:', this.isMuted);
         console.log('[音效] BGM对象:', this.bgm);
         console.log('[音效] BGM src:', this.bgm ? this.bgm.src : 'null');
@@ -400,19 +403,35 @@ class GameAudioManager {
         }
         
         if (this.isMuted) {
-            console.log('[音效] 当前静音，不播放BGM');
+            console.log('[音效] 当前静音,不播放BGM');
             this.currentPhase = 'betting';
             return;
         }
         
-        // 移动端：恢复AudioContext
+        // 移动端:恢复AudioContext
         this.resumeAudioContext();
         
-        // 停止倒计时音效
+        // 停止旧的倒计时音效
         if (this.countdownInterval) {
             clearInterval(this.countdownInterval);
             this.countdownInterval = null;
         }
+        
+        // 🎯 启动全程60秒倒计时音效(前50秒静音,后10秒正常)
+        // 用于解锁移动端音频播放
+        this.currentCountdown = 60; // 初始化倒计时
+        this.countdownInterval = setInterval(() => {
+            if (this.currentCountdown > 0) {
+                // 前50秒使用静音模式,后10秒正常音量
+                const isSilent = this.currentCountdown > 10;
+                this.playBeep(isSilent);
+                this.currentCountdown--;
+            }
+        }, 1000);
+        
+        // 立即播放一次(静音)
+        this.playBeep(true);
+        console.log('[音效] 🔓 启动全程倒计时音效(前50秒静音),解锁移动端音频播放');
         
         // 恢复正常音量
         this.bgm.volume = this.volumes.bgm;
@@ -428,7 +447,7 @@ class GameAudioManager {
                 console.log('[音效] ✅ BGM 播放成功!');
             }).catch(err => {
                 console.warn('[音效] ⚠️ BGM播放被浏览器阻止 (autoplay policy):', err.message);
-                console.warn('[音效] 这是正常的浏览器安全策略，需要用户交互才能播放音频');
+                console.warn('[音效] 这是正常的浏览器安全策略,需要用户交互才能播放音频');
                 this.setupUserInteractionListener();
             });
         }
@@ -445,37 +464,38 @@ class GameAudioManager {
         console.log(`[音效] 🔄 恢复游戏状态: 阶段=${phase}, 倒计时=${countdown}s`);
         
         if (this.isMuted) {
-            console.log('[音效] 当前静音，不恢复音效');
+            console.log('[音效] 当前静音,不恢复音效');
             this.currentPhase = phase;
             return;
         }
         
         // 根据阶段恢复音效
         if (phase === 'betting') {
-            // 投注阶段
-            if (countdown <= 10 && countdown > 0) {
-                // 最后10秒，直接播放倒计时音效
-                console.log('[音效] 恢复：倒计时最后10秒，播放哔哔声');
-                this.currentPhase = 'countdown_critical';
-                this.bgm.pause();
-                
-                // 清理旧的倒计时
-                if (this.countdownInterval) clearInterval(this.countdownInterval);
-                
-                // 启动倒计时音效
-                this.countdownInterval = setInterval(() => {
-                    this.playBeep();
-                }, 1000);
-                
-                // 立即播放一次
-                this.playBeep();
-            } else {
-                // 正常投注阶段，直接播放BGM
-                console.log('[音效] 恢复：投注阶段，播放BGM');
-                this.currentPhase = 'betting';
+            // 投注阶段 - 启动全程倒计时音效
+            console.log('[音效] 恢复:投注阶段,启动全程倒计时音效');
+            this.currentPhase = countdown <= 10 ? 'countdown_critical' : 'betting';
+            
+            // 清理旧的倒计时
+            if (this.countdownInterval) clearInterval(this.countdownInterval);
+            
+            // 🎯 启动全程倒计时音效(根据剩余时间判断静音/正常)
+            this.currentCountdown = countdown;
+            this.countdownInterval = setInterval(() => {
+                if (this.currentCountdown > 0) {
+                    const isSilent = this.currentCountdown > 10;
+                    this.playBeep(isSilent);
+                    this.currentCountdown--;
+                }
+            }, 1000);
+            
+            // 立即播放一次
+            const isSilent = countdown > 10;
+            this.playBeep(isSilent);
+            console.log('[音效] 🔓 启动倒计时音效(剩余' + countdown + '秒, ' + (isSilent ? '静音模式' : '正常模式') + ')');
+            
+            // 播放BGM(如果不是最后10秒)
+            if (countdown > 10) {
                 this.bgm.volume = this.volumes.bgm;
-                
-                // 直接播放，如果被阻止则监听用户交互
                 const playPromise = this.bgm.play();
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
@@ -485,10 +505,13 @@ class GameAudioManager {
                         this.setupUserInteractionListener();
                     });
                 }
+            } else {
+                // 最后10秒,BGM已经淡出
+                this.bgm.pause();
             }
         } else if (phase === 'killer_moving' || phase === 'settling') {
-            // 杀手/结算阶段，保持静音
-            console.log('[音效] 恢复：杀手/结算阶段，保持静音');
+            // 杀手/结算阶段,保持静音
+            console.log('[音效] 恢复:杀手/结算阶段,保持静音');
             this.currentPhase = phase;
             this.bgm.pause();
             
@@ -497,8 +520,8 @@ class GameAudioManager {
                 this.countdownInterval = null;
             }
         } else {
-            // 其他阶段（如 waiting）
-            console.log('[音效] 恢复：其他阶段 (' + phase + ')，不播放音效');
+            // 其他阶段(如 waiting)
+            console.log('[音效] 恢复:其他阶段 (' + phase + '),不播放音效');
             this.currentPhase = phase;
             this.bgm.pause();
         }
@@ -551,28 +574,26 @@ class GameAudioManager {
      * @param {number} countdown - 剩余秒数
      */
     onCountdownUpdate(countdown) {
-        // 最后10秒：BGM淡出 + 播放哔哔声
+        // 同步倒计时值
+        this.currentCountdown = countdown;
+        
+        // 最后10秒:BGM淡出(声音已经在onGameStart中全程播放)
         if (countdown <= 10 && countdown > 0) {
             if (this.currentPhase !== 'countdown_critical') {
-                console.log('[音效] 倒计时最后10秒，BGM开始淡出');
+                console.log('[音效] 倒计时最后10秒,BGM开始淡出');
                 this.currentPhase = 'countdown_critical';
-                
-                // 开始播放倒计时哔哔声
-                if (this.countdownInterval) clearInterval(this.countdownInterval);
-                this.countdownInterval = setInterval(() => {
-                    this.playBeep();
-                }, 1000); // 每秒一次
+                // 注意:倒计时音效已经在onGameStart中启动,无需再次启动
             }
             
-            // BGM淡出：从10秒到1秒，音量从30%逐渐降到0%
+            // BGM淡出:从10秒到1秒,音量从30%逐渐降到0%
             if (!this.isMuted) {
                 const fadeProgress = (10 - countdown) / 9; // 0 到 1
                 const targetVolume = this.volumes.bgm * (1 - fadeProgress);
                 this.bgm.volume = Math.max(0, targetVolume);
                 
-                // 当倒计时1秒时，完全停止BGM
+                // 当倒计时1秒时,完全停止BGM
                 if (countdown === 1) {
-                    console.log('[音效] BGM淡出完毕，停止播放');
+                    console.log('[音效] BGM淡出完毕,停止播放');
                     this.bgm.pause();
                 }
             }
@@ -608,7 +629,7 @@ class GameAudioManager {
         
         // === 声音时间轴 ===
         // 0-8秒:     沉重脚步声（接近）
-        // 8秒:       刺杀音效（cisha.mp3）
+        // 8秒:       刺杀音效（cisha.aac）
         // 刺杀音频结束后: 快速逃离脚步声
         
         // 清理旧的定时器
