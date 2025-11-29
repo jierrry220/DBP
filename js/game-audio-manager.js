@@ -46,8 +46,9 @@ class GameAudioManager {
         this.volumes = {
             bgm: 0.3,
             countdown: 0.5,
-            footsteps: 0.4,
-            sfx: 0.6  // 音效音量
+            footsteps: 0.624,  // 杀手脚步声 (0.52 * 1.2 = 0.624)
+            sfx: 0.6,  // 通用音效音量
+            jingdi: 0.459  // 警笛声 (0.51 * 0.9 = 0.459)
         };
         
         this.init();
@@ -177,6 +178,9 @@ class GameAudioManager {
         // 连接节点
         source.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
+        
+        // 保存gainNode引用以便后续调整音量
+        source.gainNode = gainNode;
         
         // 播放
         source.start(0);
@@ -394,13 +398,6 @@ class GameAudioManager {
     onGameStart() {
         console.log('[音效] 游戏开始,播放BGM + 启动全程倒计时(前50秒静音)');
         console.log('[音效] 当前静音状态:', this.isMuted);
-        console.log('[音效] BGM对象:', this.bgm);
-        console.log('[音效] BGM src:', this.bgm ? this.bgm.src : 'null');
-        
-        if (!this.bgm) {
-            console.error('[音效] BGM对象不存在!');
-            return;
-        }
         
         if (this.isMuted) {
             console.log('[音效] 当前静音,不播放BGM');
@@ -433,24 +430,10 @@ class GameAudioManager {
         this.playBeep(true);
         console.log('[音效] 🔓 启动全程倒计时音效(前50秒静音),解锁移动端音频播放');
         
-        // 恢复正常音量
-        this.bgm.volume = this.volumes.bgm;
-        console.log('[音效] 设置BGM音量为:', this.volumes.bgm);
-        
-        // 从头播放BGM
-        this.bgm.currentTime = 0;
+        // 播放BGM (使用Web Audio API)
         console.log('[音效] 尝试播放BGM...');
-        
-        const playPromise = this.bgm.play();
-        if (playPromise !== undefined) {
-            playPromise.then(() => {
-                console.log('[音效] ✅ BGM 播放成功!');
-            }).catch(err => {
-                console.warn('[音效] ⚠️ BGM播放被浏览器阻止 (autoplay policy):', err.message);
-                console.warn('[音效] 这是正常的浏览器安全策略,需要用户交互才能播放音频');
-                this.setupUserInteractionListener();
-            });
-        }
+        this.playAudioBuffer('bgm', true, this.volumes.bgm);
+        console.log('[音效] ✅ BGM 已启动播放 (循环)');
         
         this.currentPhase = 'betting';
     }
@@ -495,25 +478,14 @@ class GameAudioManager {
             
             // 播放BGM(如果不是最后10秒)
             if (countdown > 10) {
-                this.bgm.volume = this.volumes.bgm;
-                const playPromise = this.bgm.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        console.log('[音效] ✅ BGM 恢复播放成功');
-                    }).catch(err => {
-                        console.warn('[音效] ⚠️ BGM播放被阻止:', err.message);
-                        this.setupUserInteractionListener();
-                    });
-                }
-            } else {
-                // 最后10秒,BGM已经淡出
-                this.bgm.pause();
+                this.playAudioBuffer('bgm', true, this.volumes.bgm);
+                console.log('[音效] ✅ BGM 恢复播放');
             }
         } else if (phase === 'killer_moving' || phase === 'settling') {
             // 杀手/结算阶段,保持静音
             console.log('[音效] 恢复:杀手/结算阶段,保持静音');
             this.currentPhase = phase;
-            this.bgm.pause();
+            this.stopAudioBuffer('bgm');
             
             if (this.countdownInterval) {
                 clearInterval(this.countdownInterval);
@@ -523,7 +495,7 @@ class GameAudioManager {
             // 其他阶段(如 waiting)
             console.log('[音效] 恢复:其他阶段 (' + phase + '),不播放音效');
             this.currentPhase = phase;
-            this.bgm.pause();
+            this.stopAudioBuffer('bgm');
         }
     }
     
@@ -545,11 +517,8 @@ class GameAudioManager {
             
             if (this.currentPhase === 'betting' && !this.isMuted) {
                 console.log('[音效] 尝试恢复BGM播放...');
-                this.bgm.play().then(() => {
-                    console.log('[音效] ✅ BGM 恢复播放成功!');
-                }).catch(err => {
-                    console.error('[音效] ❌ BGM仍无法播放:', err);
-                });
+                this.playAudioBuffer('bgm', true, this.volumes.bgm);
+                console.log('[音效] ✅ BGM 恢复播放成功!');
             } else {
                 console.log('[音效] 当前不是投注阶段或已静音，不恢复BGM');
             }
@@ -586,15 +555,20 @@ class GameAudioManager {
             }
             
             // BGM淡出:从10秒到1秒,音量从30%逐渐降到0%
-            if (!this.isMuted) {
+            if (!this.isMuted && this.currentSources['bgm']) {
                 const fadeProgress = (10 - countdown) / 9; // 0 到 1
                 const targetVolume = this.volumes.bgm * (1 - fadeProgress);
-                this.bgm.volume = Math.max(0, targetVolume);
+                
+                // 通过重新创建音源并调整音量实现淡出
+                const source = this.currentSources['bgm'];
+                if (source.gainNode) {
+                    source.gainNode.gain.setValueAtTime(Math.max(0, targetVolume), this.audioContext.currentTime);
+                }
                 
                 // 当倒计时1秒时,完全停止BGM
                 if (countdown === 1) {
                     console.log('[音效] BGM淡出完毕,停止播放');
-                    this.bgm.pause();
+                    this.stopAudioBuffer('bgm');
                 }
             }
         }
@@ -607,7 +581,7 @@ class GameAudioManager {
         console.log('[音效] 杀手出现，全场静音');
         
         // 停止BGM
-        this.bgm.pause();
+        this.stopAudioBuffer('bgm');
         
         // 停止倒计时音效
         if (this.countdownInterval) {
@@ -660,24 +634,20 @@ class GameAudioManager {
             // 移动端：恢复AudioContext
             this.resumeAudioContext();
             
-            // 从头播放刺杀音效
-            this.cishaAudio.currentTime = 0;
-            const playPromise = this.cishaAudio.play();
+            // 播放刺杀音效
+            const source = this.playAudioBuffer('cisha', false, this.volumes.sfx);
             
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    console.log('[音效] 刺杀音效播放中...');
-                    
-                    // 监听音频结束事件，然后播放逃离脚步声
-                    this.cishaAudio.onended = () => {
-                        console.log('[音效] 刺杀音效结束，开始逃离脚步声');
-                        this.playEscapeFootsteps();
-                    };
-                }).catch(err => {
-                    console.warn('[音效] 刺杀音效播放失败:', err);
-                    // 如果播放失败，仍然播放逃离脚步声
-                    setTimeout(() => this.playEscapeFootsteps(), 2000);
-                });
+            if (source) {
+                console.log('[音效] 刺杀音效播放中...');
+                
+                // 监听音频结束事件，然后播放逃离脚步声
+                source.onended = () => {
+                    console.log('[音效] 刺杀音效结束，开始逃离脚步声');
+                    this.playEscapeFootsteps();
+                };
+            } else {
+                // 如果播放失败，仍然播放逃离脚步声
+                setTimeout(() => this.playEscapeFootsteps(), 2000);
             }
         }, 8000);
         
@@ -695,21 +665,18 @@ class GameAudioManager {
         // 移动端：恢复AudioContext
         this.resumeAudioContext();
         
-        // 从头播放惊笛音效
-        this.jingdiAudio.currentTime = 0;
-        const playPromise = this.jingdiAudio.play();
+        // 播放惊笛音效 (音量降低15%)
+        const source = this.playAudioBuffer('jingdi', false, this.volumes.jingdi);
         
-        if (playPromise !== undefined) {
-            playPromise.then(() => {
-                console.log('[音效] 惊笛音效播放中...');
-                
-                // 监听音频结杞
-                this.jingdiAudio.onended = () => {
-                    console.log('[音效] 🏃 杀手音效序列完毕');
-                };
-            }).catch(err => {
-                console.warn('[音效] 惊笛音效播放失败:', err);
-            });
+        if (source) {
+            console.log('[音效] 惊笛音效播放中...');
+            
+            // 监听音频结束
+            source.onended = () => {
+                console.log('[音效] 🏃 杀手音效序列完毕');
+            };
+        } else {
+            console.warn('[音效] 惊笛音效播放失败');
         }
     }
     
@@ -723,17 +690,11 @@ class GameAudioManager {
         // BGM会在下一局游戏开始时重新播放
         
         // 停止刺杀音效（如果还在播放）
-        if (this.cishaAudio) {
-            this.cishaAudio.pause();
-            this.cishaAudio.currentTime = 0;
-        }
+        this.stopAudioBuffer('cisha');
         
         // 停止惊笛音效（如果还在播放）
-        if (this.jingdiAudio) {
-            this.jingdiAudio.pause();
-            this.jingdiAudio.currentTime = 0;
-            console.log('[音效] ✅ 已停止惊笛音效');
-        }
+        this.stopAudioBuffer('jingdi');
+        console.log('[音效] ✅ 已停止所有杀手音效');
         
         this.currentPhase = 'settling';
     }
@@ -755,26 +716,19 @@ class GameAudioManager {
      * 播放胜利音效
      */
     playWinSound() {
-        if (this.isMuted || !this.winAudio) return;
+        if (this.isMuted) return;
         
         console.log('[音效] 🎉 播放胜利音效');
         
         // 移动端：恢复AudioContext
         this.resumeAudioContext();
         
-        this.winAudio.currentTime = 0;
-        const playPromise = this.winAudio.play();
-        
-        if (playPromise !== undefined) {
-            playPromise.then(() => {
-                console.log('[音效] ✅ 胜利音效播放中');
-            }).catch(err => {
-                console.warn('[音效] 胜利音效播放失败:', err);
-                // 移动端重试
-                setTimeout(() => {
-                    this.winAudio.play().catch(e => console.error('[音效] 重试失败:', e));
-                }, 100);
-            });
+        // 播放胜利音效
+        const source = this.playAudioBuffer('win', false, this.volumes.sfx);
+        if (source) {
+            console.log('[音效] ✅ 胜利音效播放中');
+        } else {
+            console.warn('[音效] 胜利音效播放失败');
         }
     }
     
@@ -782,26 +736,19 @@ class GameAudioManager {
      * 播放失败音效
      */
     playDefeatSound() {
-        if (this.isMuted || !this.defeatAudio) return;
+        if (this.isMuted) return;
         
-        console.log('[音效] 💀 播放失败音效');
+        console.log('[音效] 💀 播放胜利音效');
         
         // 移动端：恢复AudioContext
         this.resumeAudioContext();
         
-        this.defeatAudio.currentTime = 0;
-        const playPromise = this.defeatAudio.play();
-        
-        if (playPromise !== undefined) {
-            playPromise.then(() => {
-                console.log('[音效] ✅ 失败音效播放中');
-            }).catch(err => {
-                console.warn('[音效] 失败音效播放失败:', err);
-                // 移动端重试
-                setTimeout(() => {
-                    this.defeatAudio.play().catch(e => console.error('[音效] 重试失败:', e));
-                }, 100);
-            });
+        // 播放失败音效
+        const source = this.playAudioBuffer('defeat', false, this.volumes.sfx);
+        if (source) {
+            console.log('[音效] ✅ 失败音效播放中');
+        } else {
+            console.warn('[音效] 失败音效播放失败');
         }
     }
     
@@ -812,12 +759,17 @@ class GameAudioManager {
         this.isMuted = !this.isMuted;
         
         if (this.isMuted) {
-            this.bgm.volume = 0;
+            // 停止所有音频
+            this.stopAudioBuffer('bgm');
+            this.stopAudioBuffer('cisha');
+            this.stopAudioBuffer('jingdi');
+            this.stopAudioBuffer('win');
+            this.stopAudioBuffer('defeat');
             console.log('[音效] 已静音');
         } else {
             // 只有在投注阶段且不是倒计时最后10秒时才恢复音量
             if (this.currentPhase === 'betting') {
-                this.bgm.volume = this.volumes.bgm;
+                this.playAudioBuffer('bgm', true, this.volumes.bgm);
             }
             console.log('[音效] 取消静音');
         }
@@ -827,19 +779,26 @@ class GameAudioManager {
     
     /**
      * 设置音量
-     * @param {string} type - 音频类型 (bgm, countdown, footsteps)
+     * @param {string} type - 音频类型 (bgm, countdown, footsteps, sfx, jingdi)
      * @param {number} volume - 音量 (0-1)
      */
     setVolume(type, volume) {
         if (type === 'bgm') {
             this.volumes.bgm = volume;
-            if (this.currentPhase === 'betting' && !this.isMuted) {
-                this.bgm.volume = volume;
+            if (this.currentPhase === 'betting' && !this.isMuted && this.currentSources['bgm']) {
+                const source = this.currentSources['bgm'];
+                if (source.gainNode) {
+                    source.gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
+                }
             }
         } else if (type === 'countdown') {
             this.volumes.countdown = volume;
         } else if (type === 'footsteps') {
             this.volumes.footsteps = volume;
+        } else if (type === 'sfx') {
+            this.volumes.sfx = volume;
+        } else if (type === 'jingdi') {
+            this.volumes.jingdi = volume;
         }
     }
     
@@ -847,30 +806,12 @@ class GameAudioManager {
      * 清理资源
      */
     destroy() {
-        if (this.bgm) {
-            this.bgm.pause();
-            this.bgm = null;
-        }
-        
-        if (this.cishaAudio) {
-            this.cishaAudio.pause();
-            this.cishaAudio = null;
-        }
-        
-        if (this.jingdiAudio) {
-            this.jingdiAudio.pause();
-            this.jingdiAudio = null;
-        }
-        
-        if (this.winAudio) {
-            this.winAudio.pause();
-            this.winAudio = null;
-        }
-        
-        if (this.defeatAudio) {
-            this.defeatAudio.pause();
-            this.defeatAudio = null;
-        }
+        // 停止所有音频
+        this.stopAudioBuffer('bgm');
+        this.stopAudioBuffer('cisha');
+        this.stopAudioBuffer('jingdi');
+        this.stopAudioBuffer('win');
+        this.stopAudioBuffer('defeat');
         
         if (this.countdownInterval) {
             clearInterval(this.countdownInterval);
