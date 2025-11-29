@@ -452,6 +452,9 @@ class GameAudioManager {
             return;
         }
         
+        // 🔑 关键:移动端必须先恢复AudioContext
+        this.resumeAudioContext();
+        
         // 根据阶段恢复音效
         if (phase === 'betting') {
             // 投注阶段 - 启动全程倒计时音效
@@ -471,15 +474,20 @@ class GameAudioManager {
                 }
             }, 1000);
             
-            // 立即播放一次
+            // 立即播放一次(解锁音频)
             const isSilent = countdown > 10;
             this.playBeep(isSilent);
             console.log('[音效] 🔓 启动倒计时音效(剩余' + countdown + '秒, ' + (isSilent ? '静音模式' : '正常模式') + ')');
             
             // 播放BGM(如果不是最后10秒)
             if (countdown > 10) {
-                this.playAudioBuffer('bgm', true, this.volumes.bgm);
-                console.log('[音效] ✅ BGM 恢复播放');
+                const bgmSource = this.playAudioBuffer('bgm', true, this.volumes.bgm);
+                if (bgmSource) {
+                    console.log('[音效] ✅ BGM 恢复播放');
+                } else {
+                    console.warn('[音效] ⚠️ BGM播放被阻止,设置用户交互监听器');
+                    this.setupUserInteractionListener();
+                }
             }
         } else if (phase === 'killer_moving' || phase === 'settling') {
             // 杀手/结算阶段,保持静音
