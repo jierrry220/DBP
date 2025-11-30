@@ -121,6 +121,21 @@ class GameAudioManager {
             }
             
             this.audioUnlocked = true;
+
+            // 如果刷新后恢复到投注阶段, 此时应当自动补播一次BGM
+            // (第一次自动播放因为浏览器限制被拦截了)
+            try {
+                if (!this.isMuted && this.currentPhase === 'betting') {
+                    console.log('[音效管理器] 🔁 解锁后自动补播BGM');
+                    // 重置音量并播放循环BGM
+                    if (this.gainNodes.bgm) {
+                        this.gainNodes.bgm.gain.value = this.volumes.bgm;
+                    }
+                    this.playSound('bgm', true);
+                }
+            } catch (e) {
+                console.warn('[音效管理器] 解锁后补播BGM失败:', e);
+            }
             
             // 移除监听器
             document.removeEventListener('touchstart', unlock);
