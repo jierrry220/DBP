@@ -1151,7 +1151,7 @@
         .history-bar {
             width: 135px;
             padding: 8px;
-            top: calc(1% + 38px + 30px);
+            top: calc(1% + 38px + 20px); /* 向上移动10px: 30px -> 20px */
             left: 2%;
         }
         
@@ -1173,7 +1173,7 @@
             .history-bar {
                 width: 120px;
                 padding: 5px;
-                top: calc(1% + 38px + 15px);
+                top: calc(1% + 38px + 5px); /* 向上移动10px: 15px -> 5px */
                 left: 2%;
             }
             
@@ -1197,7 +1197,7 @@
             .history-bar {
                 width: 75px;
                 padding: 3px;
-                top: calc(1% + 38px + 15px); /* 480px以下向上移动15px */
+                top: calc(1% + 38px + 5px); /* 向上移动10px: 15px -> 5px */
                 left: 2%;
                 border-radius: 8px;
                 border-width: 1px;
@@ -3099,7 +3099,7 @@
                 
                 // 更新历史记录（从游戏数据中获取）
                 if (game.history && game.history.length > 0) {
-                    partyCrisisGame.history = game.history.slice(-3).map(h => h.killedRoom);
+                    partyCrisisGame.history = game.history.slice(-4).map(h => h.killedRoom);
                     updateHistoryDisplay();
                     console.log('[派对危机] 更新历史记录:', partyCrisisGame.history);
                 }
@@ -3108,7 +3108,7 @@
             
             // 每次同步都更新历史记录（确保实时更新）
             if (game.history && game.history.length > 0) {
-                const newHistory = game.history.slice(-3).map(h => h.killedRoom);
+                const newHistory = game.history.slice(-4).map(h => h.killedRoom);
                 if (JSON.stringify(newHistory) !== JSON.stringify(partyCrisisGame.history)) {
                     partyCrisisGame.history = newHistory;
                     updateHistoryDisplay();
@@ -3908,7 +3908,7 @@
                 const response = await fetch(`${PARTY_CRISIS_API.BASE_URL}/history`);
                 const data = await response.json();
                 if (data.success && data.history) {
-                    partyCrisisGame.history = data.history.slice(-3).map(h => h.killedRoom);
+                    partyCrisisGame.history = data.history.slice(-4).map(h => h.killedRoom);
                     updateHistoryDisplay();
                 }
             } catch (error) {
