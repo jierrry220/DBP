@@ -1084,17 +1084,51 @@
         
         @media (max-width: 480px) {
             .history-bar {
-                width: 112px;
-                padding: 6px;
+                width: 90px;
+                padding: 4px;
+                top: 10%;
+                left: 1.5%;
             }
             
             .history-title {
-                font-size: 9px;
+                font-size: 8px;
+                margin-bottom: 4px;
+            }
+            
+            .history-items {
+                gap: 3px;
             }
             
             .history-item {
-                padding: 4px 6px;
-                font-size: 10px;
+                padding: 3px 4px;
+                font-size: 8px;
+            }
+        }
+        
+        /* 极小屏幕适配 (360px 及以下) */
+        @media (max-width: 360px) {
+            .history-bar {
+                width: 75px;
+                padding: 3px;
+                top: 8%;
+                left: 1%;
+                border-radius: 8px;
+                border-width: 1px;
+            }
+            
+            .history-title {
+                font-size: 7px;
+                margin-bottom: 3px;
+            }
+            
+            .history-items {
+                gap: 2px;
+            }
+            
+            .history-item {
+                padding: 2px 3px;
+                font-size: 7px;
+                border-radius: 4px;
             }
         }
 
