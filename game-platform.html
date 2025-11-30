@@ -840,8 +840,8 @@
         /* 杀手容器 */
         .killer {
             position: absolute;
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -3567,8 +3567,8 @@
             killer.style.top = `${PARTY_CRISIS.ENTRANCE.y}%`;
             killer.style.position = 'absolute';
 
-            // 固定容器大小 48px（移动端和桌面统一）
-            const killerSize = 48;
+            // 固定容器大小 40px（移动端和桌面统一）
+            const killerSize = 40;
             killer.style.width = `${killerSize}px`;
             killer.style.height = `${killerSize}px`;
             killer.style.zIndex = '2000';
@@ -3604,8 +3604,8 @@
                 
                 let currentStep = 0;
                 const totalSteps = path.length;
-                // 杀手从入口走到目标房间，约 7.5 秒
-                const stepDuration = 7500 / totalSteps;
+                // 杀手从入口走到目标房间，约 8 秒
+                const stepDuration = 8000 / totalSteps;
                 
                 function moveKillerToNextStep() {
                     if (currentStep >= totalSteps - 1) {
