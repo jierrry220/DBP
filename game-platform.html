@@ -535,12 +535,12 @@
             justify-content: space-between;
             align-items: center;
             gap: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(0, 196, 239, 0.4);
+            background: transparent; /* 透明化 */
+            backdrop-filter: blur(5px); /* 减少模糊效果 */
+            border: 2px solid rgba(0, 196, 239, 0.6); /* 增加边框不透明度 */
             border-radius: 12px;
             padding: 12px 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 15px rgba(0, 196, 239, 0.2); /* 调整阴影 */
         }
         
         .game-info-bar > div:first-child {
@@ -696,9 +696,19 @@
         }
 
         .room-name {
-            font-weight: 700;
-            color: white;
-            margin-bottom: 3px;
+            position: absolute;
+            top: -25px; /* 移到外部顶部 */
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: 800;
+            font-size: 14px; /* 增大字体 */
+            color: #fff;
+            white-space: nowrap;
+            text-shadow: 0 0 8px rgba(0, 196, 239, 0.8),
+                         0 0 12px rgba(0, 196, 239, 0.6),
+                         0 2px 4px rgba(0, 0, 0, 0.9); /* 添加发光效果 */
+            z-index: 10;
+            pointer-events: none;
         }
 
         .room-stats {
@@ -852,13 +862,13 @@
             width: 90%;
             max-width: 600px;
             z-index: 50;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(0, 196, 239, 0.4);
+            background: rgba(0, 0, 0, 0.4); /* 添加半透明黑色背景 */
+            backdrop-filter: blur(8px); /* 增加模糊效果 */
+            border: 2px solid rgba(0, 196, 239, 0.6); /* 增加边框不透明度 */
             border-radius: 0 0 12px 12px;
-            border-top: 2px solid rgba(0, 196, 239, 0.4);
+            border-top: 2px solid rgba(0, 196, 239, 0.6);
             padding: 10px 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 15px rgba(0, 196, 239, 0.2); /* 调整阴影 */
         }
         
         /* 信息窗口（已选房间、已投注） */
@@ -869,13 +879,13 @@
             width: 54%;
             max-width: 360px;
             z-index: 50;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(0, 196, 239, 0.4);
+            background: rgba(0, 0, 0, 0.4); /* 添加半透明黑色背景 */
+            backdrop-filter: blur(8px); /* 增加模糊效果 */
+            border: 2px solid rgba(0, 196, 239, 0.6); /* 增加边框不透明度 */
             border-radius: 12px 12px 0 0;
             border-bottom: none;
             padding: 5px 15px; /* 从8px改为5px */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 15px rgba(0, 196, 239, 0.2); /* 调整阴影 */
             display: flex;
             justify-content: space-around;
             gap: 20px;
@@ -1106,12 +1116,12 @@
             left: 5%; /* 与 game-info-bar 左侧对齐 */
             width: 165px;
             z-index: 50;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(0, 196, 239, 0.4);
+            background: transparent; /* 透明化 */
+            backdrop-filter: blur(5px); /* 减少模糊效果 */
+            border: 2px solid rgba(0, 196, 239, 0.6); /* 增加边框不透明度 */
             border-radius: 12px;
             padding: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 15px rgba(0, 196, 239, 0.2); /* 调整阴影 */
         }
 
         .history-title {
@@ -1149,45 +1159,45 @@
         
         /* 移动端适配 - 历史记录 - 统一使用移动端布局 */
         .history-bar {
-            width: 135px;
-            padding: 8px;
-            top: calc(1% + 38px + 20px); /* 向上移动10px: 30px -> 20px */
+            width: 128.25px; /* 从135px再缩小5%到128.25px */
+            padding: 6.84px; /* 从7.2px再缩小5%到6.84px */
+            top: calc(1% + 38px + 16px); /* 向上移动4px: 20px -> 16px */
             left: 2%;
         }
         
         .history-title {
             font-size: 11px;
-            margin-bottom: 6px;
+            margin-bottom: 5.13px; /* 从5.4px再缩小5%到5.13px */
         }
         
         .history-items {
-            gap: 4px;
+            gap: 3.42px; /* 从3.6px再缩小5%到3.42px */
         }
         
         .history-item {
-            padding: 5px 8px;
+            padding: 4.275px 7.6px; /* 从4.5px 8px再缩小5%到4.275px 7.6px */
             font-size: 12px;
         }
         
         @media (max-width: 480px) {
             .history-bar {
-                width: 120px;
-                padding: 5px;
-                top: calc(1% + 38px + 5px); /* 向上移动10px: 15px -> 5px */
+                width: 114px; /* 从120px再缩小5%到114px */
+                padding: 4.275px; /* 从4.5px再缩小5%到4.275px */
+                top: calc(1% + 38px + 1px); /* 向上移动4px: 5px -> 1px */
                 left: 2%;
             }
             
             .history-title {
                 font-size: 10px;
-                margin-bottom: 5px;
+                margin-bottom: 4.275px; /* 从4.5px再缩小5%到4.275px */
             }
             
             .history-items {
-                gap: 4px;
+                gap: 3.42px; /* 从3.6px再缩小5%到3.42px */
             }
             
             .history-item {
-                padding: 4px 5px;
+                padding: 3.42px 4.75px; /* 从3.6px 5px再缩小5%到3.42px 4.75px */
                 font-size: 11px;
             }
         }
@@ -1195,9 +1205,9 @@
         /* 极小屏幕适配 (360px 及以下) */
         @media (max-width: 360px) {
             .history-bar {
-                width: 75px;
-                padding: 3px;
-                top: calc(1% + 38px + 5px); /* 向上移动10px: 15px -> 5px */
+                width: 71.25px; /* 从75px再缩小5%到71.25px */
+                padding: 2.565px; /* 从2.7px再缩小5%到2.565px */
+                top: calc(1% + 38px + 1px); /* 向上移动4px: 5px -> 1px */
                 left: 2%;
                 border-radius: 8px;
                 border-width: 1px;
@@ -1205,15 +1215,15 @@
             
             .history-title {
                 font-size: 7px;
-                margin-bottom: 3px;
+                margin-bottom: 2.565px; /* 从2.7px再缩小5%到2.565px */
             }
             
             .history-items {
-                gap: 2px;
+                gap: 1.71px; /* 从1.8px再缩小5%到1.71px */
             }
             
             .history-item {
-                padding: 2px 3px;
+                padding: 1.71px 2.85px; /* 从1.8px 3px再缩小5%到1.71px 2.85px */
                 font-size: 7px;
                 border-radius: 4px;
             }
@@ -1812,10 +1822,10 @@
 
         /* ========== 结算弹窗 ========== */
         .game-result-modal {
-            position: absolute;
-            top: 50%;
+            position: fixed;
+            top: 50%; /* 改回居中显示 */
             left: 50%;
-            transform: translate(-50%, -50%) scale(0);
+            transform: translate(-50%, -50%) scale(0); /* 恢复原始居中动画 */
             width: 40%; /* 从50%缩小到40% */
             max-width: 450px; /* 从600px缩小到450px */
             min-width: 300px; /* 从320px缩小到300px */
@@ -1827,12 +1837,12 @@
             opacity: 0;
             visibility: hidden;
             transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            z-index: 150;
+            z-index: 3000; /* 从150提高到3000，高于玩家角色(2500) */
             backdrop-filter: blur(20px);
         }
 
         .game-result-modal.show {
-            transform: translate(-50%, -50%) scale(1);
+            transform: translate(-50%, -50%) scale(1); /* 恢复原始居中动画 */
             opacity: 1;
             visibility: visible;
         }
@@ -2113,7 +2123,7 @@
                         <!-- 游戏信息栏（移动到地图内部） -->
                         <div class="game-info-bar">
                             <div>
-                                <div class="game-status-text" id="gamePhaseText">等待游戏开始...</div>
+                                <div class="game-status-text" id="gamePhaseText" data-i18n="partyCrisis.waitingToStart">等待游戏开始...</div>
                             </div>
                             <div class="game-timer" id="gameTimer">--:--</div>
                         </div>
@@ -2121,11 +2131,11 @@
                         <!-- 信息窗口（已选房间、已投注） -->
                         <div class="bet-info-panel">
                             <div class="bet-info-item">
-                                已选房间
+                                <span data-i18n="partyCrisis.selectedRoom">已选房间</span>
                                 <span class="bet-info-value" id="selectedRoomDisplay" style="color: var(--neon-cyan);">--</span>
                             </div>
                             <div class="bet-info-item">
-                                已投注
+                                <span data-i18n="partyCrisis.betAmount">已投注</span>
                                 <span class="bet-info-value" id="currentBetDisplay" style="color: var(--neon-pink);">0 DP</span>
                             </div>
                         </div>
@@ -2143,7 +2153,7 @@
                         
                         <!-- 历史记录（移到地图内部底部偏左） -->
                         <div class="history-bar">
-                            <div class="history-title">刺杀记录</div>
+                            <div class="history-title" data-i18n="partyCrisis.historyTitle">刺殺记录</div>
                             <div class="history-items" id="historyItems">
                                 <!-- 历史记录会动态生成 -->
                             </div>
@@ -2154,9 +2164,9 @@
                             <div class="result-content">
                                 <div class="result-icon" id="resultIcon">🎉</div>
                                 <div class="result-title" id="resultTitle">你太棒了！</div>
-                                <div class="result-message" id="resultMessage">成功躲过杀手</div>
+                                <div class="result-message" id="resultMessage">成功蹲过殺手</div>
                                 <div class="result-amount" id="resultAmount">
-                                    <span class="amount-label">本局获得</span>
+                                    <span class="amount-label" id="resultAmountLabel">本局获得</span>
                                     <span class="amount-value" id="resultAmountValue">0 DP</span>
                                 </div>
                             </div>
@@ -2963,12 +2973,12 @@
         // 游戏配置
         const PARTY_CRISIS = {
             ROOMS: {
-                1: { x: 12.5, y: 63.0, name: '办公区', centerX: 19.8, centerY: 69.1, path: [[7.5,50.5],[35.0,50.5],[34.8,64.2],[25.1,64.9],[19.8,69.1]] },
+                1: { x: 12.5, y: 63.0, name: '办公室', centerX: 19.8, centerY: 69.1, path: [[7.5,50.5],[35.0,50.5],[34.8,64.2],[25.1,64.9],[19.8,69.1]] },
                 2: { x: 35.9, y: 15.6, name: '酒吧', centerX: 43.3, centerY: 22.0, path: [[7.5,50.5],[35.3,50.6],[35.4,31.9],[35.4,31.1],[42.1,31.0],[45.0,26.4],[43.3,22.0]] },
-                3: { x: 53.1, y: 15.6, name: '休息区', centerX: 60.5, centerY: 21.5, path: [[7.5,50.5],[35.1,50.3],[34.8,31.7],[55.9,31.3],[58.1,31.2],[58.8,25.3],[58.8,24.4],[59.2,23.2],[60.5,21.5]] },
-                4: { x: 73.5, y: 15.9, name: 'VIP包厢', centerX: 81.0, centerY: 22.1, path: [[7.5,50.5],[35.3,50.3],[35.2,31.5],[77.1,30.6],[82.1,25.6],[81.0,22.1]] },
-                5: { x: 74.7, y: 36.7, name: '餐饮区', centerX: 82.3, centerY: 42.5, path: [[7.5,50.5],[35.2,50.1],[35.3,30.9],[69.9,31.1],[69.2,47.1],[78.7,46.5],[82.3,42.5]] },
-                6: { x: 74.9, y: 55.1, name: '包厢区', centerX: 82.6, centerY: 61.1, path: [[7.5,50.5],[35.0,50.3],[35.0,69.3],[68.7,69.1],[70.0,69.1],[69.8,63.8],[76.5,64.0],[82.6,61.1]] },
+                3: { x: 53.1, y: 15.6, name: '休息室', centerX: 60.5, centerY: 21.5, path: [[7.5,50.5],[35.1,50.3],[34.8,31.7],[55.9,31.3],[58.1,31.2],[58.8,25.3],[58.8,24.4],[59.2,23.2],[60.5,21.5]] },
+                4: { x: 73.5, y: 15.9, name: '高贵包厢', centerX: 81.0, centerY: 22.1, path: [[7.5,50.5],[35.3,50.3],[35.2,31.5],[77.1,30.6],[82.1,25.6],[81.0,22.1]] },
+                5: { x: 74.7, y: 36.7, name: '尊贵包厢', centerX: 82.3, centerY: 42.5, path: [[7.5,50.5],[35.2,50.1],[35.3,30.9],[69.9,31.1],[69.2,47.1],[78.7,46.5],[82.3,42.5]] },
+                6: { x: 74.9, y: 55.1, name: '钻石包厢', centerX: 82.6, centerY: 61.1, path: [[7.5,50.5],[35.0,50.3],[35.0,69.3],[68.7,69.1],[70.0,69.1],[69.8,63.8],[76.5,64.0],[82.6,61.1]] },
                 7: { x: 71.5, y: 74.1, name: '餐厅', centerX: 78.8, centerY: 80.1, path: [[7.5,50.5],[34.8,50.7],[35.3,69.1],[69.3,68.9],[70.0,78.2],[78.8,80.1]] },
                 8: { x: 43.3, y: 44.5, name: '舞池', centerX: 53.1, centerY: 52.6, path: [[7.5,50.5],[34.8,50.5],[35.5,69.0],[48.9,69.3],[52.5,69.2],[55.9,61.0],[49.8,58.4],[53.1,52.6]] }
             },
@@ -3003,6 +3013,11 @@
         
         // 初始化游戏
         async function initPartyCrisisGame() {
+            // 确保i18n已初始化并应用翻译
+            if (window.i18n) {
+                window.i18n.applyLanguage();
+            }
+            
             createRoomZones();
             await loadGameHistory();
             
@@ -3042,7 +3057,8 @@
                     
                     const selectedRoomEl = document.getElementById('selectedRoomDisplay');
                     const currentBetEl = document.getElementById('currentBetDisplay');
-                    if (selectedRoomEl) selectedRoomEl.textContent = PARTY_CRISIS.ROOMS[bet.roomId].name;
+                    const room = PARTY_CRISIS.ROOMS[bet.roomId];
+                    if (selectedRoomEl && room) selectedRoomEl.textContent = window.i18n.t(`partyCrisis.room${bet.roomId}`);
                     if (currentBetEl) currentBetEl.textContent = `${bet.amount} DP`;
                     
                     console.log('[派对危机] 投注状态已恢复: 房间', bet.roomId, '投注', bet.amount, 'DP');
@@ -3127,10 +3143,16 @@
             partyCrisisGame.phase = game.phase;
             partyCrisisGame.countdown = game.countdown;
             
-            // 更新倒计时显示
-            const minutes = Math.floor(game.countdown / 60);
-            const seconds = game.countdown % 60;
-            document.getElementById('gameTimer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            // 更新倒计时显示（杀手行动和结算阶段隐藏）
+            const timerElement = document.getElementById('gameTimer');
+            if (game.phase === 'betting') {
+                const minutes = Math.floor(game.countdown / 60);
+                const seconds = game.countdown % 60;
+                timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timerElement.style.display = ''; // 显示倒计时
+            } else {
+                timerElement.style.display = 'none'; // 隐藏倒计时
+            }
             
             // 触发音效：倒计时更新
             if (window.gameAudioManager && game.phase === 'betting') {
@@ -3138,11 +3160,15 @@
             }
             
             // 更新阶段文本并显示详细信息
+            const phaseTextEl = document.getElementById('gamePhaseText');
             if (game.phase === 'betting') {
-                document.getElementById('gamePhaseText').textContent = '投注阶段 - 选择房间并下注';
+                const text = window.i18n.t('partyCrisis.killerComing');
+                // 将Killer/杀手字样设置为红色加粗
+                phaseTextEl.innerHTML = text.replace(/Killer|killer|杀手/g, '<span style="color: #ff3333; font-weight: 900; text-shadow: 0 0 10px rgba(255, 51, 51, 0.8);">$&</span>');
             } else if (game.phase === 'killer_moving') {
                 // 不显示目标房间，保持神秘感
-                document.getElementById('gamePhaseText').textContent = '🚨 杀手出现！';
+                const text = window.i18n.t('partyCrisis.killerAppears');
+                phaseTextEl.innerHTML = text.replace(/Killer|killer|殺手/g, '<span style="color: #ff3333; font-weight: 900; text-shadow: 0 0 10px rgba(255, 51, 51, 0.8);">$&</span>');
                 
                 // 只在阶段刚切换时触发动画
                 if (phaseChanged) {
@@ -3163,7 +3189,7 @@
                 }
                 
             } else if (game.phase === 'settling') {
-                document.getElementById('gamePhaseText').textContent = '结算中...';
+                phaseTextEl.textContent = window.i18n.t('partyCrisis.settling');
                 
                 // 只在阶段刚切换时触发结算动画
                 if (phaseChanged) {
@@ -3398,7 +3424,7 @@
             const icon = document.getElementById('resultIcon');
             const title = document.getElementById('resultTitle');
             const message = document.getElementById('resultMessage');
-            const amountLabel = modal.querySelector('.amount-label');
+            const amountLabel = document.getElementById('resultAmountLabel');
             const amountValue = document.getElementById('resultAmountValue');
             
             // 确保 amount 是有效数字
@@ -3410,8 +3436,8 @@
             if (isWin === 'no-bet') {
                 // 未投注，显示鼓励弹窗
                 icon.textContent = '🚀';
-                title.textContent = '下一局赢家就是你！';
-                message.textContent = '选择你躲藏的房间吧';
+                title.textContent = window.i18n.t('partyCrisis.noBetTitle');
+                message.textContent = window.i18n.t('partyCrisis.noBetMessage');
                 // 隐藏金额窗口
                 const amountBox = document.getElementById('resultAmount');
                 if (amountBox) amountBox.style.display = 'none';
@@ -3423,9 +3449,9 @@
             } else if (isWin) {
                 // 胜利
                 icon.textContent = '🎉';
-                title.textContent = '你太棒了！';
-                message.textContent = '成功躲过杀手';
-                amountLabel.textContent = '本局获得';
+                title.textContent = window.i18n.t('partyCrisis.resultWinTitle');
+                message.textContent = window.i18n.t('partyCrisis.resultWinMessage');
+                amountLabel.textContent = window.i18n.t('partyCrisis.earnedThisRound');
                 amountValue.textContent = `${safeAmount.toFixed(2)} DP`;
                 // 显示金额窗口
                 const amountBox = document.getElementById('resultAmount');
@@ -3439,9 +3465,9 @@
                 // 失败
                 modal.classList.add('defeat');
                 icon.textContent = '💀';
-                title.textContent = '太遗憾了！';
-                message.textContent = '你被杀手击杀了！';
-                amountLabel.textContent = '本局损失';
+                title.textContent = window.i18n.t('partyCrisis.resultLoseTitle');
+                message.textContent = window.i18n.t('partyCrisis.resultLoseMessage');
+                amountLabel.textContent = window.i18n.t('partyCrisis.lostThisRound');
                 amountValue.textContent = `${safeAmount.toFixed(2)} DP`;
                 // 显示金额窗口
                 const amountBox = document.getElementById('resultAmount');
@@ -3593,8 +3619,9 @@
                 zone.id = `room-${id}`;
                 zone.style.left = `${room.x}%`;
                 zone.style.top = `${room.y}%`;
+                const roomName = window.i18n.t(`partyCrisis.room${id}`);
                 zone.innerHTML = `
-                    <div class="room-name">${room.name}</div>
+                    <div class="room-name">${roomName}</div>
                     <div class="room-stats" id="room-${id}-stats">0 DP</div>
                 `;
                 zone.onclick = () => selectRoom(parseInt(id));
@@ -3602,15 +3629,42 @@
             });
         }
         
+        // 翻译后端返回的错误消息
+        function translateErrorMessage(errorMsg) {
+            if (!errorMsg) return window.i18n.t('partyCrisis.betFailed');
+            
+            const errorLower = errorMsg.toLowerCase();
+            
+            // 匹配常见错误消息
+            if (errorMsg.includes('余额不足') || errorLower.includes('insufficient balance')) {
+                return window.i18n.t('partyCrisis.insufficientBalance');
+            }
+            if (errorMsg.includes('游戏未开始') || errorMsg.includes('不在投注阶段') || errorLower.includes('not in betting phase')) {
+                return window.i18n.t('partyCrisis.cannotSelectNow');
+            }
+            if (errorMsg.includes('已经下注') || errorLower.includes('already bet')) {
+                return window.i18n.t('partyCrisis.alreadyBet');
+            }
+            if (errorMsg.includes('金额无效') || errorMsg.includes('投注金额') || errorLower.includes('invalid amount')) {
+                return window.i18n.t('partyCrisis.invalidBetAmount');
+            }
+            if (errorMsg.includes('房间') || errorLower.includes('room')) {
+                return window.i18n.t('partyCrisis.selectRoomFirst');
+            }
+            
+            // 如果没有匹配，返回原始错误消息
+            return errorMsg;
+        }
+        
         // 选择房间
         function selectRoom(roomId) {
             if (partyCrisisGame.phase !== 'betting') {
-                showToast('现在不能选择房间', 'error');
+                showToast(window.i18n.t('partyCrisis.cannotSelectNow'), 'error');
                 return;
             }
             
             if (partyCrisisGame.currentBet > 0) {
-                showToast('已下注，无法更换房间', 'error');
+                showToast(window.i18n.t('partyCrisis.alreadyBet'), 'error');
                 return;
             }
             
@@ -3621,18 +3675,19 @@
             partyCrisisGame.selectedRoom = roomId;
             document.getElementById(`room-${roomId}`).classList.add('selected');
             const displayEl = document.getElementById('selectedRoomDisplay');
-            if (displayEl) displayEl.textContent = PARTY_CRISIS.ROOMS[roomId].name;
+            const room = PARTY_CRISIS.ROOMS[roomId];
+            if (displayEl && room) displayEl.textContent = window.i18n.t(`partyCrisis.room${roomId}`);
         }
         
         // 点击按钮直接下注
         async function directBet(amount) {
             if (!userAddress) {
-                showToast('请先连接钱包', 'error');
+                showToast(window.i18n.t('partyCrisis.connectWalletFirst'), 'error');
                 return;
             }
             
             if (!partyCrisisGame.selectedRoom) {
-                showToast('请先选择房间', 'error');
+                showToast(window.i18n.t('partyCrisis.selectRoomFirst'), 'error');
                 return;
             }
             
@@ -3642,12 +3697,12 @@
         // MAX按钮直接下注
         async function directBetMax() {
             if (!userAddress) {
-                showToast('请先连接钱包', 'error');
+                showToast(window.i18n.t('partyCrisis.connectWalletFirst'), 'error');
                 return;
             }
             
             if (!partyCrisisGame.selectedRoom) {
-                showToast('请先选择房间', 'error');
+                showToast(window.i18n.t('partyCrisis.selectRoomFirst'), 'error');
                 return;
             }
             
@@ -3657,7 +3712,7 @@
                 const data = await response.json();
                 
                 if (!data.success) {
-                    showToast('获取余额失败', 'error');
+                    showToast(window.i18n.t('partyCrisis.getBalanceFailed'), 'error');
                     return;
                 }
                 
@@ -3666,14 +3721,14 @@
                 const amount = Math.floor(balance);
                 
                 if (amount < 1) {
-                    showToast('余额不足', 'error');
+                    showToast(window.i18n.t('partyCrisis.insufficientBalance'), 'error');
                     return;
                 }
                 
                 await placeBet(amount);
             } catch (error) {
                 console.error('MAX投注失败:', error);
-                showToast('获取余额失败', 'error');
+                showToast(window.i18n.t('partyCrisis.getBalanceFailed'), 'error');
             }
         }
         
@@ -3693,7 +3748,7 @@
             }
             
             if (!amount || amount < 1) {
-                showToast('投注金额无效', 'error');
+                showToast(window.i18n.t('partyCrisis.invalidBetAmount'), 'error');
                 return;
             }
             
@@ -3722,7 +3777,7 @@
                 const data = await response.json();
                 
                 if (!data.success) {
-                    throw new Error(data.error || '下注失败');
+                    throw new Error(data.error || window.i18n.t('partyCrisis.betFailed'));
                 }
                 
                 // 下注成功
@@ -3744,11 +3799,15 @@
                     await loadAllData();
                 }
                 
-                showToast(`成功下注 ${amount} DP 到 ${PARTY_CRISIS.ROOMS[partyCrisisGame.selectedRoom].name}`, 'success');
+                const selectedRoom = PARTY_CRISIS.ROOMS[partyCrisisGame.selectedRoom];
+                const roomName = selectedRoom ? window.i18n.t(`partyCrisis.room${partyCrisisGame.selectedRoom}`) : window.i18n.t('partyCrisis.room1');
+                const successMsg = window.i18n.t('partyCrisis.betSuccess', { amount: amount, room: roomName });
+                showToast(successMsg, 'success');
                 
             } catch (error) {
                 console.error('[派对危机] 下注失败:', error);
-                showToast('下注失败: ' + error.message, 'error');
+                const errorMsg = translateErrorMessage(error.message);
+                showToast(errorMsg, 'error');
             } finally {
                 // 恢复下注状态和按钮
                 partyCrisisGame.isBetting = false;
@@ -3897,7 +3956,8 @@
             const historyItems = document.getElementById('historyItems');
             // 反转数组，让最新的记录在最上面
             historyItems.innerHTML = [...partyCrisisGame.history].reverse().map(roomId => {
-                const roomName = PARTY_CRISIS.ROOMS[roomId]?.name || `房间${roomId}`;
+                const room = PARTY_CRISIS.ROOMS[roomId];
+                const roomName = room ? window.i18n.t(`partyCrisis.room${roomId}`) : `房间${roomId}`;
                 return `<div class="history-item">${roomName}</div>`;
             }).join('');
         }
@@ -3946,6 +4006,30 @@
                         connectWallet();
                     }
                 });
+            }
+        });
+        
+        // 监听语言切换事件，更新动态内容
+        window.addEventListener('languageChanged', () => {
+            // 更新历史记录显示
+            updateHistoryDisplay();
+            
+            // 更新房间名称（重新创建房间区域）
+            document.querySelectorAll('.room-zone').forEach(zone => zone.remove());
+            createRoomZones();
+            
+            // 如果有选中的房间，重新添加selected样式
+            if (partyCrisisGame.selectedRoom) {
+                const selectedZone = document.getElementById(`room-${partyCrisisGame.selectedRoom}`);
+                if (selectedZone) selectedZone.classList.add('selected');
+            }
+            
+            // 更新已选房间显示
+            if (partyCrisisGame.selectedRoom) {
+                const displayEl = document.getElementById('selectedRoomDisplay');
+                if (displayEl) {
+                    displayEl.textContent = window.i18n.t(`partyCrisis.room${partyCrisisGame.selectedRoom}`);
+                }
             }
         });
 

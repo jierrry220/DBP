@@ -46,7 +46,7 @@ class GameAudioManager {
         this.volumes = {
             bgm: 0.3,
             countdown: 0.5,
-            footsteps: 0.936,  // 杀手脚步声 (0.624 * 1.5 = 0.936)
+            footsteps: 1.0,  // 杀手脚步声 (0.936 * 2 = 1.872，取最大值1.0)
             sfx: 0.6,  // 通用音效音量
             jingdi: 0.459  // 警笛声 (0.51 * 0.9 = 0.459)
         };
