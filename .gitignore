@@ -36,3 +36,17 @@ party-crisis-api-integration.js
 *_README.md
 FRONTEND_UPDATE.md
 DEPLOY.md
+
+# Local GIF helper scripts (do not commit)
+compose_killer_dao_002_024.py
+compose_killer_dao_custom.py
+compose_walk_left_000_004.py
+create_killer_gif.py
+create_killer_gif_3frames.py
+extract_gif_frames.py
+flip_gif.py
+speedup_gif.py
+split_sprite_to_gif.py
+
+# Pixel character demo page (local only)
+pixel-characters-example.html
