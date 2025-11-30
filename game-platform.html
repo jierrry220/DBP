@@ -1816,9 +1816,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            width: 50%;
-            max-width: 600px;
-            min-width: 320px;
+            width: 40%; /* 从50%缩小到40% */
+            max-width: 450px; /* 从600px缩小到450px */
+            min-width: 300px; /* 从320px缩小到300px */
             background: linear-gradient(135deg, rgba(26, 10, 46, 0.98) 0%, rgba(10, 14, 26, 0.98) 100%);
             border: 3px solid rgba(0, 196, 239, 0.5);
             border-radius: 20px;
@@ -1838,7 +1838,7 @@
         }
 
         .result-content {
-            padding: 60px 40px;
+            padding: 40px 30px; /* 从60px 40px缩小到40px 30px */
             text-align: center;
             position: relative;
         }
@@ -1855,8 +1855,8 @@
         }
 
         .result-icon {
-            font-size: 120px;
-            margin-bottom: 20px;
+            font-size: 80px; /* 从120px缩小到80px */
+            margin-bottom: 15px; /* 从20px缩小到15px */
             animation: iconPulse 2s ease-in-out infinite;
             filter: drop-shadow(0 0 20px rgba(0, 196, 239, 0.6));
         }
@@ -1867,20 +1867,20 @@
         }
 
         .result-title {
-            font-size: 48px;
+            font-size: 36px; /* 从48px缩小到36px */
             font-weight: 800;
             background: var(--primary-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 15px;
+            margin-bottom: 12px; /* 从15px缩小到12px */
             text-shadow: 0 0 30px rgba(0, 196, 239, 0.5);
         }
 
         .result-message {
-            font-size: 24px;
+            font-size: 18px; /* 从24px缩小到18px */
             color: var(--text-secondary);
-            margin-bottom: 30px;
+            margin-bottom: 20px; /* 从30px缩小到20px */
             font-weight: 500;
         }
 
@@ -1888,23 +1888,23 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
-            padding: 25px;
+            gap: 8px; /* 从10px缩小到8px */
+            padding: 18px; /* 从25px缩小到18px */
             background: rgba(0, 196, 239, 0.1);
             border: 2px solid rgba(0, 196, 239, 0.3);
-            border-radius: 15px;
+            border-radius: 12px; /* 从15px缩小到12px */
             margin: 0 auto;
-            max-width: 400px;
+            max-width: 300px; /* 从400px缩小到300px */
         }
 
         .amount-label {
-            font-size: 18px;
+            font-size: 14px; /* 从18px缩小到14px */
             color: var(--text-secondary);
             font-weight: 500;
         }
 
         .amount-value {
-            font-size: 42px;
+            font-size: 32px; /* 从42px缩小到32px */
             font-weight: 800;
             background: var(--primary-gradient);
             -webkit-background-clip: text;
@@ -2006,16 +2006,16 @@
             
             /* 结算弹窗移动端 */
             .game-result-modal {
-                width: 90%;
-                min-width: 280px;
+                width: 85%; /* 从90%缩小到85% */
+                min-width: 260px; /* 从280px缩小到260px */
             }
             
             .result-content {
-                padding: 40px 20px;
+                padding: 30px 20px; /* 从40px 20px缩小到30px 20px */
             }
             
             .result-icon {
-                font-size: 80px;
+                font-size: 60px; /* 从80px缩小到60px */
             }
             
             .result-title {
