@@ -681,7 +681,7 @@
         .room-zone.killed {
             border-color: #f44336;
             background: rgba(244, 67, 54, 0.4);
-            animation: death-pulse 0.5s ease;
+            animation: death-pulse 0.5s ease, red-flash 0.2s ease 4;
         }
         
         /* 中央舞池特殊样式 */
@@ -693,6 +693,17 @@
         @keyframes death-pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.15); }
+        }
+        
+        @keyframes red-flash {
+            0%, 100% { 
+                background: rgba(244, 67, 54, 0.4);
+                box-shadow: 0 0 20px rgba(244, 67, 54, 0.6);
+            }
+            50% { 
+                background: rgba(255, 0, 0, 0.8);
+                box-shadow: 0 0 40px rgba(255, 0, 0, 1);
+            }
         }
 
         .room-name {
@@ -826,17 +837,38 @@
             }
         }
 
-        /* 杀手 */
+        /* 杀手容器 */
         .killer {
             position: absolute;
-            width: 40px;
-            height: 40px;
-            font-size: 32px;
-            text-align: center;
-            line-height: 40px;
-            filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.8));
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.9)) drop-shadow(0 0 25px rgba(255, 0, 0, 0.5));
             z-index: 2000;
             pointer-events: none;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 杀手内部 GIF 精灵 */
+        .killer-sprite {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* 所有GIF强制缩放到同一盒子大小 */
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        /* 攻击阶段轻微抖动 */
+        .killer.attacking {
+            animation: killerShake 0.1s ease-in-out infinite;
+        }
+
+        @keyframes killerShake {
+            0%, 100% { transform: translate(-50%, -50%) rotate(-2deg); }
+            50% { transform: translate(-50%, -50%) rotate(2deg); }
         }
 
         /* 金币动画 */
@@ -3531,15 +3563,21 @@
             const killer = document.createElement('div');
             killer.className = 'killer';
             killer.id = 'killer';
-            killer.textContent = '💀';
             killer.style.left = `${PARTY_CRISIS.ENTRANCE.x}%`;
             killer.style.top = `${PARTY_CRISIS.ENTRANCE.y}%`;
             killer.style.position = 'absolute';
-            // 响应式大小：移动端20px，桌面端40px
-            const isMobile = window.innerWidth <= 768;
-            killer.style.fontSize = isMobile ? '20px' : '40px';
-            killer.style.zIndex = '100';
-            killer.style.transform = 'translate(-50%, -50%)';
+
+            // 固定容器大小 48px（移动端和桌面统一）
+            const killerSize = 48;
+            killer.style.width = `${killerSize}px`;
+            killer.style.height = `${killerSize}px`;
+            killer.style.zIndex = '2000';
+
+            // 内部 GIF 精灵：默认使用“向右行走”作为进场
+            const killerSprite = document.createElement('img');
+            killerSprite.className = 'killer-sprite';
+            killerSprite.src = './images/killer-walk-right.gif';
+            killer.appendChild(killerSprite);
             
             const mapInner = document.getElementById('gameMapInner');
             if (!mapInner) {
@@ -3566,7 +3604,8 @@
                 
                 let currentStep = 0;
                 const totalSteps = path.length;
-                const stepDuration = 9000 / totalSteps;
+                // 杀手从入口走到目标房间，约 7.5 秒
+                const stepDuration = 7500 / totalSteps;
                 
                 function moveKillerToNextStep() {
                     if (currentStep >= totalSteps - 1) {
@@ -3574,8 +3613,7 @@
                         killer.style.left = `${centerX}%`;
                         killer.style.top = `${centerY}%`;
                         setTimeout(() => {
-                            killPlayers(targetRoom);
-                            setTimeout(() => returnKillerToEntrance(), 1000);
+                            performKillerAttack(targetRoom);
                         }, stepDuration);
                         return;
                     }
@@ -3585,6 +3623,28 @@
                     killer.style.left = `${x}%`;
                     killer.style.top = `${y}%`;
                     setTimeout(moveKillerToNextStep, stepDuration);
+                }
+                
+                function performKillerAttack(roomId) {
+                    console.log('[杀手动画] 开始攻击动画');
+
+                    // 切换为攻击 GIF，并添加抖动效果
+                    killerSprite.src = './images/killer-dao-custom.gif';
+                    killer.classList.add('attacking');
+                    
+                    // 攻击阶段持续约 2 秒
+                    setTimeout(() => {
+                        killer.classList.remove('attacking');
+
+                        // 攻击结束，触发击杀效果
+                        killPlayers(roomId);
+
+                        // 准备返回入口：切换为“向左行走” GIF 作为逃跑
+                        killerSprite.src = './images/killer-walk-left.gif';
+
+                        // 等待一点时间让击杀效果更清晰，再开始返回
+                        setTimeout(() => returnKillerToEntrance(), 200);
+                    }, 2000);
                 }
                 
                 function returnKillerToEntrance() {
