@@ -300,6 +300,7 @@
         .main-content {
             padding: 80px 0 0;
             width: 100%;
+            min-width: 330px; /* 最小宽度330px */
             max-width: 479.69px; /* 锁定最大宽度 */
             margin: 0 auto;
             height: calc(100vh - 80px);
@@ -576,12 +577,12 @@
         }
         
         .game-timer {
-            font-size: 16px;
+            font-size: 24px;
             min-width: 70px;
         }
         
         .game-status-text {
-            font-size: 13px;
+            font-size: 19.5px;
         }
         
         @media (max-width: 480px) {
@@ -591,12 +592,12 @@
             }
             
             .game-timer {
-                font-size: 12px;
+                font-size: 18px;
                 min-width: 60px;
             }
             
             .game-status-text {
-                font-size: 9px;
+                font-size: 13.5px;
             }
         }
         
@@ -606,12 +607,12 @@
             }
             
             .game-timer {
-                font-size: 11px;
+                font-size: 16.5px;
                 min-width: 55px;
             }
             
             .game-status-text {
-                font-size: 8px;
+                font-size: 12px;
             }
         }
 
@@ -635,7 +636,7 @@
             width: 100%;
             flex: 1;
             background-image: url('map.png');
-            background-size: cover;
+            background-size: 100% 100%; /* 强制填充容器，保持比例一致 */
             background-position: center;
             background-repeat: no-repeat;
         }
@@ -1054,6 +1055,47 @@
             .bet-btn {
                 padding: 6px;
                 font-size: 10px;
+            }
+        }
+        
+        /* 超小屏幕适配 - 投注面板 (360px 及以下) */
+        @media (max-width: 360px) {
+            .bet-panel {
+                padding: 4px 5px;
+                bottom: 1%;
+                left: 2%;
+                width: 96%;
+            }
+            
+            .bet-info-panel {
+                padding: 2px 5px;
+                bottom: calc(1% + 38px);
+                left: 2%;
+                width: 55%;
+                gap: 5px;
+            }
+            
+            .bet-info-item {
+                font-size: 6px;
+            }
+            
+            .bet-info-value {
+                font-size: 7px;
+            }
+            
+            .bet-amount-buttons {
+                gap: 2px;
+                margin-bottom: 3px;
+            }
+            
+            .bet-amount-btn {
+                padding: 3px 1px;
+                font-size: 8px;
+            }
+            
+            .bet-btn {
+                padding: 5px;
+                font-size: 9px;
             }
         }
 
