@@ -298,23 +298,33 @@
 
         /* ========== Main Content ========== */
         .main-content {
-            padding: 100px 5% 50px;
-            max-width: 1400px;
+            padding: 80px 0 0;
+            width: 100%;
+            max-width: 479.69px; /* 锁定最大宽度 */
             margin: 0 auto;
+            height: calc(100vh - 80px);
+            max-height: 820px; /* 锁定最大高度 */
+            display: flex;
+            flex-direction: column;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 10px;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .header h1 {
-            font-size: 48px;
+            font-size: 32px;
             font-weight: 900;
             background: var(--primary-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
+            margin: 0;
         }
 
         .header p {
@@ -464,18 +474,18 @@
         /* ========== Party Crisis Game ========== */
         .game-section {
             background: linear-gradient(135deg, rgba(233, 0, 233, 0.05) 0%, rgba(0, 196, 239, 0.08) 100%);
-            border: 2px solid rgba(233, 0, 233, 0.25);
-            border-radius: 20px;
-            padding: 20px;
+            border: none;
+            border-radius: 0;
+            padding: 0;
             text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
         
         .game-title-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            position: relative;
+            display: none;
         }
 
         .game-section h2 {
@@ -493,7 +503,7 @@
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            font-size: 16px;
+            font-size: 20px;
             cursor: pointer;
             transition: all 0.3s;
             line-height: 1;
@@ -556,24 +566,22 @@
             text-overflow: ellipsis;
         }
         
-        /* 移动端适配 */
-        @media (max-width: 768px) {
-            .game-info-bar {
-                padding: 6px 10px;
-                top: 1%;
-                width: 96%;
-                gap: 6px;
-                flex-wrap: nowrap;
-            }
-            
-            .game-timer {
-                font-size: 14px;
-                min-width: 70px;
-            }
-            
-            .game-status-text {
-                font-size: 11px;
-            }
+        /* 移动端适配 - 统一使用移动端布局 */
+        .game-info-bar {
+            padding: 6px 10px;
+            top: 1%;
+            width: 96%;
+            gap: 6px;
+            flex-wrap: nowrap;
+        }
+        
+        .game-timer {
+            font-size: 16px;
+            min-width: 70px;
+        }
+        
+        .game-status-text {
+            font-size: 13px;
         }
         
         @media (max-width: 480px) {
@@ -611,18 +619,21 @@
         .party-crisis-container {
             position: relative;
             width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
+            max-width: none;
+            margin: 0;
             background: rgba(0, 0, 0, 0.6);
-            border-radius: 15px;
+            border-radius: 0;
             overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         /* 地图容器 */
         .game-map {
             position: relative;
             width: 100%;
-            padding-bottom: 133%; /* 3:4 比例 */
+            flex: 1;
             background-image: url('map.png');
             background-size: cover;
             background-position: center;
@@ -862,7 +873,7 @@
             border: 2px solid rgba(0, 196, 239, 0.4);
             border-radius: 12px 12px 0 0;
             border-bottom: none;
-            padding: 8px 15px;
+            padding: 5px 15px; /* 从8px改为5px */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             display: flex;
             justify-content: space-around;
@@ -871,15 +882,15 @@
         
         .bet-info-item {
             text-align: center;
-            font-size: 10px;
+            font-size: 9px; /* 增大字体 */
             color: var(--text-secondary);
         }
         
         .bet-info-value {
             display: block;
             font-weight: 700;
-            font-size: 12px;
-            margin-top: 4px;
+            font-size: 11px; /* 增大字体 */
+            margin-top: 2px;
         }
         
         .bet-amount-buttons {
@@ -937,46 +948,44 @@
             cursor: not-allowed;
         }
         
-        /* 移动端适配 - 投注面板 */
-        @media (max-width: 768px) {
-            .bet-panel {
-                padding: 8px 12px;
-                bottom: 1%;
-                left: 2%;
-                width: 96%;
-            }
-            
-            .bet-info-panel {
-                padding: 6px 10px;
-                bottom: calc(1% + 52px);
-                left: 2%;
-                width: 57.6%;
-                max-width: 345px;
-                gap: 10px;
-            }
-            
-            .bet-info-item {
-                font-size: 9px;
-            }
-            
-            .bet-info-value {
-                font-size: 10px;
-            }
-            
-            .bet-amount-buttons {
-                gap: 4px;
-                margin-bottom: 6px;
-            }
-            
-            .bet-amount-btn {
-                padding: 6px 2px;
-                font-size: 11px;
-            }
-            
-            .bet-btn {
-                padding: 8px;
-                font-size: 12px;
-            }
+        /* 移动端适配 - 投注面板 - 统一使用移动端布局 */
+        .bet-panel {
+            padding: 8px 12px;
+            bottom: 1%;
+            left: 2%;
+            width: 96%;
+        }
+        
+        .bet-info-panel {
+            padding: 4px 10px;
+            bottom: calc(1% + 52px);
+            left: 2%;
+            width: 57.6%;
+            max-width: 345px;
+            gap: 10px;
+        }
+        
+        .bet-info-item {
+            font-size: 10px;
+        }
+        
+        .bet-info-value {
+            font-size: 12px;
+        }
+        
+        .bet-amount-buttons {
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+        
+        .bet-amount-btn {
+            padding: 6px 2px;
+            font-size: 13px;
+        }
+        
+        .bet-btn {
+            padding: 8px;
+            font-size: 14px;
         }
         
         @media (max-width: 480px) {
@@ -985,18 +994,18 @@
             }
             
             .bet-info-panel {
-                padding: 5px 8px;
+                padding: 3px 8px; /* 从5px改为3px */
                 bottom: calc(1% + 48px);
                 left: 2%;
                 width: 57.6%;
             }
             
             .bet-info-item {
-                font-size: 8px;
+                font-size: 8px; /* 增大字体 */
             }
             
             .bet-info-value {
-                font-size: 9px;
+                font-size: 9px; /* 增大字体 */
             }
             
             .bet-amount-btn {
@@ -1009,12 +1018,50 @@
                 font-size: 11px;
             }
         }
+        
+        /* 极小屏幕适配 - 投注面板 (420px 及以下) */
+        @media (max-width: 420px) {
+            .bet-panel {
+                padding: 5px 6px;
+                bottom: 1%;
+            }
+            
+            .bet-info-panel {
+                padding: 3px 6px; /* 从4px改为3px */
+                bottom: calc(1% + 42px);
+                width: 56%;
+                gap: 6px;
+            }
+            
+            .bet-info-item {
+                font-size: 7px; /* 增大字体 */
+            }
+            
+            .bet-info-value {
+                font-size: 8px; /* 增大字体 */
+            }
+            
+            .bet-amount-buttons {
+                gap: 3px;
+                margin-bottom: 4px;
+            }
+            
+            .bet-amount-btn {
+                padding: 4px 1px;
+                font-size: 9px;
+            }
+            
+            .bet-btn {
+                padding: 6px;
+                font-size: 10px;
+            }
+        }
 
         /* 历史记录（移到地图左上角空白区域） */
         .history-bar {
             position: absolute;
-            top: 12%;
-            left: 3%;
+            top: calc(2% + 52px); /* 2%(top) + 50px(信息栏高度约) + 2px(间距) */
+            left: 5%; /* 与 game-info-bar 左侧对齐 */
             width: 165px;
             z-index: 50;
             background: rgba(0, 0, 0, 0.7);
@@ -1058,18 +1105,39 @@
             text-overflow: ellipsis;
         }
         
-        /* 移动端适配 - 历史记录 */
-        @media (max-width: 768px) {
+        /* 移动端适配 - 历史记录 - 统一使用移动端布局 */
+        .history-bar {
+            width: 135px;
+            padding: 8px;
+            top: calc(1% + 38px + 30px);
+            left: 2%;
+        }
+        
+        .history-title {
+            font-size: 11px;
+            margin-bottom: 6px;
+        }
+        
+        .history-items {
+            gap: 4px;
+        }
+        
+        .history-item {
+            padding: 5px 8px;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 480px) {
             .history-bar {
-                width: 135px;
-                padding: 8px;
-                top: 12%;
+                width: 120px;
+                padding: 5px;
+                top: calc(1% + 38px + 15px);
                 left: 2%;
             }
             
             .history-title {
                 font-size: 10px;
-                margin-bottom: 6px;
+                margin-bottom: 5px;
             }
             
             .history-items {
@@ -1077,31 +1145,8 @@
             }
             
             .history-item {
-                padding: 5px 8px;
+                padding: 4px 5px;
                 font-size: 11px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .history-bar {
-                width: 90px;
-                padding: 4px;
-                top: 10%;
-                left: 1.5%;
-            }
-            
-            .history-title {
-                font-size: 8px;
-                margin-bottom: 4px;
-            }
-            
-            .history-items {
-                gap: 3px;
-            }
-            
-            .history-item {
-                padding: 3px 4px;
-                font-size: 8px;
             }
         }
         
@@ -1110,8 +1155,8 @@
             .history-bar {
                 width: 75px;
                 padding: 3px;
-                top: 8%;
-                left: 1%;
+                top: calc(1% + 38px + 15px); /* 480px以下向上移动15px */
+                left: 2%;
                 border-radius: 8px;
                 border-width: 1px;
             }
@@ -1132,39 +1177,28 @@
             }
         }
 
-        /* 移动端适配 */
-        @media (max-width: 768px) {
-            .game-section h2 {
-                font-size: 22px;
-            }
-            
-            .game-info-bar {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .room-zone {
-                font-size: 8px;
-            }
-            
-            .character {
-                width: 20px;
-                height: 20px;
-                font-size: 16px;
-                line-height: 20px;
-            }
-            
-            .character-name {
-                font-size: 8px;
-                top: -14px;
-            }
-            
-            .killer {
-                width: 20px;
-                height: 20px;
-                font-size: 20px;
-                line-height: 20px;
-            }
+        /* 移动端适配 - 统一使用移动端布局 */
+        .room-zone {
+            font-size: 9px;
+        }
+        
+        .character {
+            width: 20px;
+            height: 20px;
+            font-size: 16px;
+            line-height: 20px;
+        }
+        
+        .character-name {
+            font-size: 9px;
+            top: -14px;
+        }
+        
+        .killer {
+            width: 20px;
+            height: 20px;
+            font-size: 20px;
+            line-height: 20px;
         }
 
         /* ========== Toast ========== */
@@ -2023,15 +2057,11 @@
         <!-- Header -->
         <div class="header">
             <h1 data-i18n="gamePlatform.header">🎮 Play to Earn</h1>
+            <button class="game-audio-btn" id="gameAudioBtn" onclick="toggleAudio()" title="音效控制">🔊</button>
         </div>
-
 
         <!-- Party Crisis Game -->
         <div class="game-section">
-            <div class="game-title-container">
-                <h2>Party Crisis</h2>
-                <button class="game-audio-btn" id="gameAudioBtn" onclick="toggleAudio()" title="音效控制">🔊</button>
-            </div>
 
             <!-- 游戏容器 -->
             <div class="party-crisis-container">
