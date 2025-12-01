@@ -4197,23 +4197,8 @@
             }
         }
 
-        // 验证访问权限
-        function checkAccess() {
-            const hasAuth = sessionStorage.getItem('gamePlatformAuth');
-            if (!hasAuth) {
-                // 没有权限,重定向回 gamefi.html
-                window.location.href = 'gamefi.html';
-                return false;
-            }
-            return true;
-        }
-
         // 页面加载完成
         window.addEventListener('load', () => {
-            // 先检查访问权限
-            if (!checkAccess()) {
-                return;
-            }
 
             // 初始化派对危机游戏
             initPartyCrisisGame();
