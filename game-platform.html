@@ -739,15 +739,34 @@
         /* 角色 */
         .character {
             position: absolute;
-            width: 30px;
-            height: 30px;
+            width: 45px;
+            height: 45px;
             font-size: 24px;
             text-align: center;
-            line-height: 30px;
+            line-height: 45px;
             transition: all 3s ease;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
             pointer-events: none;
             z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* 角色 GIF 精灵 */
+        .character-sprite {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        
+        /* 到达房间后停止GIF动画 */
+        .character.idle .character-sprite {
+            animation-play-state: paused;
         }
 
         /* 当前玩家特效 */
@@ -1267,10 +1286,10 @@
         }
         
         .character {
-            width: 20px;
-            height: 20px;
+            width: 36px;
+            height: 36px;
             font-size: 16px;
-            line-height: 20px;
+            line-height: 36px;
         }
         
         .character-name {
@@ -3431,6 +3450,7 @@
             // 反向遍历路径
             let currentStep = path.length - 1;
             const stepDuration = 600 / path.length; // 总共0.6秒（大幅提速）
+            let lastX = parseFloat(char.style.left);
             
             function moveToNextStep() {
                 if (currentStep < 0) {
@@ -3439,6 +3459,11 @@
                 }
                 
                 const [x, y] = path[currentStep];
+                
+                // 根据移动方向切换GIF
+                updateCharacterDirection(char, x - lastX);
+                lastX = x;
+                
                 char.style.transition = `all ${stepDuration}ms linear`;
                 char.style.left = `${x}%`;
                 char.style.top = `${y}%`;
@@ -3558,7 +3583,7 @@
         
         // 触发杀手阶段动画
         function triggerKillerPhase(targetRoom) {
-            console.log(`[杀手动画] 开始创建杀手，目标房间: ${targetRoom}`);
+            console.log(`%c[杀手动画] 开始创建杀手，目标房间: ${targetRoom}`, 'color: red; font-weight: bold; font-size: 14px;');
             
             const killer = document.createElement('div');
             killer.className = 'killer';
@@ -3586,6 +3611,8 @@
             }
             mapInner.appendChild(killer);
             console.log('[杀手动画] 杀手已创建，初始位置:', PARTY_CRISIS.ENTRANCE);
+            console.log('[杀手动画] 杀手CSS left:', killer.style.left, 'top:', killer.style.top);
+            console.log('[杀手动画] 杀手实际位置:', killer.getBoundingClientRect());
             
             // 触发音效：杀手移动（脚步声）
             if (window.gameAudioManager) {
@@ -3606,9 +3633,18 @@
             const totalSteps = path.length;
             // 杀手从入口走到目标房间，约 7.8 秒
             const stepDuration = 7800 / totalSteps;
+            let lastKillerX = PARTY_CRISIS.ENTRANCE.x;
             
             function moveKillerToNextStep() {
                 if (currentStep >= totalSteps - 1) {
+                    // 最后一步，根据方向切换GIF
+                    const deltaX = centerX - lastKillerX;
+                    if (deltaX > 0) {
+                        killerSprite.src = './images/killer-walk-right.gif';
+                    } else if (deltaX < 0) {
+                        killerSprite.src = './images/killer-walk-left.gif';
+                    }
+                    
                     killer.style.transition = `all ${stepDuration}ms linear`;
                     killer.style.left = `${centerX}%`;
                     killer.style.top = `${centerY}%`;
@@ -3619,6 +3655,16 @@
                 }
                 currentStep++;
                 const [x, y] = path[currentStep];
+                
+                // 根据移动方向切换杀手GIF
+                const deltaX = x - lastKillerX;
+                if (deltaX > 0) {
+                    killerSprite.src = './images/killer-walk-right.gif';
+                } else if (deltaX < 0) {
+                    killerSprite.src = './images/killer-walk-left.gif';
+                }
+                lastKillerX = x;
+                
                 killer.style.transition = `all ${stepDuration}ms linear`;
                 killer.style.left = `${x}%`;
                 killer.style.top = `${y}%`;
@@ -3626,36 +3672,50 @@
             }
             
             function performKillerAttack(roomId) {
-                console.log('[杀手动画] 开始攻击动画');
+                console.log('%c[杀手动画] 开始攻击动画，房间ID: ' + roomId, 'color: orange; font-weight: bold; font-size: 14px;');
 
                 // 切换为攻击 GIF，并添加抖动效果
                 killerSprite.src = './images/killer-dao-custom.gif';
                 killer.classList.add('attacking');
                 
+                console.log('%c[杀手动画] 准备调用 startPlayerDeathAnimation', 'color: yellow; font-weight: bold;');
+                // 同时触发玩家死亡动画（与攻击同步）
+                startPlayerDeathAnimation(roomId);
+                console.log('%c[杀手动画] startPlayerDeathAnimation 已调用', 'color: green; font-weight: bold;');
+                
                 // 攻击阶段持续 1.2 秒
                 setTimeout(() => {
                     killer.classList.remove('attacking');
-
-                    // 攻击结束，触发击杀效果
-                    killPlayers(roomId);
 
                     // 准备返回入口：切换为"向左行走" GIF 作为逃跑
                     killerSprite.src = './images/killer-walk-left.gif';
 
                     // 等待一点时间让击杀效果更清晰，再开始返回
-                    setTimeout(() => returnKillerToEntrance(), 200);
+                    setTimeout(() => returnKillerToEntrance(), 800);
                 }, 1200);
             }
             
             function returnKillerToEntrance() {
                 let returnStep = path.length - 1;
                 const returnStepDuration = 4000 / path.length;
+                let lastReturnX = centerX;
+                
                 function moveKillerBack() {
                     if (returnStep < 0) {
                         killer.remove();
                         return;
                     }
                     const [x, y] = path[returnStep];
+                    
+                    // 根据返回方向切换GIF
+                    const deltaX = x - lastReturnX;
+                    if (deltaX > 0) {
+                        killerSprite.src = './images/killer-walk-right.gif';
+                    } else if (deltaX < 0) {
+                        killerSprite.src = './images/killer-walk-left.gif';
+                    }
+                    lastReturnX = x;
+                    
                     killer.style.transition = `all ${returnStepDuration}ms linear`;
                     killer.style.left = `${x}%`;
                     killer.style.top = `${y}%`;
@@ -3882,7 +3942,18 @@
             const char = document.createElement('div');
             char.className = 'character' + (isCurrentPlayer ? ' current-player' : '');
             char.id = `char-${id}`;
-            char.innerHTML = '🐻<div class="character-name">' + name + '</div>';
+            
+            // 创建玩家GIF精灵（默认向右走）
+            const sprite = document.createElement('img');
+            sprite.className = 'character-sprite';
+            sprite.src = './images/player-walk-right.gif?v=1';
+            char.appendChild(sprite);
+            
+            // 添加名字标签
+            const nameTag = document.createElement('div');
+            nameTag.className = 'character-name';
+            nameTag.textContent = name;
+            char.appendChild(nameTag);
             
             // 从出生点开始
             char.style.left = `${PARTY_CRISIS.SPAWN_POINT.x}%`;
@@ -3935,18 +4006,36 @@
             let currentStep = 0;
             const totalSteps = path.length;
             const stepDuration = 3000 / totalSteps; // 总共3秒
+            let lastX = parseFloat(char.style.left);
             
             function moveToNextStep() {
                 if (currentStep >= totalSteps - 1) {
                     // 最后一步：移动到最终站位
+                    updateCharacterDirection(char, finalX - lastX);
                     char.style.transition = `all ${stepDuration}ms linear`;
                     char.style.left = `${finalX}%`;
                     char.style.top = `${finalY}%`;
+                    
+                    // 到达后设置为静止状态
+                    setTimeout(() => {
+                        char.classList.add('idle');
+                        // 将GIF替换为静态图片（如果有的话）
+                        const sprite = char.querySelector('.character-sprite');
+                        if (sprite && !sprite.src.includes('player-die.gif')) {
+                            // 使用canvas截取GIF的当前帧作为静态图
+                            freezeGif(sprite);
+                        }
+                    }, stepDuration);
                     return;
                 }
                 
                 currentStep++;
                 const [x, y] = path[currentStep];
+                
+                // 根据移动方向切换GIF
+                updateCharacterDirection(char, x - lastX);
+                lastX = x;
+                
                 char.style.transition = `all ${stepDuration}ms linear`;
                 char.style.left = `${x}%`;
                 char.style.top = `${y}%`;
@@ -3957,6 +4046,46 @@
             moveToNextStep();
         }
         
+        // 根据移动方向更新角色GIF
+        function updateCharacterDirection(char, deltaX) {
+            const sprite = char.querySelector('.character-sprite');
+            if (!sprite) return;
+            
+            // 如果已经是死亡或金币状态，不更改
+            if (char.classList.contains('coin') || sprite.src.includes('player-die.gif')) {
+                return;
+            }
+            
+            // 移除静止状态，恢复GIF播放
+            char.classList.remove('idle');
+            
+            // 根据横向移动方向切换GIF
+            if (deltaX > 0) {
+                sprite.src = './images/player-walk-right.gif?v=1';
+            } else if (deltaX < 0) {
+                sprite.src = './images/player-walk-left.gif?v=1';
+            }
+        }
+        
+        // 冻结GIF为静态图片
+        function freezeGif(imgElement) {
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = imgElement.naturalWidth || 100;
+                canvas.height = imgElement.naturalHeight || 100;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(imgElement, 0, 0);
+                
+                // 将canvas转换为data URL并设置为img的src
+                const frozenImage = canvas.toDataURL('image/png');
+                imgElement.src = frozenImage;
+                console.log('[角色动画] GIF已冻结为静态图片');
+            } catch (e) {
+                console.warn('[角色动画] 无法冻结GIF:', e);
+                // 如果失败，至少添加idle类来停止动画
+            }
+        }
+        
         // 注意：这些函数已移除，由后端和 API 同步接管：
         // - startNewGame() -> 由后端自动创建新游戏
         // - generateBotPlayers() -> 由后端生成
@@ -3964,26 +4093,60 @@
         // - startCountdown() -> 由后端倒计时
         // - startKillerPhase() -> 由 triggerKillerPhase() 触发
         
-        // 刺杀玩家 - 由 triggerKillerPhase 调用
-        function killPlayers(roomId) {
-            console.log(`[杀手动画] 刺杀房间 ${roomId}:`, PARTY_CRISIS.ROOMS[roomId]?.name);
-            document.getElementById(`room-${roomId}`).classList.add('killed');
+        // 开始玩家死亡动画（与杀手攻击同步）
+        function startPlayerDeathAnimation(roomId) {
+            console.log(`%c[死亡动画] === 开始函数 === 房间ID: ${roomId}`, 'background: red; color: white; font-size: 16px; padding: 5px;');
             
-            // 只将被杀房间的玩家变成金币
+            // 添加房间被杀效果
+            const roomElement = document.getElementById(`room-${roomId}`);
+            console.log(`[死亡动画] 房间元素:`, roomElement);
+            if (roomElement) {
+                roomElement.classList.add('killed');
+            }
+            
             const room = PARTY_CRISIS.ROOMS[roomId];
             if (!room) return;
             
             // 获取在被刺杀房间的玩家
             const playersInRoom = partyCrisisGame.players.filter(p => p.roomId === roomId);
-            console.log(`[杀手动画] 房间内玩家数: ${playersInRoom.length}`);
+            console.log(`[死亡动画] 房间内玩家数: ${playersInRoom.length}`);
             
-            // 将这些玩家变成金币
+            // 将这些玩家切换为死亡GIF
             playersInRoom.forEach(player => {
                 const charElement = document.getElementById(`char-${player.id}`);
+                console.log(`[死亡动画] 处理玩家: ${player.name}, 元素:`, charElement);
+                
                 if (charElement) {
-                    charElement.textContent = '💰';
-                    charElement.classList.add('coin');
-                    console.log(`[杀手动画] ${player.name} 被消灭`);
+                    const sprite = charElement.querySelector('.character-sprite');
+                    console.log(`[死亡动画] 找到sprite:`, sprite);
+                    
+                    if (sprite) {
+                        // 先移除coin类避免被忽略
+                        charElement.classList.remove('coin');
+                        
+                        const deathGifUrl = './images/player-die.gif?v=' + Date.now();
+                        sprite.src = deathGifUrl;
+                        console.log(`[死亡动画] ${player.name} 开始播放死亡动画, URL: ${deathGifUrl}`);
+                        
+                        // 检查GIF是否加载成功
+                        sprite.onerror = () => {
+                            console.error(`[死亡动画] GIF加载失败: ${deathGifUrl}`);
+                        };
+                        sprite.onload = () => {
+                            console.log(`[死亡动画] GIF加载成功: ${deathGifUrl}`);
+                        };
+                    } else {
+                        console.warn(`[死亡动画] 找不到sprite元素，角色可能已经是金币`);
+                    }
+                    
+                    // 2秒后变成金币（给足够的时间播放完整的死亡GIF）
+                    setTimeout(() => {
+                        charElement.innerHTML = '💰<div class="character-name">' + player.name + '</div>';
+                        charElement.classList.add('coin');
+                        console.log(`[死亡动画] ${player.name} 变成金币`);
+                    }, 2000);
+                } else {
+                    console.warn(`[死亡动画] 找不到角色元素: char-${player.id}`);
                 }
             });
             
@@ -3992,7 +4155,6 @@
                 const charId = char.id;
                 if (charId.startsWith('char-bot-')) {
                     // 检查这个bot是否在被杀的房间
-                    // 简单方法：检查位置是否接近房间中心
                     const left = parseFloat(char.style.left);
                     const top = parseFloat(char.style.top);
                     const distX = Math.abs(left - room.centerX);
@@ -4000,9 +4162,21 @@
                     
                     // 如果距离小于10%，认为在这个房间
                     if (distX < 10 && distY < 10) {
-                        char.textContent = '💰';
-                        char.classList.add('coin');
-                        console.log(`[杀手动画] Bot ${charId} 被消灭`);
+                        const sprite = char.querySelector('.character-sprite');
+                        if (sprite) {
+                            char.classList.remove('coin');
+                            const deathGifUrl = './images/player-die.gif?v=' + Date.now();
+                            sprite.src = deathGifUrl;
+                            console.log(`[死亡动画] Bot ${charId} 开始播放死亡动画, URL: ${deathGifUrl}`);
+                        }
+                        // 2秒后变成金币
+                        setTimeout(() => {
+                            const nameTag = char.querySelector('.character-name');
+                            const botName = nameTag ? nameTag.textContent : '';
+                            char.innerHTML = '💰<div class="character-name">' + botName + '</div>';
+                            char.classList.add('coin');
+                            console.log(`[死亡动画] Bot ${charId} 变成金币`);
+                        }, 2000);
                     }
                 }
             });
