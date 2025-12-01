@@ -219,7 +219,7 @@ const translations = {
         
         // Game Platform 游戏平台页面
         'gamePlatform.title': 'Game Platform',
-        'gamePlatform.header': '🎮 Play to Earn',
+        'gamePlatform.header': 'Hide-and-seek',
         'gamePlatform.subtitle': 'Deposit DP Token to start playing, win rewards and withdraw to wallet',
         'gamePlatform.gameDemo': '🎲 Demo Game: Guess Big or Small',
         'gamePlatform.gameDesc': 'Choose bet amount, guess correctly to double your reward!',
@@ -589,7 +589,7 @@ const translations = {
         
         // Game Platform 遊戲平台頁面
         'gamePlatform.title': '遊戲平台',
-        'gamePlatform.header': '🎮 Play to Earn',
+        'gamePlatform.header': '躺貓貓',
         'gamePlatform.subtitle': '充值 DP Token 開始遊戲，贏取獎勵後可提現到錢包',
         'gamePlatform.gameDemo': '🎲 示例遊戲: 猜大小',
         'gamePlatform.gameDesc': '選擇投注金額，猜對翻倍獎勵！',
@@ -720,13 +720,13 @@ const translations = {
         'partyCrisis.room1': '办公室',
         'partyCrisis.room2': '酒吧',
         'partyCrisis.room3': '休息室',
-        'partyCrisis.room4': '高贵包厘',
-        'partyCrisis.room5': '尊贵包厘',
-        'partyCrisis.room6': '钻石包厘',
+        'partyCrisis.room4': '高贵包厢',
+        'partyCrisis.room5': '尊贵包厢',
+        'partyCrisis.room6': '钻石包厢',
         'partyCrisis.room7': '餐厅',
         'partyCrisis.room8': '舞池',
         'partyCrisis.resultWinTitle': '你太棒了！',
-        'partyCrisis.resultWinMessage': '成功蹲过殺手',
+        'partyCrisis.resultWinMessage': '成功躺过殺手',
         'partyCrisis.resultLoseTitle': '太遗憾了！',
         'partyCrisis.resultLoseMessage': '你被殺手击杀了！',
         'partyCrisis.noBetTitle': '下一局赢家就是你！',

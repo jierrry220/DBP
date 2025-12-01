@@ -2168,7 +2168,7 @@
                             </div>
                             <div class="bet-info-item">
                                 <span data-i18n="partyCrisis.betAmount">已投注</span>
-                                <span class="bet-info-value" id="currentBetDisplay" style="color: var(--neon-pink);">0 DP</span>
+                                <span class="bet-info-value" id="currentBetDisplay" style="color: var(--neon-cyan);">0 DP</span>
                             </div>
                         </div>
                         
@@ -3594,79 +3594,78 @@
                 window.gameAudioManager.onKillerMove(steps);
             }
             
-            setTimeout(() => {
-                const room = PARTY_CRISIS.ROOMS[targetRoom];
-                const path = room.path;
-                const centerX = room.centerX;
-                const centerY = room.centerY;
+            // 立即开始移动，无延迟
+            const room = PARTY_CRISIS.ROOMS[targetRoom];
+            const path = room.path;
+            const centerX = room.centerX;
+            const centerY = room.centerY;
+            
+            if (!path || path.length === 0) return;
+            
+            let currentStep = 0;
+            const totalSteps = path.length;
+            // 杀手从入口走到目标房间，约 7.8 秒
+            const stepDuration = 7800 / totalSteps;
+            
+            function moveKillerToNextStep() {
+                if (currentStep >= totalSteps - 1) {
+                    killer.style.transition = `all ${stepDuration}ms linear`;
+                    killer.style.left = `${centerX}%`;
+                    killer.style.top = `${centerY}%`;
+                    setTimeout(() => {
+                        performKillerAttack(targetRoom);
+                    }, stepDuration);
+                    return;
+                }
+                currentStep++;
+                const [x, y] = path[currentStep];
+                killer.style.transition = `all ${stepDuration}ms linear`;
+                killer.style.left = `${x}%`;
+                killer.style.top = `${y}%`;
+                setTimeout(moveKillerToNextStep, stepDuration);
+            }
+            
+            function performKillerAttack(roomId) {
+                console.log('[杀手动画] 开始攻击动画');
+
+                // 切换为攻击 GIF，并添加抖动效果
+                killerSprite.src = './images/killer-dao-custom.gif';
+                killer.classList.add('attacking');
                 
-                if (!path || path.length === 0) return;
-                
-                let currentStep = 0;
-                const totalSteps = path.length;
-                // 杀手从入口走到目标房间，约 7.8 秒
-                const stepDuration = 7800 / totalSteps;
-                
-                function moveKillerToNextStep() {
-                    if (currentStep >= totalSteps - 1) {
-                        killer.style.transition = `all ${stepDuration}ms linear`;
-                        killer.style.left = `${centerX}%`;
-                        killer.style.top = `${centerY}%`;
-                        setTimeout(() => {
-                            performKillerAttack(targetRoom);
-                        }, stepDuration);
+                // 攻击阶段持续 1.2 秒
+                setTimeout(() => {
+                    killer.classList.remove('attacking');
+
+                    // 攻击结束，触发击杀效果
+                    killPlayers(roomId);
+
+                    // 准备返回入口：切换为"向左行走" GIF 作为逃跑
+                    killerSprite.src = './images/killer-walk-left.gif';
+
+                    // 等待一点时间让击杀效果更清晰，再开始返回
+                    setTimeout(() => returnKillerToEntrance(), 200);
+                }, 1200);
+            }
+            
+            function returnKillerToEntrance() {
+                let returnStep = path.length - 1;
+                const returnStepDuration = 4000 / path.length;
+                function moveKillerBack() {
+                    if (returnStep < 0) {
+                        killer.remove();
                         return;
                     }
-                    currentStep++;
-                    const [x, y] = path[currentStep];
-                    killer.style.transition = `all ${stepDuration}ms linear`;
+                    const [x, y] = path[returnStep];
+                    killer.style.transition = `all ${returnStepDuration}ms linear`;
                     killer.style.left = `${x}%`;
                     killer.style.top = `${y}%`;
-                    setTimeout(moveKillerToNextStep, stepDuration);
+                    returnStep--;
+                    setTimeout(moveKillerBack, returnStepDuration);
                 }
-                
-                function performKillerAttack(roomId) {
-                    console.log('[杀手动画] 开始攻击动画');
-
-                    // 切换为攻击 GIF，并添加抖动效果
-                    killerSprite.src = './images/killer-dao-custom.gif';
-                    killer.classList.add('attacking');
-                    
-                    // 攻击阶段持续约 2 秒
-                    setTimeout(() => {
-                        killer.classList.remove('attacking');
-
-                        // 攻击结束，触发击杀效果
-                        killPlayers(roomId);
-
-                        // 准备返回入口：切换为“向左行走” GIF 作为逃跑
-                        killerSprite.src = './images/killer-walk-left.gif';
-
-                        // 等待一点时间让击杀效果更清晰，再开始返回
-                        setTimeout(() => returnKillerToEntrance(), 200);
-                    }, 2000);
-                }
-                
-                function returnKillerToEntrance() {
-                    let returnStep = path.length - 1;
-                    const returnStepDuration = 4000 / path.length;
-                    function moveKillerBack() {
-                        if (returnStep < 0) {
-                            killer.remove();
-                            return;
-                        }
-                        const [x, y] = path[returnStep];
-                        killer.style.transition = `all ${returnStepDuration}ms linear`;
-                        killer.style.left = `${x}%`;
-                        killer.style.top = `${y}%`;
-                        returnStep--;
-                        setTimeout(moveKillerBack, returnStepDuration);
-                    }
-                    moveKillerBack();
-                }
-                
-                moveKillerToNextStep();
-            }, 1000);
+                moveKillerBack();
+            }
+            
+            moveKillerToNextStep();
         }
         
         // 创建房间区域
