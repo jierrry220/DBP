@@ -375,27 +375,83 @@
             padding: 120px 5% 50px;
         }
 
-        .development-container {
+        .games-showcase {
+            max-width: 1200px;
+            width: 100%;
             text-align: center;
-            max-width: 800px;
-            padding: 60px 40px;
+        }
+
+        .showcase-title {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 60px;
+            background: linear-gradient(135deg, #00d4ff 0%, #ffffff 30%, #ff00ff 70%, #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.4));
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
+            padding: 0 20px;
+        }
+
+        .game-card {
             background: linear-gradient(135deg, rgba(0, 212, 255, 0.05) 0%, rgba(255, 0, 255, 0.08) 100%);
             border: 2px solid rgba(0, 212, 255, 0.25);
             border-radius: 30px;
-            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.2), 0 0 80px rgba(255, 0, 255, 0.15);
+            padding: 50px 40px;
+            text-align: center;
+            transition: all 0.4s;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
         }
 
-        .development-container::before {
+        .game-card.with-poster {
+            background-image: url('../images/hide-and-seek.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            padding: 50px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            aspect-ratio: 1 / 1;
+        }
+
+        .game-card.with-poster::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.85) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .game-card::before {
             content: '';
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255, 0, 255, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
+            background: radial-gradient(circle, rgba(255, 0, 255, 0.15) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .game-card:hover::before {
+            opacity: 1;
+            animation: rotate 8s linear infinite;
         }
 
         @keyframes rotate {
@@ -403,339 +459,131 @@
             100% { transform: rotate(360deg); }
         }
 
-        .development-icon {
-            font-size: 120px;
+        .game-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--neon-pink);
+            box-shadow: 0 20px 60px rgba(255, 0, 255, 0.4), 0 0 100px rgba(0, 212, 255, 0.3);
+        }
+
+        .game-card.available:hover {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.5), 0 0 100px rgba(255, 0, 255, 0.3);
+        }
+
+        .game-card-icon {
+            font-size: 100px;
             margin-bottom: 30px;
             display: inline-block;
-            animation: pulse 2s ease-in-out infinite;
             filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.6));
             position: relative;
             z-index: 1;
+            animation: float 3s ease-in-out infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { 
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% { 
-                transform: scale(1.1);
-                opacity: 0.8;
-            }
+        .game-card.with-poster .game-card-icon {
+            display: none;
         }
 
-        .development-title {
-            font-size: 48px;
-            font-weight: 900;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #00d4ff 0%, #ffffff 30%, #ff00ff 70%, #ffffff 100%);
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .game-card:hover .game-card-icon {
+            animation: float 1.5s ease-in-out infinite;
+        }
+
+        .game-card-title {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: var(--primary-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.4));
             position: relative;
             z-index: 1;
         }
 
-        .development-subtitle {
-            font-size: 24px;
+        .game-card.with-poster .game-card-title {
+            display: none;
+        }
+
+        .game-card-description {
+            font-size: 16px;
             color: var(--text-secondary);
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             line-height: 1.6;
             position: relative;
             z-index: 1;
         }
 
-        .progress-bar-container {
-            width: 100%;
-            height: 8px;
-            background: rgba(0, 212, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 40px 0;
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            position: relative;
-            z-index: 1;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: var(--primary-gradient);
-            border-radius: 10px;
-            animation: progress 3s ease-in-out infinite;
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
-        }
-
-        @keyframes progress {
-            0% { width: 30%; }
-            50% { width: 70%; }
-            100% { width: 30%; }
-        }
-
-        .feature-preview {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 50px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .feature-item {
-            padding: 25px;
-            background: rgba(0, 212, 255, 0.05);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            border-radius: 15px;
-            transition: all 0.3s;
-        }
-
-        .feature-item:hover {
-            background: rgba(255, 0, 255, 0.08);
-            border-color: var(--neon-pink);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(255, 0, 255, 0.3);
-        }
-
-        .feature-item-icon {
-            font-size: 40px;
-            margin-bottom: 15px;
-        }
-
-        .feature-item-title {
+        .game-card.with-poster .game-card-description {
             font-size: 18px;
-            font-weight: 700;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: white;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+            font-weight: 600;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
         }
 
-        .back-btn {
-            margin-top: 40px;
-            padding: 16px 40px;
-            background: transparent;
+        .game-card.with-poster .game-card-status {
+            background: rgba(0, 212, 255, 0.85);
+            color: #000;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.8), 0 4px 15px rgba(0, 0, 0, 0.5);
+            font-weight: 900;
+            position: relative;
+            z-index: 2;
+        }
+
+        .game-card-status {
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-card.available .game-card-status {
+            background: rgba(0, 212, 255, 0.2);
             color: var(--neon-cyan);
             border: 2px solid var(--neon-cyan);
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-            position: relative;
-            z-index: 1;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+            animation: pulse 2s ease-in-out infinite;
         }
 
-        .back-btn:hover {
-            background: var(--neon-cyan);
-            color: white;
-            transform: translateY(-3px);
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.6), 0 4px 20px rgba(0, 212, 255, 0.4);
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+            }
         }
 
-        .game-platform-btn {
-            margin-top: 20px;
-            padding: 16px 40px;
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-            box-shadow: 0 4px 20px rgba(233, 0, 233, 0.4);
-            position: relative;
-            z-index: 1;
-        }
-
-        .game-platform-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 6px 30px rgba(233, 0, 233, 0.6), 0 0 40px rgba(0, 212, 255, 0.4);
-        }
-
-        .game-platform-btn::before {
-            content: '🔐 ';
-            margin-right: 5px;
-        }
-
-        /* ========== iPhone Style Password Modal ========== */
-        .password-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(20px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: var(--z-modal);
-            animation: fadeIn 0.3s ease;
-        }
-
-        .password-modal.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .password-container {
-            background: rgba(20, 20, 30, 0.95);
-            border-radius: 30px;
-            padding: 40px 30px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.3);
-            border: 2px solid rgba(0, 212, 255, 0.3);
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .password-title {
-            text-align: center;
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 10px;
-        }
-
-        .password-subtitle {
-            text-align: center;
-            font-size: 14px;
+        .game-card.coming-soon .game-card-status {
+            background: rgba(255, 255, 255, 0.05);
             color: var(--text-secondary);
-            margin-bottom: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
 
-        .password-dots {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 40px;
-            min-height: 20px;
-        }
-
-        .password-dot {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            border: 2px solid rgba(0, 212, 255, 0.5);
-            transition: all 0.2s;
-        }
-
-        .password-dot.filled {
-            background: var(--neon-cyan);
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
-            border-color: var(--neon-cyan);
-        }
-
-        .password-dot.error {
-            background: #ff4444;
-            border-color: #ff4444;
-            animation: shake 0.5s;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-        }
-
-        .numpad-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .numpad-btn {
-            aspect-ratio: 1;
-            border: 2px solid rgba(0, 212, 255, 0.3);
-            border-radius: 50%;
-            background: rgba(0, 212, 255, 0.05);
-            color: var(--text-primary);
-            font-size: 28px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .numpad-btn:hover {
-            background: rgba(0, 212, 255, 0.15);
-            border-color: var(--neon-cyan);
-            transform: scale(0.95);
-        }
-
-        .numpad-btn:active {
-            transform: scale(0.9);
-            background: rgba(0, 212, 255, 0.25);
-        }
-
-        .numpad-btn.delete {
-            background: rgba(255, 68, 68, 0.1);
-            border-color: rgba(255, 68, 68, 0.3);
-            font-size: 24px;
-        }
-
-        .numpad-btn.delete:hover {
-            background: rgba(255, 68, 68, 0.2);
-            border-color: #ff4444;
-        }
-
-        .numpad-btn.empty {
-            background: transparent;
-            border-color: transparent;
+        .game-card.coming-soon {
             cursor: default;
+            opacity: 0.8;
         }
 
-        .numpad-btn.empty:hover {
-            background: transparent;
-            transform: none;
+        .game-card.coming-soon:hover {
+            transform: translateY(-5px);
         }
 
-        .password-cancel {
-            width: 100%;
-            padding: 15px;
-            background: transparent;
-            border: 2px solid rgba(255, 68, 68, 0.5);
-            border-radius: 15px;
-            color: #ff4444;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .password-cancel:hover {
-            background: rgba(255, 68, 68, 0.1);
-            border-color: #ff4444;
-        }
-
-        .error-message {
-            text-align: center;
-            color: #ff4444;
-            font-size: 14px;
-            margin-top: 10px;
-            min-height: 20px;
-            animation: fadeIn 0.3s;
-        }
 
         /* ========== Responsive Design ========== */
         @media (max-width: 768px) {
@@ -745,20 +593,38 @@
             .navbar .connect-btn { display: none; }
             .mobile-connect-btn { display: block; }
             
-            .development-title {
+            .showcase-title {
                 font-size: 36px;
             }
             
-            .development-subtitle {
+            .showcase-subtitle {
                 font-size: 18px;
             }
             
-            .development-icon {
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .game-card {
+                padding: 40px 30px;
+            }
+            
+            .game-card-icon {
                 font-size: 80px;
             }
             
-            .development-container {
-                padding: 40px 25px;
+            .game-card-title {
+                font-size: 28px;
+            }
+            
+            .game-card.with-poster {
+                min-height: 300px;
+                padding: 25px;
+            }
+            
+            .game-card.with-poster .game-card-description {
+                font-size: 16px;
             }
         }
     </style>
@@ -823,73 +689,29 @@
         <button class="connect-btn mobile-connect-btn" onclick="connectWallet()" data-i18n="nav.connect">Connect Wallet</button>
     </div>
 
-    <!-- Password Modal -->
-    <div class="password-modal" id="passwordModal">
-        <div class="password-container">
-            <div class="password-title" data-i18n="gamefi.enterPassword">Enter Password</div>
-            <div class="password-subtitle">Enter 4-digit access code</div>
-            
-            <div class="password-dots" id="passwordDots">
-                <div class="password-dot"></div>
-                <div class="password-dot"></div>
-                <div class="password-dot"></div>
-                <div class="password-dot"></div>
-            </div>
-            
-            <div class="numpad-grid">
-                <button class="numpad-btn" onclick="addDigit('1')">1</button>
-                <button class="numpad-btn" onclick="addDigit('2')">2</button>
-                <button class="numpad-btn" onclick="addDigit('3')">3</button>
-                <button class="numpad-btn" onclick="addDigit('4')">4</button>
-                <button class="numpad-btn" onclick="addDigit('5')">5</button>
-                <button class="numpad-btn" onclick="addDigit('6')">6</button>
-                <button class="numpad-btn" onclick="addDigit('7')">7</button>
-                <button class="numpad-btn" onclick="addDigit('8')">8</button>
-                <button class="numpad-btn" onclick="addDigit('9')">9</button>
-                <button class="numpad-btn empty"></button>
-                <button class="numpad-btn" onclick="addDigit('0')">0</button>
-                <button class="numpad-btn delete" onclick="deleteDigit()">⌫</button>
-            </div>
-            
-            <div class="error-message" id="errorMessage"></div>
-            
-            <button class="password-cancel" onclick="closePasswordModal()">Cancel</button>
-        </div>
-    </div>
 
     <!-- Main content area -->
     <section class="main-content">
-        <div class="development-container">
-            <div class="development-icon" data-i18n="gamefi.title">🎮</div>
-            <h1 class="development-title" data-i18n="gamefi.developing">Game In Development</h1>
-            <p class="development-subtitle" data-i18n="gamefi.subtitle">We are building an exciting GameFi experience<br>Stay tuned!</p>
+        <div class="games-showcase">
+            <h1 class="showcase-title" data-i18n="gamefi.showcaseTitle">Play to Earn</h1>
             
-            <div class="progress-bar-container">
-                <div class="progress-bar"></div>
-            </div>
+            <div class="games-grid">
+                <!-- Game 1: Available Game -->
+                <a href="game-platform.html" class="game-card available with-poster">
+                    <div class="game-card-icon">🎰</div>
+                    <h2 class="game-card-title" data-i18n="gamefi.game1Title">Hide-and-seek</h2>
+                    <p class="game-card-description" data-i18n="gamefi.game1Desc">夜色中生存,逃脱殺手的追击，赚取代币，体验快节奏的多人游戏！</p>
+                    <span class="game-card-status" data-i18n="gamefi.playNow">Play Now</span>
+                </a>
 
-            <div class="feature-preview">
-                <div class="feature-item">
-                    <div class="feature-item-icon">🏆</div>
-                    <div class="feature-item-title" data-i18n="gamefi.competition">Competitive Battles</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-item-icon">💰</div>
-                    <div class="feature-item-title" data-i18n="gamefi.playToEarn">Play to Earn</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-item-icon">🌟</div>
-                    <div class="feature-item-title" data-i18n="gamefi.nftEquipment">NFT Equipment</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-item-icon">🤝</div>
-                    <div class="feature-item-title" data-i18n="gamefi.socialInteraction">Social Interaction</div>
+                <!-- Game 2: Coming Soon -->
+                <div class="game-card coming-soon">
+                    <div class="game-card-icon">🔮</div>
+                    <h2 class="game-card-title" data-i18n="gamefi.game2Title">游戏正在开发中...</h2>
+                    <p class="game-card-description" data-i18n="gamefi.game2Desc">敬请期待</p>
+                    <span class="game-card-status" data-i18n="gamefi.comingSoon">Coming Soon</span>
                 </div>
             </div>
-
-            <a href="index.html" class="back-btn" data-i18n="gamefi.backHome">Back to Home</a>
-            
-            <button class="game-platform-btn" onclick="enterGamePlatform()" data-i18n="gamefi.joinTest">Join Game Testing</button>
         </div>
     </section>
 
@@ -1065,94 +887,6 @@
             }
         }
 
-        // ========== Protected entry to game platform ==========
-        let currentPassword = '';
-        const CORRECT_PASSWORD = '1414';
-
-        function enterGamePlatform() {
-            const modal = document.getElementById('passwordModal');
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            currentPassword = '';
-            updatePasswordDots();
-            clearError();
-        }
-
-        function closePasswordModal() {
-            const modal = document.getElementById('passwordModal');
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-            currentPassword = '';
-            updatePasswordDots();
-            clearError();
-        }
-
-        function addDigit(digit) {
-            if (currentPassword.length < 4) {
-                currentPassword += digit;
-                updatePasswordDots();
-                
-                // Auto-verify when 4 digits entered
-                if (currentPassword.length === 4) {
-                    setTimeout(verifyPassword, 300);
-                }
-            }
-        }
-
-        function deleteDigit() {
-            if (currentPassword.length > 0) {
-                currentPassword = currentPassword.slice(0, -1);
-                updatePasswordDots();
-                clearError();
-            }
-        }
-
-        function updatePasswordDots() {
-            const dots = document.querySelectorAll('.password-dot');
-            dots.forEach((dot, index) => {
-                dot.classList.remove('filled', 'error');
-                if (index < currentPassword.length) {
-                    dot.classList.add('filled');
-                }
-            });
-        }
-
-        function verifyPassword() {
-            if (currentPassword === CORRECT_PASSWORD) {
-                // Correct password - set session flag and redirect
-                sessionStorage.setItem('gamePlatformAuth', 'true');
-                closePasswordModal();
-                window.location.href = 'game-platform.html';
-            } else {
-                // Wrong password - show error
-                showError();
-                setTimeout(() => {
-                    currentPassword = '';
-                    updatePasswordDots();
-                }, 800);
-            }
-        }
-
-        function showError() {
-            const dots = document.querySelectorAll('.password-dot');
-            dots.forEach(dot => dot.classList.add('error'));
-            
-            const errorMsg = document.getElementById('errorMessage');
-            errorMsg.textContent = window.i18n?.t('gamefi.wrongPassword') || 'Incorrect password';
-        }
-
-        function clearError() {
-            const errorMsg = document.getElementById('errorMessage');
-            errorMsg.textContent = '';
-        }
-
-        // Close modal when clicking outside
-        document.addEventListener('click', (e) => {
-            const modal = document.getElementById('passwordModal');
-            if (e.target === modal) {
-                closePasswordModal();
-            }
-        });
     </script>
 </body>
 </html>

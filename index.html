@@ -485,9 +485,9 @@
 
         .cta-buttons {
             display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
         }
 
         .btn-primary, .btn-secondary {
@@ -539,6 +539,88 @@
             outline-offset: 2px;
         }
 
+        /* Game Platform Button - Enhanced Attention-Grabbing Style */
+        .game-platform-btn {
+            padding: 14px 35px;
+            background: linear-gradient(135deg, #ff00ff 0%, #00d4ff 50%, #ff00ff 100%);
+            background-size: 200% 200%;
+            color: white;
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 
+                0 0 30px rgba(255, 0, 255, 0.6),
+                0 0 60px rgba(0, 212, 255, 0.4),
+                0 8px 32px rgba(233, 0, 233, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: pulseGlow 2s ease-in-out infinite, gradientShift 3s ease infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 
+                    0 0 30px rgba(255, 0, 255, 0.6),
+                    0 0 60px rgba(0, 212, 255, 0.4),
+                    0 8px 32px rgba(233, 0, 233, 0.5),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 
+                    0 0 50px rgba(255, 0, 255, 0.9),
+                    0 0 100px rgba(0, 212, 255, 0.7),
+                    0 12px 48px rgba(233, 0, 233, 0.8),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+                transform: scale(1.03);
+            }
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+
+        .game-platform-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -50%; }
+            50%, 100% { left: 150%; }
+        }
+
+        .game-platform-btn:hover {
+            transform: translateY(-5px) scale(1.08);
+            box-shadow: 
+                0 0 60px rgba(255, 0, 255, 1),
+                0 0 120px rgba(0, 212, 255, 0.8),
+                0 15px 60px rgba(233, 0, 233, 0.9);
+            border-color: rgba(255, 255, 255, 0.8);
+            animation: pulseGlow 1s ease-in-out infinite, gradientShift 2s ease infinite;
+        }
+
+        .game-platform-btn:active {
+            transform: translateY(-2px) scale(1.05);
+        }
 
         /* ========== 功能展示区 ========== */
         .features-section {
@@ -920,6 +1002,7 @@
             <p data-i18n="hero.description">Innovative Web3.0 Comprehensive Platform - DeFi, GameFi, and Trendy Collectibles Await Your Discovery</p>
             <div class="cta-buttons">
                 <a href="#features" class="btn-secondary" data-i18n="hero.learnmore">Learn More</a>
+                <a href="game-platform.html" class="game-platform-btn" data-i18n="gamefi.joinTest">Join Game Testing</a>
             </div>
         </div>
     </section>

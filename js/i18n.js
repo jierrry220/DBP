@@ -208,6 +208,13 @@ const translations = {
         'gamefi.joinTest': 'Join Game Testing',
         'gamefi.enterPassword': 'Please enter access password:',
         'gamefi.wrongPassword': 'Incorrect password. Access denied.',
+        'gamefi.showcaseTitle': 'Game List',
+        'gamefi.game1Title': 'Hide-and-seek',
+        'gamefi.game1Desc': 'Survive in the darkness, escape the killer, earn tokens in this fast-paced multiplayer game!',
+        'gamefi.game2Title': 'Game in Development...',
+        'gamefi.game2Desc': 'Stay tuned',
+        'gamefi.playNow': 'Enter Game (Beta)',
+        'gamefi.comingSoon': 'Coming Soon',
         
         // Whitepaper 白皮书
         'whitepaper.backHome': '← Back to Home',
@@ -578,6 +585,13 @@ const translations = {
         'gamefi.joinTest': '加入遊戲測試',
         'gamefi.enterPassword': '請輸入訪問密碼：',
         'gamefi.wrongPassword': '密碼錯誤，無法進入。',
+        'gamefi.showcaseTitle': '游戏列表',
+        'gamefi.game1Title': '躲猫猫',
+        'gamefi.game1Desc': '夜色中生存,逃脱殺手的追击，赚取代币，体验快节奏的多人游戏！',
+        'gamefi.game2Title': '游戏正在开发中...',
+        'gamefi.game2Desc': '敬请期待',
+        'gamefi.playNow': '进入游戏（Beta版本）',
+        'gamefi.comingSoon': '即将推出',
         
         // Whitepaper 白皮書
         'whitepaper.backHome': '← 返回首頁',
