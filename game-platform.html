@@ -764,9 +764,9 @@
             image-rendering: crisp-edges;
         }
         
-        /* 到达房间后停止GIF动画 */
+        /* 到达房间后的状态（暂时不做特殊处理，GIF继续播放） */
         .character.idle .character-sprite {
-            animation-play-state: paused;
+            /* GIF继续播放 */
         }
 
         /* 当前玩家特效 */
@@ -3143,7 +3143,7 @@
         function updateGameState(gameData) {
             const game = gameData;
             
-            console.log(`[派对危机] 同步状态: Game #${game.gameId}, 阶段: ${game.phase}, 倒计时: ${game.countdown}s`);
+            console.log(`%c[派对危机] 同步状态: Game #${game.gameId}, 阶段: ${game.phase}, 倒计时: ${game.countdown}s`, 'background: blue; color: white;');
             
             // 检测游戏ID变化（新游戏开始）
             if (lastKnownGameId !== null && lastKnownGameId !== game.gameId) {
@@ -3221,9 +3221,11 @@
                 const text = window.i18n.t('partyCrisis.killerAppears');
                 phaseTextEl.innerHTML = text.replace(/Killer|killer|殺手/g, '<span style="color: #ff3333; font-weight: 900; text-shadow: 0 0 10px rgba(255, 51, 51, 0.8);">$&</span>');
                 
+                console.log(`%c[派对危机] killer_moving阶段, phaseChanged=${phaseChanged}, targetRoom=${game.targetRoom}`, 'background: purple; color: white; font-size: 14px;');
+                
                 // 只在阶段刚切换时触发动画
                 if (phaseChanged) {
-                    console.log('[派对危机] 杀手阶段开始!', {
+                    console.log('%c[派对危机] === 杀手阶段开始! ===', 'background: red; color: yellow; font-size: 18px; padding: 10px;', {
                         targetRoom: game.targetRoom,
                         countdown: game.countdown
                     });
@@ -3234,9 +3236,14 @@
                     }
                     
                     if (game.targetRoom) {
-                        console.log('[派对危机] 触发杀手动画...');
+                        console.log('%c[派对危机] 准备触发杀手动画...', 'background: orange; color: black; font-size: 16px;');
                         triggerKillerPhase(game.targetRoom);
+                        console.log('%c[派对危机] triggerKillerPhase 已调用', 'background: green; color: white; font-size: 16px;');
+                    } else {
+                        console.error('%c[派对危机] 错误：没有targetRoom!', 'background: red; color: white; font-size: 16px;');
                     }
+                } else {
+                    console.log('[派对危机] killer_moving阶段继续中，不重复触发动画');
                 }
                 
             } else if (game.phase === 'settling') {
@@ -3991,7 +3998,7 @@
                 const posInLayer = (playerIndex - 1) % 8;
                 const playersInLayer = Math.min(8, playersInRoom.length - 1 - (layer - 1) * 8);
                 
-                const radius = layer * 2.5;
+                const radius = layer * 3.0; // 设置为3.0
                 const angleStep = (Math.PI * 2) / playersInLayer;
                 const angle = posInLayer * angleStep + (layer * 0.2);
                 
@@ -4016,16 +4023,10 @@
                     char.style.left = `${finalX}%`;
                     char.style.top = `${finalY}%`;
                     
-                    // 到达后设置为静止状态
-                    setTimeout(() => {
-                        char.classList.add('idle');
-                        // 将GIF替换为静态图片（如果有的话）
-                        const sprite = char.querySelector('.character-sprite');
-                        if (sprite && !sprite.src.includes('player-die.gif')) {
-                            // 使用canvas截取GIF的当前帧作为静态图
-                            freezeGif(sprite);
-                        }
-                    }, stepDuration);
+                    // 到达后不做特殊处理，GIF继续播放
+                    // setTimeout(() => {
+                    //     char.classList.add('idle');
+                    // }, stepDuration);
                     return;
                 }
                 
@@ -4056,9 +4057,6 @@
                 return;
             }
             
-            // 移除静止状态，恢复GIF播放
-            char.classList.remove('idle');
-            
             // 根据横向移动方向切换GIF
             if (deltaX > 0) {
                 sprite.src = './images/player-walk-right.gif?v=1';
@@ -4067,24 +4065,10 @@
             }
         }
         
-        // 冻结GIF为静态图片
-        function freezeGif(imgElement) {
-            try {
-                const canvas = document.createElement('canvas');
-                canvas.width = imgElement.naturalWidth || 100;
-                canvas.height = imgElement.naturalHeight || 100;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(imgElement, 0, 0);
-                
-                // 将canvas转换为data URL并设置为img的src
-                const frozenImage = canvas.toDataURL('image/png');
-                imgElement.src = frozenImage;
-                console.log('[角色动画] GIF已冻结为静态图片');
-            } catch (e) {
-                console.warn('[角色动画] 无法冻结GIF:', e);
-                // 如果失败，至少添加idle类来停止动画
-            }
-        }
+        // 注意：冻结GIF功能已禁用，因为会导致再次移动时显示错误
+        // function freezeGif(imgElement) {
+        //     此功能已被禁用
+        // }
         
         // 注意：这些函数已移除，由后端和 API 同步接管：
         // - startNewGame() -> 由后端自动创建新游戏
@@ -4121,11 +4105,12 @@
                     console.log(`[死亡动画] 找到sprite:`, sprite);
                     
                     if (sprite) {
-                        // 先移除coin类避免被忽略
-                        charElement.classList.remove('coin');
+                        // 移除idle类和coin类，确保GIF能播放
+                        charElement.classList.remove('coin', 'idle');
                         
                         const deathGifUrl = './images/player-die.gif?v=' + Date.now();
                         sprite.src = deathGifUrl;
+                        sprite.style.display = 'block';
                         console.log(`[死亡动画] ${player.name} 开始播放死亡动画, URL: ${deathGifUrl}`);
                         
                         // 检查GIF是否加载成功
@@ -4164,9 +4149,10 @@
                     if (distX < 10 && distY < 10) {
                         const sprite = char.querySelector('.character-sprite');
                         if (sprite) {
-                            char.classList.remove('coin');
+                            char.classList.remove('coin', 'idle');
                             const deathGifUrl = './images/player-die.gif?v=' + Date.now();
                             sprite.src = deathGifUrl;
+                            sprite.style.display = 'block';
                             console.log(`[死亡动画] Bot ${charId} 开始播放死亡动画, URL: ${deathGifUrl}`);
                         }
                         // 2秒后变成金币
