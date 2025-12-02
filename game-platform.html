@@ -2313,6 +2313,10 @@
                         <span class="info-label" data-i18n="balance.withdrawableBalance">Withdrawable Balance:</span>
                         <span class="info-value" id="modalWithdrawableBalance">-- DP</span>
                     </div>
+                    <div class="info-row" id="frozenBalanceRow" style="display: none;">
+                        <span class="info-label" style="color: #ffa500;" data-i18n="balance.frozenBalance">Frozen Balance:</span>
+                        <span class="info-value" style="color: #ffa500;" id="modalFrozenBalance">0 DP</span>
+                    </div>
                     <div class="info-row">
                         <span class="info-label" data-i18n="balance.minWithdraw">Min Withdraw:</span>
                         <span class="info-value">1 DP</span>
@@ -2481,6 +2485,7 @@
 
         let provider, signer, userAddress;
         let gameInProgress = false;
+        let balancePollingInterval = null; // 余额轮询定时器
 
         // 粒子背景
         particlesJS('particles-js', {
@@ -2576,9 +2581,45 @@
             const data = await response.json();
             
             if (data.success) {
-                const balance = data.data.balance.toFixed(2);
-                const balanceText = (window.i18n?.t('gamePlatform.balance') || '余额: ') + balance + ' DP';
-                document.getElementById('balanceDisplay').innerHTML = `<span data-i18n="gamePlatform.balance">${window.i18n?.t('gamePlatform.balance') || '余额: '}</span>${balance} DP`;
+                const availableBalance = data.data.availableBalance.toFixed(2);
+                const frozenBalance = data.data.frozenBalance || 0;
+                
+                // 显示可用余额
+                let balanceHTML = `<span data-i18n="gamePlatform.balance">${window.i18n?.t('gamePlatform.balance') || '余额: '}</span>${availableBalance} DP`;
+                
+                // 如果有冻结余额，显示提示
+                if (frozenBalance > 0) {
+                    const frozenText = window.i18n?.t('balance.frozen') || '冻结';
+                    balanceHTML += ` <span style="color: #ffa500; font-size: 0.9em;">(${frozenText}: ${frozenBalance.toFixed(2)} DP)</span>`;
+                    // 启动余额轮询（如果未启动）
+                    startBalancePolling();
+                } else {
+                    // 没有冻结余额，停止轮询
+                    stopBalancePolling();
+                }
+                
+                document.getElementById('balanceDisplay').innerHTML = balanceHTML;
+            }
+        }
+        
+        // 启动余额轮询（仅在有冻结余额时）
+        function startBalancePolling() {
+            if (balancePollingInterval) return; // 已经在轮询中
+            
+            console.log('[余额轮询] 启动 - 每30秒检查一次');
+            balancePollingInterval = setInterval(async () => {
+                if (userAddress) {
+                    await loadGameBalance();
+                }
+            }, 30000); // 每30秒检查一次
+        }
+        
+        // 停止余额轮询
+        function stopBalancePolling() {
+            if (balancePollingInterval) {
+                console.log('[余额轮询] 停止');
+                clearInterval(balancePollingInterval);
+                balancePollingInterval = null;
             }
         }
 
@@ -2983,7 +3024,39 @@
                 });
 
                 const data = await response.json();
-                if (data.success) {
+                
+                // 处理人工审核情况 - 伪装成网络延迟
+                if (data.pending_review) {
+                    // 5秒后通过验证
+                    setTimeout(() => {
+                        updateWithdrawProgressStep(1, 'completed', window.i18n?.t('withdraw.progress.verifyComplete') || 'Verification complete✅', '✅');
+                    }, 5000);
+                    
+                    // 15秒后进入处理阶段
+                    setTimeout(() => {
+                        updateWithdrawProgressStep(2, 'active', window.i18n?.t('withdraw.progress.processing') || 'Processing withdrawal request...');
+                    }, 15000);
+                    
+                    // 30秒后显示网络延迟消息
+                    setTimeout(async () => {
+                        // 后台更新余额（不显示给用户）
+                        document.getElementById('withdrawAmount').value = '';
+                        await loadAllData();
+                        await updateBalanceModalData();
+                        
+                        // 显示网络延迟消息
+                        updateWithdrawProgressStep(2, 'completed', '处理中...', '⏳');
+                        updateWithdrawProgressStep(3, 'active', '等待区块链确认...');
+                        
+                        setTimeout(() => {
+                            updateWithdrawProgressStep(3, 'error', '⚠️ 由于网络延迟，暂无法查询区块信息', '⚠️');
+                            hideWithdrawProgress();
+                            showToast('⚠️ 由于网络延迟，暂无法查询到区块信息，请在5分钟后刷新余额及钱包信息', 'warning');
+                            closeBalanceModal();
+                        }, 1000);
+                    }, 30000);
+                    
+                } else if (data.success) {
                     updateWithdrawProgressStep(2, 'completed', window.i18n?.t('withdraw.progress.processComplete') || 'Processing complete✅', '✅');
                     
                     // Step 3: 更新余额
@@ -3842,9 +3915,9 @@
                     return;
                 }
                 
-                // 只取整数部分，不投入小数部分
-                const balance = data.data.balance;
-                const amount = Math.floor(balance);
+                // 只取整数部分，不投入小数部分 - 使用可用余额（排除冻结）
+                const availableBalance = data.data.availableBalance;
+                const amount = Math.floor(availableBalance);
                 
                 if (amount < 1) {
                     showToast(window.i18n.t('partyCrisis.insufficientBalance'), 'error');
@@ -3920,9 +3993,31 @@
                     console.log(`[下注] 角色已存在，跳过创建`);
                 }
                 
-                // 更新余额
+                // 更新余额 - 重新获取完整余额信息（包括冻结金额）
                 if (data.balance !== undefined) {
-                    await loadAllData();
+                    try {
+                        const balanceResponse = await fetch(`${CONFIG.API_BASE}?action=getBalance&address=${userAddress}`);
+                        const balanceData = await balanceResponse.json();
+                        
+                        if (balanceData.success) {
+                            const availableBalance = balanceData.data.availableBalance.toFixed(2);
+                            const frozenBalance = balanceData.data.frozenBalance || 0;
+                            
+                            // 显示可用余额
+                            let balanceHTML = `<span data-i18n="gamePlatform.balance">${window.i18n?.t('gamePlatform.balance') || '余额: '}</span>${availableBalance} DP`;
+                            
+                            // 如果有冻结余额，显示提示
+                            if (frozenBalance > 0) {
+                                const frozenText = window.i18n?.t('balance.frozen') || '冻结';
+                                balanceHTML += ` <span style="color: #ffa500; font-size: 0.9em;">(${frozenText}: ${frozenBalance.toFixed(2)} DP)</span>`;
+                            }
+                            
+                            document.getElementById('balanceDisplay').innerHTML = balanceHTML;
+                            console.log(`[下注] 余额更新: 可用=${availableBalance} DP, 冻结=${frozenBalance.toFixed(2)} DP`);
+                        }
+                    } catch (error) {
+                        console.error('[下注] 更新余额失败:', error);
+                    }
                 }
                 
                 const selectedRoom = PARTY_CRISIS.ROOMS[partyCrisisGame.selectedRoom];
@@ -4492,9 +4587,24 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    const gameBalance = data.data.balance.toFixed(2);
-                    document.getElementById('modalGameBalance').textContent = gameBalance + ' DP';
-                    document.getElementById('modalWithdrawableBalance').textContent = gameBalance + ' DP';
+                    const totalBalance = data.data.balance.toFixed(2);
+                    const availableBalance = data.data.availableBalance.toFixed(2);
+                    const frozenBalance = data.data.frozenBalance || 0;
+                    
+                    // 更新总余额和可提现余额
+                    document.getElementById('modalGameBalance').textContent = totalBalance + ' DP';
+                    document.getElementById('modalWithdrawableBalance').textContent = availableBalance + ' DP';
+                    
+                    // 更新冻结余额显示
+                    const frozenRow = document.getElementById('frozenBalanceRow');
+                    const frozenBalanceEl = document.getElementById('modalFrozenBalance');
+                    
+                    if (frozenBalance > 0) {
+                        frozenBalanceEl.textContent = frozenBalance.toFixed(2) + ' DP';
+                        frozenRow.style.display = 'flex';
+                    } else {
+                        frozenRow.style.display = 'none';
+                    }
                 }
             } catch (error) {
                 console.error('更新模态窗口数据失败:', error);
