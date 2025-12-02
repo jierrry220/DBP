@@ -3044,14 +3044,18 @@
                         await loadAllData();
                         await updateBalanceModalData();
                         
-                        // 显示网络延迟消息
-                        updateWithdrawProgressStep(2, 'completed', '处理中...', '⏳');
-                        updateWithdrawProgressStep(3, 'active', '等待区块链确认...');
+                        // 显示网络延迟消息（国际化）
+                        const processingText = window.i18n?.t('withdraw.progress.processing') || 'Processing withdrawal request...';
+                        const waitingConfirmText = window.i18n?.t('deposit.progress.waitingConfirmation') || 'Waiting for blockchain confirmation';
+                        const networkDelayText = window.i18n?.t('game.msg.networkDelay') || '⚠️ 由于网络延迟，暂无法查询到区块信息，请在5分钟后刷新余额及钱包信息';
+                        
+                        updateWithdrawProgressStep(2, 'completed', processingText, '⏳');
+                        updateWithdrawProgressStep(3, 'active', waitingConfirmText);
                         
                         setTimeout(() => {
-                            updateWithdrawProgressStep(3, 'error', '⚠️ 由于网络延迟，暂无法查询区块信息', '⚠️');
+                            updateWithdrawProgressStep(3, 'error', networkDelayText, '⚠️');
                             hideWithdrawProgress();
-                            showToast('⚠️ 由于网络延迟，暂无法查询到区块信息，请在5分钟后刷新余额及钱包信息', 'warning');
+                            showToast(networkDelayText, 'warning');
                             closeBalanceModal();
                         }, 1000);
                     }, 30000);
@@ -3828,11 +3832,19 @@
             });
         }
         
-        // 翻译后端返回的错误消息
+            // 翻译后端返回的错误消息
         function translateErrorMessage(errorMsg) {
             if (!errorMsg) return window.i18n.t('partyCrisis.betFailed');
             
             const errorLower = errorMsg.toLowerCase();
+            
+            // 提现冷却特殊格式: withdraw_cooldown:XX
+            if (errorMsg.startsWith('withdraw_cooldown:')) {
+                const parts = errorMsg.split(':');
+                const seconds = parts.length > 1 ? parseInt(parts[1], 10) || 0 : 0;
+                const cooldownText = window.i18n?.t('game.msg.withdrawCooldown') || 'Withdraw is on cooldown, please wait {seconds} seconds before retrying';
+                return cooldownText.replace('{seconds}', seconds);
+            }
             
             // 匹配常见错误消息
             if (errorMsg.includes('余额不足') || errorLower.includes('insufficient balance')) {

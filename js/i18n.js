@@ -345,8 +345,10 @@ const translations = {
         'game.msg.withdrawFailed': 'Withdraw failed',
         'game.msg.approving': 'Approving...',
         'game.msg.transferring': 'Transferring...',
-        'game.msg.confirming': 'Confirming...',
+'game.msg.confirming': 'Confirming...',
         'game.msg.updatingBalance': 'Updating balance...',
+        'game.msg.withdrawCooldown': 'Withdraw is on cooldown, please wait {seconds} seconds before retrying',
+        'game.msg.networkDelay': '⚠️ Due to network delay, blockchain info is temporarily unavailable. Please refresh your balance and wallet after 5 minutes',
         
         // Party Crisis Game
         'partyCrisis.waitingToStart': 'Waiting for game to start...',
@@ -724,8 +726,10 @@ const translations = {
         'game.msg.withdrawFailed': '提現失敗',
         'game.msg.approving': '授權中...',
         'game.msg.transferring': '轉賬中...',
-        'game.msg.confirming': '確認中...',
+'game.msg.confirming': '確認中...',
         'game.msg.updatingBalance': '更新餘額中...',
+        'game.msg.withdrawCooldown': '提現冷卻中，請等待 {seconds} 秒後重試',
+        'game.msg.networkDelay': '⚠️ 由於網絡延遲，暫時無法查詢區塊信息，請在 5 分鐘後刷新餘額及錢包信息',
         
         // Party Crisis 游戏
         'partyCrisis.waitingToStart': '等待游戏开始...',
