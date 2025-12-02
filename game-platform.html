@@ -3932,9 +3932,9 @@
             let botsPerBatch, intervalMs;
             
             if (PerformanceConfig.usePerformanceMode) {
-                // 移动端：每次 1-2 个，间隔 0.8-2.5秒（更平缓）
-                botsPerBatch = Math.floor(1 + Math.random() * 2); 
-                intervalMs = 800 + Math.random() * 1700;
+                // 移动端：每次 1 个，间隔 1秒（稳定渲染）
+                botsPerBatch = 1;
+                intervalMs = 1000;
             } else {
                 // 桌面端：每次 2-5 个，间隔 0.5-2秒
                 botsPerBatch = Math.floor(2 + Math.random() * 4);
@@ -3942,9 +3942,6 @@
             }
             
             console.log(`[Bot渲染] 开始渐进式渲染 ${totalBots} 个Bot，每批 ${botsPerBatch} 个，间隔 ${intervalMs}ms`);
-            
-            let currentInterval = intervalMs;
-            let isAccelerated = false; // 标记是否已加速
             
             function renderBatch() {
                 if (botRenderQueue.length === 0 || partyCrisisGame.phase !== 'betting') {
@@ -3954,21 +3951,14 @@
                     return;
                 }
                 
-                // 动态调整渲染速度：倒计时<5秒时加速（iPhone优化）
-                if (!isAccelerated && partyCrisisGame.countdown <= 5 && botRenderQueue.length > 5) {
-                    isAccelerated = true;
-                    // 倒计时最后5秒，如果还有很多Bot未渲染，加速
-                    if (PerformanceConfig.usePerformanceMode) {
-                        botsPerBatch = 3; // iPhone加速至3个/批
-                        currentInterval = 200; // 间隔缩短到200ms
-                    } else {
-                        botsPerBatch = 8;
-                        currentInterval = 100;
+                // 移动端角色数量限制：最多40个（真实玩家优先）
+                if (PerformanceConfig.usePerformanceMode) {
+                    const totalRendered = document.querySelectorAll('.character').length;
+                    
+                    if (totalRendered >= 40) {
+                        // 已达上限，需要删除最早的Bot以腾出位置
+                        removeOldestBotToMakeRoom();
                     }
-                    // 重启定时器以应用新间隔
-                    clearInterval(botRenderTimer);
-                    botRenderTimer = setInterval(renderBatch, currentInterval);
-                    console.log(`[Bot渲染] 加速模式：每批${botsPerBatch}个，间隔${currentInterval}ms`);
                 }
                 
                 // 渲染一批Bot
@@ -3981,10 +3971,34 @@
                     }
                 });
                 
-                console.log(`[Bot渨染] 已渨染 ${batch.length} 个，剩余 ${botRenderQueue.length} 个`);
+                console.log(`[Bot渲染] 已渲染 ${batch.length} 个，剩余 ${botRenderQueue.length} 个，当前总角色: ${document.querySelectorAll('.character').length}`);
             }
             
-            botRenderTimer = setInterval(renderBatch, currentInterval);
+            botRenderTimer = setInterval(renderBatch, intervalMs);
+        }
+        
+        // 删除最早的Bot以腾出位置（移动端40个角色上限）
+        function removeOldestBotToMakeRoom() {
+            const allCharacters = document.querySelectorAll('.character');
+            
+            // 找到最早渲染的Bot（不删除真实玩家）
+            for (let char of allCharacters) {
+                const charId = char.id.replace('char-', '');
+                
+                // 检查是否是真实玩家
+                const isRealPlayer = userAddress && charId === userAddress.toLowerCase();
+                const isOtherRealPlayer = partyCrisisGame.players.some(p => 
+                    p.address.toLowerCase() === charId
+                );
+                
+                // 只删除Bot，不删除真实玩家
+                if (!isRealPlayer && !isOtherRealPlayer && charId.startsWith('bot-')) {
+                    char.remove();
+                    renderedBots.delete(charId);
+                    console.log(`[Bot管理] 删除旧Bot ${charId} 以腾出位置`);
+                    return; // 只删除一个
+                }
+            }
         }
         
         
