@@ -3992,8 +3992,9 @@
                 const oldestBot = allBots[0];
                 const botId = oldestBot.id.replace('char-', '');
                 oldestBot.remove();
-                renderedBots.delete(botId);
-                console.log(`[Bot管理] 静默删除旧Bot ${botId} 以维持36个上限`);
+                // 注意：不从 renderedBots 中删除，保持投注额统计正确
+                // renderedBots.delete(botId);
+                console.log(`[Bot管理] 静默删除旧Bot显示 ${botId}，但保留投注额统计`);
                 return true;
             }
             
