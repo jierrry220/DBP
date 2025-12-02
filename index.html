@@ -866,6 +866,37 @@
             color: var(--text-secondary);
         }
 
+        /* ========== Toast Notification ========== */
+        .toast {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            padding: 15px 25px;
+            background: rgba(10, 14, 26, 0.95);
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            z-index: var(--z-toast);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid;
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.3s ease forwards;
+            max-width: 350px;
+        }
+
+        .toast.success { border-left-color: #00e676; }
+        .toast.error { border-left-color: #ff1744; }
+        .toast.warning { border-left-color: #ff9100; }
+        .toast.info { border-left-color: var(--neon-cyan); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
         /* ========== Responsive Design ========== */
         /* Tablet */
         @media (max-width: 1024px) {
@@ -1193,6 +1224,26 @@
         document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
 
+        // ========== Toast Notification ==========
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            // Add icon
+            let icon = 'ℹ️';
+            if (type === 'success') icon = '✅';
+            if (type === 'error') icon = '❌';
+            if (type === 'warning') icon = '⚠️';
+            
+            toast.innerHTML = `<span style="font-size: 1.2em;">${icon}</span><span>${message}</span>`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
         // ========== Connect Wallet ==========
         async function connectWallet() {
             // Berachain Configuration
@@ -1213,11 +1264,7 @@
                 const walletProvider = window.okxwallet || window.ethereum;
                 if (!walletProvider) {
                     const msg = window.i18n?.t('toast.wallet.noProvider') || 'Please install MetaMask or OKX Wallet!';
-                    if (window.DebearParty?.toast) {
-                        window.DebearParty.toast.error(msg);
-                    } else {
-                        alert(msg);
-                    }
+                    showToast(msg, 'error');
                     return;
                 }
 
@@ -1242,15 +1289,13 @@
                             } catch (addError) {
                                 console.error('Add network failed:', addError);
                                 const msg = window.i18n?.t('toast.wallet.addNetworkFailed') || 'Failed to add Berachain network automatically. Please add it manually.';
-                                if (window.DebearParty?.toast) window.DebearParty.toast.error(msg);
-                                else alert(msg);
+                                showToast(msg, 'error');
                                 return;
                             }
                         } else {
                             console.error('Switch network failed:', switchError);
                             const msg = window.i18n?.t('toast.wallet.switchNetwork') || 'Please switch to Berachain Mainnet (Chain ID: 80094)';
-                            if (window.DebearParty?.toast) window.DebearParty.toast.error(msg);
-                            else alert(msg);
+                            showToast(msg, 'error');
                             return;
                         }
                     }
@@ -1275,19 +1320,11 @@
                 checkOwnerAccess();
                 
                 const successMsg = window.i18n?.t('toast.wallet.connected') || 'Wallet connected successfully!';
-                if (window.DebearParty?.toast) {
-                    window.DebearParty.toast.success(successMsg);
-                } else {
-                    alert(successMsg);
-                }
+                showToast(successMsg, 'success');
             } catch (error) {
                 console.error('Connect wallet error:', error);
                 const errorMsg = (window.i18n?.t('toast.wallet.failed') || 'Failed to connect wallet') + ': ' + error.message;
-                if (window.DebearParty?.toast) {
-                    window.DebearParty.toast.error(errorMsg);
-                } else {
-                    alert(errorMsg);
-                }
+                showToast(errorMsg, 'error');
             }
         }
 
