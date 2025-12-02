@@ -3245,7 +3245,9 @@
             
             // 获取最大 Bot 渲染数量
             getMaxBotRenderCount: function() {
-                return this.usePerformanceMode ? 15 : 50;  // iOS/移动: 最多15个Bot, 桌面: 50个
+                // 用户反馈：为了保证游戏热闹氛围，移动端也不减少显示数量
+                // 依靠渐进式渲染和 CSS 优化来维持性能
+                return 50;
             }
         };
         
@@ -3555,20 +3557,12 @@
                 });
             }
             
-            // 渲染Bot角色（分批渐进，移动端限制数量）
+            // 渲染Bot角色（分批渐进）
             if (game.phase === 'betting' && game.bots && game.bots.length > 0) {
                 // 只在投注阶段渐进式渲染Bot
                 
-                // 性能优化：限制移动端 Bot 数量
-                const maxBots = PerformanceConfig.getMaxBotRenderCount();
-                const botsToRender = game.bots.slice(0, maxBots);
-                
-                if (PerformanceConfig.usePerformanceMode && game.bots.length > maxBots) {
-                    console.log(`[性能优化] 移动端限制 Bot 数量: ${game.bots.length} -> ${maxBots}`);
-                }
-                
                 // 将未渲染的Bot加入队列
-                botsToRender.forEach(bot => {
+                game.bots.forEach(bot => {
                     if (!renderedBots.has(bot.id) && !botRenderQueue.find(b => b.id === bot.id)) {
                         botRenderQueue.push(bot);
                     }
@@ -3579,17 +3573,14 @@
                     startGradualBotRendering();
                 }
             } else if (game.phase !== 'betting') {
-                // 非投注阶段，停止渐进渲染，直接渲染所有Bot（也限制数量）
+                // 非投注阶段，停止渐进渲染，直接渲染所有Bot
                 if (botRenderTimer) {
                     clearInterval(botRenderTimer);
                     botRenderTimer = null;
                 }
                 
                 if (game.bots && game.bots.length > 0) {
-                    const maxBots = PerformanceConfig.getMaxBotRenderCount();
-                    const botsToRender = game.bots.slice(0, maxBots);
-                    
-                    botsToRender.forEach(bot => {
+                    game.bots.forEach(bot => {
                         const botId = `char-${bot.id}`;
                         if (!document.getElementById(botId)) {
                             createPlayerCharacter(bot.id, bot.name, bot.roomId, false);
@@ -3631,9 +3622,18 @@
             const totalBots = botRenderQueue.length;
             if (totalBots === 0) return;
             
-            // 每次渲染 2-5 个Bot，间隔 0.5-2 秒
-            const botsPerBatch = Math.floor(2 + Math.random() * 4); // 2-5
-            const intervalMs = 500 + Math.random() * 1500; // 0.5-2秒
+            // 性能优化：移动端渲染更平缓
+            let botsPerBatch, intervalMs;
+            
+            if (PerformanceConfig.usePerformanceMode) {
+                // 移动端：每次 1-2 个，间隔 0.8-2.5秒（更平缓）
+                botsPerBatch = Math.floor(1 + Math.random() * 2); 
+                intervalMs = 800 + Math.random() * 1700;
+            } else {
+                // 桌面端：每次 2-5 个，间隔 0.5-2秒
+                botsPerBatch = Math.floor(2 + Math.random() * 4);
+                intervalMs = 500 + Math.random() * 1500;
+            }
             
             console.log(`[Bot渲染] 开始渐进式渲染 ${totalBots} 个Bot，每批 ${botsPerBatch} 个，间隔 ${intervalMs}ms`);
             

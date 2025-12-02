@@ -28,12 +28,13 @@ const PerformanceConfig = {
   - **iOS/移动设备**: 1800ms (1.8秒)
 - **效果**: 减少 iPhone 上 44% 的 API 请求频率,降低 CPU 和网络负载
 
-### 3. Bot 渲染数量限制
-- **优化前**: 所有设备最多渲染 50 个 Bot
-- **优化后**:
-  - **桌面设备**: 50 个 Bot (无变化)
-  - **iOS/移动设备**: 15 个 Bot
-- **效果**: 大幅减少 DOM 节点数量,降低渲染压力
+### 3. 渐进式渲染优化 (调整)
+- **优化前**: 移动端限制最多 15 个 Bot
+- **调整后**: **恢复显示所有 Bot (最多 50 个)**，以保持游戏热闹氛围
+- **性能策略**: 
+  - **桌面端**: 每批 2-5 个，间隔 0.5-2秒
+  - **移动端**: 每批 1-2 个，间隔 0.8-2.5秒 (更平缓的加载，避免瞬时卡顿)
+- **效果**: 既保证了视觉上的"人多热闹"，又通过平滑渲染分散了 CPU 负载
 
 ### 4. 禁用重度 CSS 特效
 在移动设备上自动禁用以下特效:
@@ -63,12 +64,17 @@ async function initPartyCrisisGame() {
 
 ### Bot 渲染限制
 ```javascript
-// 投注阶段
-const maxBots = PerformanceConfig.getMaxBotRenderCount();
-const botsToRender = game.bots.slice(0, maxBots);
+// 渐进式渲染优化
+let botsPerBatch, intervalMs;
 
-if (PerformanceConfig.usePerformanceMode && game.bots.length > maxBots) {
-    console.log(`[性能优化] 移动端限制 Bot 数量: ${game.bots.length} -> ${maxBots}`);
+if (PerformanceConfig.usePerformanceMode) {
+    // 移动端：每次 1-2 个，间隔 0.8-2.5秒（更平缓）
+    botsPerBatch = Math.floor(1 + Math.random() * 2); 
+    intervalMs = 800 + Math.random() * 1700;
+} else {
+    // 桌面端：每次 2-5 个，间隔 0.5-2秒
+    botsPerBatch = Math.floor(2 + Math.random() * 4);
+    intervalMs = 500 + Math.random() * 1500;
 }
 ```
 
