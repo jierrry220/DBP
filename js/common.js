@@ -311,6 +311,43 @@ class WalletManager {
             this.provider = this.getProvider();
             if (!this.provider) return false;
 
+            // Check network and switch if necessary
+            const chainId = await this.provider.request({ method: 'eth_chainId' });
+            
+            // Hardcode Berachain Config
+            const TARGET_CHAIN_ID = '0x138de'; // 80094
+            const BERACHAIN_CONFIG = {
+                chainId: TARGET_CHAIN_ID,
+                chainName: 'Berachain',
+                nativeCurrency: {
+                    name: 'BERA',
+                    symbol: 'BERA',
+                    decimals: 18
+                },
+                rpcUrls: ['https://rpc.berachain.com'],
+                blockExplorerUrls: ['https://beratrail.io']
+            };
+
+            if (chainId !== TARGET_CHAIN_ID) {
+                try {
+                    await this.provider.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: TARGET_CHAIN_ID }]
+                    });
+                } catch (switchError) {
+                    if (switchError.code === 4902) {
+                        try {
+                            await this.provider.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [BERACHAIN_CONFIG],
+                            });
+                        } catch (addError) {
+                            console.error('Failed to add network in checkConnection:', addError);
+                        }
+                    }
+                }
+            }
+
             const accounts = await this.provider.request({ 
                 method: 'eth_accounts' 
             });

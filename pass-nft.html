@@ -1350,6 +1350,20 @@
             const wasConnected = localStorage.getItem('walletConnected');
             if (!wasConnected) return false;
 
+            // Berachain Configuration
+            const TARGET_CHAIN_ID = '0x138de'; // 80094
+            const BERACHAIN_CONFIG = {
+                chainId: TARGET_CHAIN_ID,
+                chainName: 'Berachain',
+                nativeCurrency: {
+                    name: 'BERA',
+                    symbol: 'BERA',
+                    decimals: 18
+                },
+                rpcUrls: ['https://rpc.berachain.com'],
+                blockExplorerUrls: ['https://beratrail.io']
+            };
+
             try {
                 const walletProvider = window.okxwallet || window.ethereum;
                 if (!walletProvider) {
@@ -1360,11 +1374,24 @@
 
                 // Check network first
                 const chainId = await walletProvider.request({ method: 'eth_chainId' });
-                if (chainId !== '0x138de') {
-                    console.log('Wrong network, need to switch to Berachain');
-                    localStorage.removeItem('walletConnected');
-                    localStorage.removeItem('walletAddress');
-                    return false;
+                if (chainId !== TARGET_CHAIN_ID) {
+                    try {
+                        await walletProvider.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: TARGET_CHAIN_ID }]
+                        });
+                    } catch (switchError) {
+                        if (switchError.code === 4902) {
+                            try {
+                                await walletProvider.request({
+                                    method: 'wallet_addEthereumChain',
+                                    params: [BERACHAIN_CONFIG],
+                                });
+                            } catch (addError) {
+                                console.error('Failed to add Berachain network:', addError);
+                            }
+                        }
+                    }
                 }
 
                 const accounts = await walletProvider.request({ method: 'eth_accounts' });
