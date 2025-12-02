@@ -4055,32 +4055,8 @@
                     console.log(`[下注] 角色已存在，跳过创建`);
                 }
                 
-                // 更新余额 - 重新获取完整余额信息（包括冻结金额）
-                if (data.balance !== undefined) {
-                    try {
-                        const balanceResponse = await fetch(`${CONFIG.API_BASE}?action=getBalance&address=${userAddress}`);
-                        const balanceData = await balanceResponse.json();
-                        
-                        if (balanceData.success) {
-                            const availableBalance = balanceData.data.availableBalance.toFixed(2);
-                            const frozenBalance = balanceData.data.frozenBalance || 0;
-                            
-                            // 显示可用余额
-                            let balanceHTML = `<span data-i18n="gamePlatform.balance">${window.i18n?.t('gamePlatform.balance') || '余额: '}</span>${availableBalance} DP`;
-                            
-                            // 如果有冻结余额，显示提示
-                            if (frozenBalance > 0) {
-                                const frozenText = window.i18n?.t('balance.frozen') || '冻结';
-                                balanceHTML += ` <span style="color: #ffa500; font-size: 0.9em;">(${frozenText}: ${frozenBalance.toFixed(2)} DP)</span>`;
-                            }
-                            
-                            document.getElementById('balanceDisplay').innerHTML = balanceHTML;
-                            console.log(`[下注] 余额更新: 可用=${availableBalance} DP, 冻结=${frozenBalance.toFixed(2)} DP`);
-                        }
-                    } catch (error) {
-                        console.error('[下注] 更新余额失败:', error);
-                    }
-                }
+                // 使用统一的余额加载逻辑，确保导航栏余额和冻结余额实时同步
+                await loadGameBalance();
                 
                 const selectedRoom = PARTY_CRISIS.ROOMS[partyCrisisGame.selectedRoom];
                 const roomName = selectedRoom ? window.i18n.t(`partyCrisis.room${partyCrisisGame.selectedRoom}`) : window.i18n.t('partyCrisis.room1');
