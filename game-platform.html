@@ -3951,23 +3951,23 @@
                     return;
                 }
                 
-                // 移动端角色数量限制：最多40个（真实玩家优先）
-                if (PerformanceConfig.usePerformanceMode) {
-                    const totalRendered = document.querySelectorAll('.character').length;
-                    
-                    if (totalRendered >= 40) {
-                        // 已达上限，需要删除最早的Bot以腾出位置
-                        removeOldestBotToMakeRoom();
-                    }
-                }
-                
-                // 渲染一批Bot
+                // 渲染一批Bot（先渲染，带动画）
                 const batch = botRenderQueue.splice(0, botsPerBatch);
                 batch.forEach(bot => {
                     const botId = `char-${bot.id}`;
                     if (!document.getElementById(botId)) {
                         createPlayerCharacter(bot.id, bot.name, bot.roomId, false);
                         renderedBots.add(bot.id);
+                        
+                        // 移动端角色数量限制：渲染后检查是否超过32个
+                        if (PerformanceConfig.usePerformanceMode) {
+                            const totalRendered = document.querySelectorAll('.character').length;
+                            
+                            if (totalRendered > 32) {
+                                // 超过上限，删除已到达房间的旧Bot（静默删除）
+                                removeOldestBotInRoom();
+                            }
+                        }
                     }
                 });
                 
@@ -3977,25 +3977,25 @@
             botRenderTimer = setInterval(renderBatch, intervalMs);
         }
         
-        // 删除最早的Bot以腾出位置（移动端40个角色上限）
-        function removeOldestBotToMakeRoom() {
-            const allCharacters = document.querySelectorAll('.character');
+        // 删除已到达房间的旧Bot（移动端32个角色上限）
+        function removeOldestBotInRoom() {
+            const allCharacters = document.querySelectorAll('.character:not(.current-player)');
             
-            // 找到最早渲染的Bot（不删除真实玩家）
+            // 找到已到达房间的Bot（不在移动中，不删除真实玩家）
             for (let char of allCharacters) {
                 const charId = char.id.replace('char-', '');
                 
                 // 检查是否是真实玩家
-                const isRealPlayer = userAddress && charId === userAddress.toLowerCase();
-                const isOtherRealPlayer = partyCrisisGame.players.some(p => 
+                const isRealPlayer = partyCrisisGame.players.some(p => 
                     p.address.toLowerCase() === charId
                 );
                 
                 // 只删除Bot，不删除真实玩家
-                if (!isRealPlayer && !isOtherRealPlayer && charId.startsWith('bot-')) {
+                if (!isRealPlayer && charId.startsWith('bot-')) {
+                    // 静默删除（无动画）
                     char.remove();
                     renderedBots.delete(charId);
-                    console.log(`[Bot管理] 删除旧Bot ${charId} 以腾出位置`);
+                    console.log(`[Bot管理] 静默删除旧Bot ${charId} 以维持32个上限`);
                     return; // 只删除一个
                 }
             }
