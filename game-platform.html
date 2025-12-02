@@ -4005,6 +4005,21 @@
         
         // 触发幸存玩家返回出生点动画
         function triggerSurvivorsReturn() {
+            // iPhone性能优化：跳过返回动画
+            if (PerformanceConfig.usePerformanceMode) {
+                console.log('[结算动画] iPhone设备跳过返回动画，直接清空角色');
+                
+                // 直接隐藏所有幸存者，不播放动画
+                const survivors = document.querySelectorAll('.character:not(.coin)');
+                survivors.forEach(char => {
+                    char.style.opacity = '0';
+                });
+                
+                console.log(`[结算动画] 已隐藏 ${survivors.length} 个幸存者`);
+                return;
+            }
+            
+            // 桌面端：正常播放返回动画
             console.log('[结算动画] 幸存玩家返回出生点');
             
             // 找到所有未被杀的角色（不是金币的）
@@ -4034,7 +4049,7 @@
                         char.style.left = `${PARTY_CRISIS.SPAWN_POINT.x}%`;
                         char.style.top = `${PARTY_CRISIS.SPAWN_POINT.y}%`;
                     }
-                }, index * 15); // 每个角色间隔5ms，更快
+                }, index * 15); // 每个角色间陉5ms，更快
             });
             
             console.log(`[结算动画] ${survivors.length} 个幸存者开始返回`);
