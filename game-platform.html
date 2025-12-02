@@ -2630,17 +2630,7 @@
         let gameInProgress = false;
         let balancePollingInterval = null; // 余额轮询定时器
 
-        // 粒子背景
-        particlesJS('particles-js', {
-            particles: {
-                number: { value: 80, density: { enable: true, value_area: 800 } },
-                color: { value: ['#00c4ef', '#e900e9'] },
-                shape: { type: 'circle' },
-                opacity: { value: 0.5, random: true },
-                size: { value: 3, random: true },
-                move: { enable: true, speed: 1.5, direction: 'none', random: true }
-            }
-        });
+        // 粒子背景已移除
 
         // Toast 通知
         function showToast(message, type = 'info') {
@@ -3958,16 +3948,6 @@
                     if (!document.getElementById(botId)) {
                         createPlayerCharacter(bot.id, bot.name, bot.roomId, false);
                         renderedBots.add(bot.id);
-                        
-                        // 移动端角色数量限制：渲染后检查是否超过32个
-                        if (PerformanceConfig.usePerformanceMode) {
-                            const totalRendered = document.querySelectorAll('.character').length;
-                            
-                            if (totalRendered > 32) {
-                                // 超过上限，删除已到达房间的旧Bot（静默删除）
-                                removeOldestBotInRoom();
-                            }
-                        }
                     }
                 });
                 
@@ -3977,7 +3957,7 @@
             botRenderTimer = setInterval(renderBatch, intervalMs);
         }
         
-        // 删除已到达房间的旧Bot（移动端32个角色上限）
+        // 删除已到达房间的旧Bot（移动端36个角色上限）
         function removeOldestBotInRoom() {
             const allCharacters = document.querySelectorAll('.character:not(.current-player)');
             
@@ -3995,7 +3975,7 @@
                     // 静默删除（无动画）
                     char.remove();
                     renderedBots.delete(charId);
-                    console.log(`[Bot管理] 静默删除旧Bot ${charId} 以维持32个上限`);
+                    console.log(`[Bot管理] 静默删除旧Bot ${charId} 以维持36个上限`);
                     return; // 只删除一个
                 }
             }
@@ -4620,10 +4600,15 @@
                     char.style.left = `${finalX}%`;
                     char.style.top = `${finalY}%`;
                     
-                    // 到达后不做特殊处理，GIF继续播放
-                    // setTimeout(() => {
-                    //     char.classList.add('idle');
-                    // }, stepDuration);
+                    // 到达后检查36人上限（移动端）
+                    setTimeout(() => {
+                        if (PerformanceConfig.usePerformanceMode) {
+                            const totalRendered = document.querySelectorAll('.character').length;
+                            if (totalRendered > 36) {
+                                removeOldestBotInRoom();
+                            }
+                        }
+                    }, stepDuration);
                     return;
                 }
                 
