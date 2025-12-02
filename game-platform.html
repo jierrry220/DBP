@@ -3944,12 +3944,32 @@
             
             console.log(`[Bot渲染] 开始渐进式渲染 ${totalBots} 个Bot，每批 ${botsPerBatch} 个，间隔 ${intervalMs}ms`);
             
-            botRenderTimer = setInterval(() => {
+            let currentInterval = intervalMs;
+            let isAccelerated = false; // 标记是否已加速
+            
+            function renderBatch() {
                 if (botRenderQueue.length === 0 || partyCrisisGame.phase !== 'betting') {
                     clearInterval(botRenderTimer);
                     botRenderTimer = null;
                     console.log('[Bot渲染] 完成');
                     return;
+                }
+                
+                // 动态调整渲染速度：倒计时<5秒时加速（iPhone优化）
+                if (!isAccelerated && partyCrisisGame.countdown <= 5 && botRenderQueue.length > 5) {
+                    isAccelerated = true;
+                    // 倒计时最后5秒，如果还有很多Bot未渲染，加速
+                    if (PerformanceConfig.usePerformanceMode) {
+                        botsPerBatch = 3; // iPhone加速至3个/批
+                        currentInterval = 200; // 间隔缩短到200ms
+                    } else {
+                        botsPerBatch = 8;
+                        currentInterval = 100;
+                    }
+                    // 重启定时器以应用新间隔
+                    clearInterval(botRenderTimer);
+                    botRenderTimer = setInterval(renderBatch, currentInterval);
+                    console.log(`[Bot渲染] 加速模式：每批${botsPerBatch}个，间隔${currentInterval}ms`);
                 }
                 
                 // 渲染一批Bot
@@ -3963,7 +3983,9 @@
                 });
                 
                 console.log(`[Bot渨染] 已渨染 ${batch.length} 个，剩余 ${botRenderQueue.length} 个`);
-            }, intervalMs);
+            }
+            
+            botRenderTimer = setInterval(renderBatch, currentInterval);
         }
         
         // 快速批量渲染Bot（杀手阶段，iPhone优化）
