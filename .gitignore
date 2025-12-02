@@ -31,22 +31,50 @@ advanced-debug.html
 # API integration test files
 party-crisis-api-integration.js
 
-# Temporary documentation
+# Documentation files (development only, not for production)
 *_GUIDE.md
 *_README.md
+*_CHANGELOG.md
+*_FILES.md
 FRONTEND_UPDATE.md
 DEPLOY.md
+DEPLOYMENT_FILES.md
+CONVERT_TO_AAC.md
+AAC_CONVERSION_COMPLETE.md
+AUDIO_CHANGELOG.md
+AUDIO_QUICK_FIX.md
+AUDIO_SYSTEM_README.md
+AUDIO_TEST_GUIDE.md
+IPHONE_PERFORMANCE_OPTIMIZATION.md
+KILLER_AUDIO_TEST.md
+PARTY_CRISIS_INTEGRATION_GUIDE.md
+PARTY_CRISIS_README.md
+QUICK_TEST_GUIDE.md
+TEST_NOW.md
 
-# Local GIF helper scripts (do not commit)
+# Python utility scripts (development only)
+*.py
+change_map_border.py
 compose_killer_dao_002_024.py
 compose_killer_dao_custom.py
 compose_walk_left_000_004.py
+compress_assets.py
 create_killer_gif.py
 create_killer_gif_3frames.py
 extract_gif_frames.py
 flip_gif.py
+generate_static_images.py
 speedup_gif.py
 split_sprite_to_gif.py
 
-# Pixel character demo page (local only)
+# Backup files
+*.bak
+map.png.bak
+map_backup.png
+
+# Deprecated or unused JS files
+ave-api.js
+price-chart.js
+
+# Development demo/test pages
 pixel-characters-example.html

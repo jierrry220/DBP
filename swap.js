@@ -707,140 +707,65 @@ class SwapManager {
     }
     
     showMessage(text, type = 'info') {
-        const messageDiv = document.getElementById('message');
-        messageDiv.innerHTML = `<div class="alert ${type}">${text}</div>`;
-        setTimeout(() => { messageDiv.innerHTML = ''; }, 5000);
+        // Deprecated: Now using common.js Toast system
+        // Do nothing to avoid showing bottom message
+        console.log(`[Swap Message - ${type}]:`, text);
     }
 }
 
 // Global functions for wallet connection
 let swapManager;
 
+// Use global connectWallet from common.js, but update swap-specific state
 async function connectWallet() {
     try {
+        // Call the global wallet manager's connect (from common.js)
+        // This will handle all the wallet connection, network switching, and show toast
+        const address = await window.DebearParty.wallet.connect();
+        
+        if (!address) return;
+        
+        // Update swap manager's state
         const walletProvider = window.okxwallet || window.ethereum;
-        if (!walletProvider) {
-            swapManager.showMessage('Please install MetaMask or OKX Wallet', 'error');
-            return;
-        }
-
-        await walletProvider.request({ method: 'eth_requestAccounts' });
-        
-        const chainId = await walletProvider.request({ method: 'eth_chainId' });
-        if (chainId !== '0x138de') {
-            try {
-                await walletProvider.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x138de' }]
-                });
-            } catch (switchError) {
-                // Chain not added, try to add it
-                if (switchError.code === 4902) {
-                    await walletProvider.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [{
-                            chainId: '0x138de',
-                            chainName: 'Berachain Mainnet',
-                            nativeCurrency: {
-                                name: 'BERA',
-                                symbol: 'BERA',
-                                decimals: 18
-                            },
-                            rpcUrls: ['https://rpc.berachain.com'],
-                            blockExplorerUrls: ['https://berascan.com']
-                        }]
-                    });
-                } else {
-                    throw switchError;
-                }
+        if (walletProvider) {
+            swapManager.provider = new ethers.providers.Web3Provider(walletProvider);
+            swapManager.signer = swapManager.provider.getSigner();
+            swapManager.userAddress = address;
+            
+            // Update balances
+            await swapManager.updateBalances();
+            
+            // Re-calculate quote if amount is entered
+            const fromAmount = document.getElementById('fromAmount').value;
+            if (fromAmount) {
+                swapManager.handleAmountChange();
             }
-        }
-
-        swapManager.provider = new ethers.providers.Web3Provider(walletProvider);
-        swapManager.signer = swapManager.provider.getSigner();
-        swapManager.userAddress = await swapManager.signer.getAddress();
-
-        const shortAddress = swapManager.userAddress.slice(0, 6) + '...' + swapManager.userAddress.slice(-4);
-        const connectBtn = document.getElementById('connectBtn');
-        const mobileConnectBtn = document.getElementById('mobileConnectBtn');
-        
-        if (connectBtn) {
-            connectBtn.textContent = shortAddress;
-            connectBtn.disabled = false;
-        }
-        
-        if (mobileConnectBtn) {
-            mobileConnectBtn.textContent = shortAddress;
-            mobileConnectBtn.disabled = false;
-        }
-
-        // Save connection state
-        localStorage.setItem('walletConnected', 'true');
-        localStorage.setItem('walletAddress', swapManager.userAddress);
-
-        await swapManager.updateBalances();
-        swapManager.showMessage('Wallet connected successfully', 'success');
-        
-        // Re-calculate quote if amount is entered
-        const fromAmount = document.getElementById('fromAmount').value;
-        if (fromAmount) {
-            swapManager.handleAmountChange();
         }
     } catch (error) {
         console.error('Connection failed:', error);
-        swapManager.showMessage('Connection failed: ' + error.message, 'error');
     }
 }
 
-// Check and restore wallet connection
+// Check and restore wallet connection (silently, no toast)
 async function checkWalletConnection() {
-    const wasConnected = localStorage.getItem('walletConnected');
-    if (!wasConnected) return;
-
     try {
         const walletProvider = window.okxwallet || window.ethereum;
         if (!walletProvider) return;
 
-        // Check network first
-        const chainId = await walletProvider.request({ method: 'eth_chainId' });
-        if (chainId !== '0x138de') {
-            console.log('Wrong network, need to switch to Berachain');
-            localStorage.removeItem('walletConnected');
-            localStorage.removeItem('walletAddress');
-            return;
-        }
-
-        const accounts = await walletProvider.request({ method: 'eth_accounts' });
-        if (accounts && accounts.length > 0) {
-            swapManager.provider = new ethers.providers.Web3Provider(walletProvider, 'any');
-            swapManager.signer = swapManager.provider.getSigner();
-            swapManager.userAddress = await swapManager.signer.getAddress();
-
-            const shortAddress = swapManager.userAddress.slice(0, 6) + '...' + swapManager.userAddress.slice(-4);
-            const connectBtn = document.getElementById('connectBtn');
-            const mobileConnectBtn = document.getElementById('mobileConnectBtn');
+        // Check if wallet is already connected via common.js
+        if (window.DebearParty && window.DebearParty.wallet.isConnected) {
+            const address = window.DebearParty.wallet.getAddress();
             
-            if (connectBtn) {
-                connectBtn.textContent = shortAddress;
-                connectBtn.disabled = false;
+            if (address && walletProvider) {
+                swapManager.provider = new ethers.providers.Web3Provider(walletProvider, 'any');
+                swapManager.signer = swapManager.provider.getSigner();
+                swapManager.userAddress = address;
+                
+                await swapManager.updateBalances();
             }
-            
-            if (mobileConnectBtn) {
-                mobileConnectBtn.textContent = shortAddress;
-                mobileConnectBtn.disabled = false;
-            }
-
-            localStorage.setItem('walletAddress', swapManager.userAddress);
-
-            await swapManager.updateBalances();
-        } else {
-            localStorage.removeItem('walletConnected');
-            localStorage.removeItem('walletAddress');
         }
     } catch (error) {
         console.error('Error checking wallet connection:', error);
-        localStorage.removeItem('walletConnected');
-        localStorage.removeItem('walletAddress');
     }
 }
 

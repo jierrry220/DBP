@@ -46,11 +46,20 @@ self.addEventListener('activate', (event) => {
 
 // 拦截请求
 self.addEventListener('fetch', (event) => {
+  // 只处理 http/https 协议的请求
+  const url = new URL(event.request.url);
+  if (!url.protocol.startsWith('http')) {
+    return;
+  }
+  
   // 只缓存 GET 请求
   if (event.request.method !== 'GET') return;
   
   // 忽略 API 请求
   if (event.request.url.includes('/api/')) return;
+  
+  // 忽略外部域名请求（只缓存同源资源）
+  if (url.origin !== location.origin) return;
 
   event.respondWith(
     caches.match(event.request)
@@ -69,18 +78,22 @@ self.addEventListener('fetch', (event) => {
             }
 
             // 只有图片、音频、JS、CSS、HTML 才缓存
-            const url = event.request.url;
-            if (url.match(/\.(html|js|css|png|jpg|jpeg|gif|aac|mp3|json)$/i)) {
+            const urlStr = event.request.url;
+            if (urlStr.match(/\.(html|js|css|png|jpg|jpeg|gif|aac|mp3|json)$/i)) {
                 const responseToCache = response.clone();
                 caches.open(CACHE_NAME)
                   .then((cache) => {
                     cache.put(event.request, responseToCache);
-                  });
+                  })
+                  .catch(err => console.warn('[SW] Cache put failed:', err));
             }
 
             return response;
           }
-        );
+        ).catch(err => {
+          console.warn('[SW] Fetch failed:', err);
+          return caches.match('./index.html'); // 离线回退
+        });
       })
   );
 });

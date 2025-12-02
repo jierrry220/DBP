@@ -292,6 +292,11 @@ class WalletManager {
             const successMsg = window.i18n ? window.i18n.t('toast.wallet.connected') : 'Wallet connected successfully!';
             toast.success(successMsg);
 
+            // Trigger custom event for other pages to sync wallet state
+            window.dispatchEvent(new CustomEvent('walletConnected', { 
+                detail: { address: this.address } 
+            }));
+
             return this.address;
         } catch (error) {
             loading.hide();

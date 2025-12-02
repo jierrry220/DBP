@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Debear Party - Next-Generation Web3 Trendy Metaverse Gaming Platform</title>
     <meta name="description" content="Web3 decentralized gaming platform based on Berachain, providing NFT Pass, mining system and referral rewards">
+    <!-- Common CSS -->
+    <link rel="stylesheet" href="css/common.css">
     <style>
         /* ========== Global Styles ========== */
         * {
@@ -866,36 +868,6 @@
             color: var(--text-secondary);
         }
 
-        /* ========== Toast Notification ========== */
-        .toast {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            padding: 15px 25px;
-            background: rgba(10, 14, 26, 0.95);
-            border-radius: 12px;
-            color: white;
-            font-weight: 600;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            z-index: var(--z-toast);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-left: 4px solid;
-            backdrop-filter: blur(10px);
-            animation: slideIn 0.3s ease forwards;
-            max-width: 350px;
-        }
-
-        .toast.success { border-left-color: #00e676; }
-        .toast.error { border-left-color: #ff1744; }
-        .toast.warning { border-left-color: #ff9100; }
-        .toast.info { border-left-color: var(--neon-cyan); }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
 
         /* ========== Responsive Design ========== */
         /* Tablet */
@@ -1155,6 +1127,9 @@
     <!-- 粒子效果库 (本地化) -->
     <script src="js/libs/particles.min.js"></script>
     
+    <!-- 公共 JS (钱包管理、Toast 通知等) -->
+    <script src="js/common.js"></script>
+    
     <!-- 国际化配置 -->
     <script src="js/i18n.js"></script>
     
@@ -1224,126 +1199,15 @@
         document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
 
-        // ========== Toast Notification ==========
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            
-            // Add icon
-            let icon = 'ℹ️';
-            if (type === 'success') icon = '✅';
-            if (type === 'error') icon = '❌';
-            if (type === 'warning') icon = '⚠️';
-            
-            toast.innerHTML = `<span style="font-size: 1.2em;">${icon}</span><span>${message}</span>`;
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.animation = 'slideIn 0.3s ease reverse forwards';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
         // ========== Connect Wallet ==========
-        async function connectWallet() {
-            // Berachain Configuration
-            const TARGET_CHAIN_ID = '0x138de'; // 80094
-            const BERACHAIN_CONFIG = {
-                chainId: TARGET_CHAIN_ID,
-                chainName: 'Berachain',
-                nativeCurrency: {
-                    name: 'BERA',
-                    symbol: 'BERA',
-                    decimals: 18
-                },
-                rpcUrls: ['https://rpc.berachain.com'],
-                blockExplorerUrls: ['https://beratrail.io']
-            };
+        // Use global connectWallet from common.js
+        // (Defined in common.js: window.connectWallet = () => wallet.connect())
+        // Note: common.js handles auto-reconnection via DOMContentLoaded
 
-            try {
-                const walletProvider = window.okxwallet || window.ethereum;
-                if (!walletProvider) {
-                    const msg = window.i18n?.t('toast.wallet.noProvider') || 'Please install MetaMask or OKX Wallet!';
-                    showToast(msg, 'error');
-                    return;
-                }
-
-                await walletProvider.request({ method: 'eth_requestAccounts' });
-                
-                const chainId = await walletProvider.request({ method: 'eth_chainId' });
-                
-                if (chainId !== TARGET_CHAIN_ID) {
-                    try {
-                        await walletProvider.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: TARGET_CHAIN_ID }]
-                        });
-                    } catch (switchError) {
-                        // This error code indicates that the chain has not been added to MetaMask/OKX Wallet.
-                        if (switchError.code === 4902) {
-                            try {
-                                await walletProvider.request({
-                                    method: 'wallet_addEthereumChain',
-                                    params: [BERACHAIN_CONFIG],
-                                });
-                            } catch (addError) {
-                                console.error('Add network failed:', addError);
-                                const msg = window.i18n?.t('toast.wallet.addNetworkFailed') || 'Failed to add Berachain network automatically. Please add it manually.';
-                                showToast(msg, 'error');
-                                return;
-                            }
-                        } else {
-                            console.error('Switch network failed:', switchError);
-                            const msg = window.i18n?.t('toast.wallet.switchNetwork') || 'Please switch to Berachain Mainnet (Chain ID: 80094)';
-                            showToast(msg, 'error');
-                            return;
-                        }
-                    }
-                }
-
-                const accounts = await walletProvider.request({ method: 'eth_accounts' });
-                const userAddress = accounts[0];
-                
-                // Update button display
-                const shortAddr = userAddress.substring(0, 6) + '...' + userAddress.substring(38);
-                const connectBtns = document.querySelectorAll('.connect-btn');
-                connectBtns.forEach(btn => {
-                    btn.textContent = shortAddr;
-                    btn.disabled = true;
-                });
-                
-                // Save connection state
-                localStorage.setItem('walletConnected', 'true');
-                localStorage.setItem('walletAddress', userAddress);
-                
-                // Check Owner permissions
-                checkOwnerAccess();
-                
-                const successMsg = window.i18n?.t('toast.wallet.connected') || 'Wallet connected successfully!';
-                showToast(successMsg, 'success');
-            } catch (error) {
-                console.error('Connect wallet error:', error);
-                const errorMsg = (window.i18n?.t('toast.wallet.failed') || 'Failed to connect wallet') + ': ' + error.message;
-                showToast(errorMsg, 'error');
-            }
-        }
-
-        // ========== Check and restore wallet connection ==========
-        async function checkWalletConnection() {
-            const walletProvider = window.okxwallet || window.ethereum;
-            const wasConnected = localStorage.getItem('walletConnected') === 'true';
-            
-            // Check if wallet is already unlocked/connected OR was connected previously
-            if ((walletProvider && walletProvider.selectedAddress) || wasConnected) {
-                console.log('Auto-connecting wallet and checking network...');
-                await connectWallet();
-            }
-        }
-
-        // ========== Check wallet connection on page load ==========
+        // ========== Page load initialization ==========
         window.addEventListener('load', () => {
-            checkWalletConnection();
-            checkOwnerAccess();
+            // common.js already handles wallet connection via DOMContentLoaded
+            // Just update UI elements here
             updateWhitepaperLink();
         });
 
@@ -1363,25 +1227,8 @@
         }
 
         // ========== Check Owner permissions ==========
-        async function checkOwnerAccess() {
-            try {
-                const walletProvider = window.okxwallet || window.ethereum;
-                if (!walletProvider) return;
-
-                const accounts = await walletProvider.request({ method: 'eth_accounts' });
-                if (accounts && accounts.length > 0) {
-                    const userAddress = accounts[0].toLowerCase();
-                    // Owner address
-                    const ownerAddress = '0xd8b4286c2f299220830f7228bab15225b4ea8379'.toLowerCase();
-                    
-                    if (userAddress === ownerAddress) {
-                        document.getElementById('owner-link').style.display = 'block';
-                    }
-                }
-            } catch (error) {
-                console.error('Error checking owner access:', error);
-            }
-        }
+        // Note: This is called by common.js wallet manager after connection
+        // No need to call it manually here
 
         // ========== Mobile menu toggle ==========
         function toggleMobileMenu() {

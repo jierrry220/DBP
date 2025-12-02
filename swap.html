@@ -649,57 +649,12 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* 消息提示 */
-        #message {
-            position: fixed;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9998;
-            width: 90%;
-            max-width: 600px;
-        }
-
-        .alert {
-            padding: 15px 20px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .alert.info {
-            background: rgba(0, 212, 255, 0.15);
-            border: 2px solid rgba(0, 212, 255, 0.5);
-            color: var(--neon-cyan);
-            box-shadow: 0 8px 30px rgba(0, 212, 255, 0.3);
-        }
-
-        .alert.success {
-            background: rgba(0, 255, 136, 0.15);
-            border: 2px solid rgba(0, 255, 136, 0.5);
-            color: #00ff88;
-            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.3);
-        }
-
-        .alert.error {
-            background: rgba(255, 0, 100, 0.15);
-            border: 2px solid rgba(255, 0, 100, 0.5);
-            color: #ff0064;
-            box-shadow: 0 8px 30px rgba(255, 0, 100, 0.3);
+        /* 消息提示 (已废弃，现在使用 common.js 的 Toast 系统) */
+        #message, #message * {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
 
         /* Token 选择弹窗 */
@@ -1024,9 +979,6 @@
             </button>
         </div>
     </nav>
-
-    <!-- 消息提示 -->
-    <div id="message"></div>
 
     <!-- 移动端菜单遮罩 -->
     <div class="mobile-menu-overlay" onclick="toggleMobileMenu()"></div>
