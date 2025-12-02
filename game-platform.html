@@ -3872,20 +3872,27 @@
                     startGradualBotRendering();
                 }
             } else if (game.phase !== 'betting') {
-                // 非投注阶段，停止渐进渲染，直接渲染所有Bot
+                // 非投注阶段，使用快速批量渲染防止iPhone卡死
                 if (botRenderTimer) {
                     clearInterval(botRenderTimer);
                     botRenderTimer = null;
                 }
                 
                 if (game.bots && game.bots.length > 0) {
+                    // 添加未渲染的Bot到队列
                     game.bots.forEach(bot => {
                         const botId = `char-${bot.id}`;
-                        if (!document.getElementById(botId)) {
-                            createPlayerCharacter(bot.id, bot.name, bot.roomId, false);
-                            renderedBots.add(bot.id);
+                        if (!document.getElementById(botId) && !renderedBots.has(bot.id)) {
+                            if (!botRenderQueue.find(b => b.id === bot.id)) {
+                                botRenderQueue.push(bot);
+                            }
                         }
                     });
+                    
+                    // 启动快速批量渲染（iPhone优化）
+                    if (botRenderQueue.length > 0) {
+                        startFastBatchBotRendering();
+                    }
                 }
             }
         }
@@ -3916,7 +3923,7 @@
             }
         }
         
-        // 渐进式渲染Bot角色
+        // 渐进式渲染Bot角色（投注阶段）
         function startGradualBotRendering() {
             const totalBots = botRenderQueue.length;
             if (totalBots === 0) return;
@@ -3956,6 +3963,53 @@
                 
                 console.log(`[Bot渨染] 已渨染 ${batch.length} 个，剩余 ${botRenderQueue.length} 个`);
             }, intervalMs);
+        }
+        
+        // 快速批量渲染Bot（杀手阶段，iPhone优化）
+        function startFastBatchBotRendering() {
+            const totalBots = botRenderQueue.length;
+            if (totalBots === 0) return;
+            
+            console.log(`[Bot快速渲染] 开始批量渲染 ${totalBots} 个Bot`);
+            
+            // iPhone优化：分批渲染，每批间隔短暂延迟
+            const batchSize = PerformanceConfig.usePerformanceMode ? 3 : 8; // iPhone每批3个，桌面每批8个
+            const batchDelay = PerformanceConfig.usePerformanceMode ? 100 : 50; // iPhone间隔100ms，桌面50ms
+            
+            let currentIndex = 0;
+            
+            function renderNextBatch() {
+                if (currentIndex >= totalBots) {
+                    console.log('[Bot快速渲染] 完成');
+                    botRenderQueue = []; // 清空队列
+                    return;
+                }
+                
+                // 渲染当前批次
+                const endIndex = Math.min(currentIndex + batchSize, totalBots);
+                for (let i = currentIndex; i < endIndex; i++) {
+                    const bot = botRenderQueue[i];
+                    const botId = `char-${bot.id}`;
+                    if (!document.getElementById(botId)) {
+                        createPlayerCharacter(bot.id, bot.name, bot.roomId, false);
+                        renderedBots.add(bot.id);
+                    }
+                }
+                
+                const rendered = endIndex - currentIndex;
+                console.log(`[Bot快速渲染] 已渲染 ${rendered} 个，总进度 ${endIndex}/${totalBots}`);
+                
+                currentIndex = endIndex;
+                
+                // 继续下一批
+                if (currentIndex < totalBots) {
+                    setTimeout(renderNextBatch, batchDelay);
+                } else {
+                    botRenderQueue = [];
+                }
+            }
+            
+            renderNextBatch();
         }
         
         // 触发幸存玩家返回出生点动画
