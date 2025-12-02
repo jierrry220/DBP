@@ -28,12 +28,16 @@ class GameAudioManager {
             sfx: null
         };
         
-        // 状态
+            // 状态
         this.isInitialized = false;
         this.isMuted = false;
         this.currentPhase = null;
         this.countdownInterval = null;
         this.audioUnlocked = false;
+        
+        // 页面可见性处理
+        this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
+        document.addEventListener('visibilitychange', this.handleVisibilityChange);
         
         // 音量设置
         this.volumes = {
@@ -114,10 +118,25 @@ class GameAudioManager {
         const unlock = () => {
             if (this.audioUnlocked) return;
             
-            console.log('[音效管理器] 🔓 用户交互，解锁AudioContext');
+            console.log('[音效管理器] 🔓 用户交互，尝试解锁AudioContext');
             
+            // 1. 恢复上下文
             if (this.audioContext.state === 'suspended') {
-                this.audioContext.resume();
+                this.audioContext.resume().then(() => {
+                    console.log('[音效管理器] AudioContext resumed');
+                });
+            }
+            
+            // 2. 播放一个空的缓冲区（iOS 解锁的关键）
+            try {
+                const buffer = this.audioContext.createBuffer(1, 1, 22050);
+                const source = this.audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.connect(this.audioContext.destination);
+                source.start(0);
+                console.log('[音效管理器] 空缓冲区播放成功 (iOS Unlock)');
+            } catch (e) {
+                console.warn('[音效管理器] 空缓冲区播放失败:', e);
             }
             
             this.audioUnlocked = true;
@@ -148,6 +167,29 @@ class GameAudioManager {
         document.addEventListener('click', unlock, { once: true });
     }
     
+    /**
+     * 处理页面可见性变化
+     */
+    handleVisibilityChange() {
+        if (!this.audioContext) return;
+        
+        if (document.hidden) {
+            // 切后台：挂起音频，节省资源并防止错误
+            if (this.audioContext.state === 'running') {
+                this.audioContext.suspend().then(() => {
+                    console.log('[音效管理器] 页面隐藏，音频挂起');
+                });
+            }
+        } else {
+            // 切回：恢复音频
+            if (this.audioContext.state === 'suspended') {
+                this.audioContext.resume().then(() => {
+                    console.log('[音效管理器] 页面可见，音频恢复');
+                });
+            }
+        }
+    }
+
     /**
      * 播放音频
      */
@@ -446,6 +488,9 @@ class GameAudioManager {
         if (this.countdownInterval) {
             clearInterval(this.countdownInterval);
         }
+        
+        // 移除事件监听
+        document.removeEventListener('visibilitychange', this.handleVisibilityChange);
         
         if (this.audioContext) {
             this.audioContext.close();

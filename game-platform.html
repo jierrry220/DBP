@@ -1,6 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- 资源预加载 -->
+    <link rel="preload" href="js/i18n.js" as="script">
+    <link rel="preload" href="js/game-audio-manager-v2.js" as="script">
+    <link rel="preload" href="images/map.png" as="image">
+    
+    <!-- Service Worker 注册 -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+
     <script src="js/disable-console.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/game-audio-manager-v2.js"></script>
