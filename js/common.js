@@ -666,3 +666,6 @@ window.DebearParty = {
     scrollAnimation: null,
     CONFIG
 };
+
+// Global connectWallet function for HTML onclick events
+window.connectWallet = () => wallet.connect();
