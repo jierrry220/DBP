@@ -1127,11 +1127,43 @@
                 await walletProvider.request({ method: 'eth_requestAccounts' });
                 
                 const chainId = await walletProvider.request({ method: 'eth_chainId' });
-                if (chainId !== '0x138de') {
-                    await walletProvider.request({
-                        method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: '0x138de' }]
-                    });
+                const TARGET_CHAIN_ID = '0x138de';
+                
+                if (chainId !== TARGET_CHAIN_ID) {
+                    try {
+                        await walletProvider.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: TARGET_CHAIN_ID }]
+                        });
+                    } catch (switchError) {
+                        // This error code indicates that the chain has not been added to MetaMask/OKX Wallet.
+                        if (switchError.code === 4902) {
+                            try {
+                                await walletProvider.request({
+                                    method: 'wallet_addEthereumChain',
+                                    params: [{
+                                        chainId: TARGET_CHAIN_ID,
+                                        chainName: 'Berachain',
+                                        nativeCurrency: {
+                                            name: 'BERA',
+                                            symbol: 'BERA',
+                                            decimals: 18
+                                        },
+                                        rpcUrls: ['https://rpc.berachain.com'],
+                                        blockExplorerUrls: ['https://beratrail.io']
+                                    }],
+                                });
+                            } catch (addError) {
+                                console.error('Add network failed:', addError);
+                                showMessage('Failed to add Berachain network automatically. Please add it manually.', 'error');
+                                return;
+                            }
+                        } else {
+                            console.error('Switch network failed:', switchError);
+                            showMessage('Please switch to Berachain Mainnet (Chain ID: 80094)', 'error');
+                            return;
+                        }
+                    }
                 }
 
                 provider = new ethers.providers.Web3Provider(walletProvider);

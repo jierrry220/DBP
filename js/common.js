@@ -238,10 +238,35 @@ class WalletManager {
                         params: [{ chainId: CONFIG.BERACHAIN_CHAIN_ID }]
                     });
                 } catch (switchError) {
-                    loading.hide();
-                    const msg = window.i18n ? window.i18n.t('toast.wallet.switchNetwork') : 'Please switch to Berachain Mainnet (Chain ID: 80094)';
-                    toast.error(msg);
-                    return null;
+                    // This error code indicates that the chain has not been added to MetaMask/OKX Wallet.
+                    if (switchError.code === 4902) {
+                        try {
+                            await this.provider.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: CONFIG.BERACHAIN_CHAIN_ID,
+                                    chainName: 'Berachain',
+                                    nativeCurrency: {
+                                        name: 'BERA',
+                                        symbol: 'BERA',
+                                        decimals: 18
+                                    },
+                                    rpcUrls: ['https://rpc.berachain.com'],
+                                    blockExplorerUrls: ['https://beratrail.io']
+                                }],
+                            });
+                        } catch (addError) {
+                            loading.hide();
+                            const msg = window.i18n ? window.i18n.t('toast.wallet.addNetworkFailed') : 'Failed to add Berachain network automatically. Please add it manually.';
+                            toast.error(msg);
+                            return null;
+                        }
+                    } else {
+                        loading.hide();
+                        const msg = window.i18n ? window.i18n.t('toast.wallet.switchNetwork') : 'Please switch to Berachain Mainnet (Chain ID: 80094)';
+                        toast.error(msg);
+                        return null;
+                    }
                 }
             }
 
