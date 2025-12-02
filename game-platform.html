@@ -2548,6 +2548,8 @@
                 await loadAllData();
                 await loadUserInfo(); // 加载用户信息
                 await restorePlayerBetState(); // 恢复投注状态（如果有）
+                // 检查是否有上次未完成的充值，自动补记账
+                await resumePendingDepositIfAny();
             } catch (error) {
                 console.error('连接钱包失败:', error);
                 showToast((window.i18n?.t('toast.wallet.failed') || '连接钱包失败') + ': ' + error.message, 'error');
@@ -2720,6 +2722,43 @@
             }
         }
 
+        // 尝试从本地存储恢复未完成的充值
+        async function resumePendingDepositIfAny() {
+            if (!userAddress) return;
+            try {
+                const raw = localStorage.getItem('pendingDeposit');
+                if (!raw) return;
+                const pending = JSON.parse(raw);
+                if (!pending || pending.address?.toLowerCase() !== userAddress.toLowerCase()) return;
+                
+                const response = await fetch(`${CONFIG.API_BASE}?action=deposit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        address: pending.address,
+                        amount: pending.amount,
+                        txHash: pending.txHash
+                    })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    // 补记账成功
+                    await loadAllData();
+                    await loadUserInfo();
+                    localStorage.removeItem('pendingDeposit');
+                    const msg = window.i18n?.t('deposit.progress.success') || '🎉 Deposit successful! You can start playing now';
+                    showToast(msg, 'success');
+                } else if (!data.pending) {
+                    // 不是 pending 且未成功，认为这笔充值无法补记账，清理记录
+                    localStorage.removeItem('pendingDeposit');
+                }
+            } catch (e) {
+                console.error('恢复未完成充值失败:', e);
+                // 不打扰用户，只在控制台记录
+            }
+        }
+
         // 充值到游戏
         async function depositToGame() {
             if (!signer || !userAddress) {
@@ -2758,6 +2797,12 @@
                 // Step 2: 转账到平台
                 updateProgressStep(2, 'active', window.i18n?.t('deposit.progress.confirmInWallet') || 'Please confirm in wallet...');
                 const transferTx = await dpToken.transfer(CONFIG.PLATFORM_RECEIVER, amountWei);
+                // 记录待完成的充值信息，防止刷新/离开页面导致丢失
+                localStorage.setItem('pendingDeposit', JSON.stringify({
+                    address: userAddress,
+                    amount: amount,
+                    txHash: transferTx.hash
+                }));
                 updateProgressStep(2, 'active', window.i18n?.t('deposit.progress.waitingTransfer') || 'Waiting for transfer transaction...');
                 await transferTx.wait();
                 updateProgressStep(2, 'completed', window.i18n?.t('deposit.progress.transferComplete') || 'Transfer complete✅', '✅');
@@ -2795,6 +2840,9 @@
                     
                     // 关闭模态窗口
                     closeBalanceModal();
+
+                    // 充值完整成功，清理本地 pending 记录
+                    localStorage.removeItem('pendingDeposit');
                     
                     // 检查是否需要设置用户名
                     console.error('👤 [DEBUG] 检查用户名设置:', {
@@ -2816,7 +2864,7 @@
                         console.error('❌ [DEBUG] 用户名已设置或用户不存在');
                     }
                 } else if (data.pending) {
-                    // 确认数不足
+                    // 确认数不足，保持 pendingDeposit 记录，等待轮询或下次登录恢复
                     const confirmText = window.i18n?.t('deposit.progress.waitingConfirm') || 'Waiting for confirmation';
                     updateProgressStep(3, 'active', `${confirmText} (${data.confirmations}/${data.requiredConfirmations})...`);
                     updateProgressStep(4, 'active', window.i18n?.t('deposit.progress.waitingComplete') || 'Waiting for completion...');
@@ -2872,6 +2920,8 @@
 
                     if (data.success) {
                         // 充值成功
+                        // 清理 pendingDeposit 记录
+                        localStorage.removeItem('pendingDeposit');
                         updateProgressStep(3, 'completed', window.i18n?.t('deposit.progress.blockchainConfirmed') || 'Blockchain confirmed✅', '✅');
                         updateProgressStep(4, 'completed', window.i18n?.t('deposit.progress.balanceUpdated') || 'Balance updated complete✅', '✅');
                         updateProgressStep(5, 'completed', window.i18n?.t('deposit.progress.success') || '🎉 Deposit successful! You can start playing now', '🎉');
