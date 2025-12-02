@@ -85,14 +85,15 @@ class GameAudioManager {
     
     /**
      * 加载所有音频文件
+     * 使用 MP3 格式以确保 iPhone Safari 完美兼容
      */
     async loadAllAudio() {
         const audioFiles = [
-            { key: 'bgm', url: 'audio/game-bgm.aac' },
-            { key: 'cisha', url: 'audio/cisha.aac' },
-            { key: 'jingdi', url: 'audio/jingdi.aac' },
-            { key: 'win', url: 'audio/win.aac' },
-            { key: 'defeat', url: 'audio/defeat.aac' }
+            { key: 'bgm', url: 'audio/game-bgm.mp3' },
+            { key: 'cisha', url: 'audio/cisha.mp3' },
+            { key: 'jingdi', url: 'audio/jingdi.mp3' },
+            { key: 'win', url: 'audio/win.mp3' },
+            { key: 'defeat', url: 'audio/defeat.mp3' }
         ];
         
         console.log('[音效管理器] 📦 开始加载音频文件...');
@@ -115,56 +116,91 @@ class GameAudioManager {
      * 设置移动端解锁
      */
     setupMobileUnlock() {
-        const unlock = () => {
+        let unlockAttempts = 0;
+        const maxAttempts = 3;
+        
+        const unlock = async () => {
             if (this.audioUnlocked) return;
             
-            console.log('[音效管理器] 🔓 用户交互，尝试解锁AudioContext');
+            unlockAttempts++;
+            console.log(`[音效管理器] 🔓 用户交互，尝试解锁AudioContext (第${unlockAttempts}次)`);
             
             // 1. 恢复上下文
             if (this.audioContext.state === 'suspended') {
-                this.audioContext.resume().then(() => {
+                try {
+                    await this.audioContext.resume();
                     console.log('[音效管理器] AudioContext resumed');
-                });
+                } catch (e) {
+                    console.warn('[音效管理器] Resume 失败:', e);
+                }
             }
             
-            // 2. 播放一个空的缓冲区（iOS 解锁的关键）
+            // 2. 播放多个空缓冲区（增强 iOS 解锁）
             try {
-                const buffer = this.audioContext.createBuffer(1, 1, 22050);
-                const source = this.audioContext.createBufferSource();
-                source.buffer = buffer;
-                source.connect(this.audioContext.destination);
-                source.start(0);
+                // 播放多个频率的空音频
+                const frequencies = [22050, 44100, 48000];
+                for (const freq of frequencies) {
+                    const buffer = this.audioContext.createBuffer(1, 1, freq);
+                    const source = this.audioContext.createBufferSource();
+                    source.buffer = buffer;
+                    source.connect(this.audioContext.destination);
+                    source.start(0);
+                }
                 console.log('[音效管理器] 空缓冲区播放成功 (iOS Unlock)');
             } catch (e) {
                 console.warn('[音效管理器] 空缓冲区播放失败:', e);
             }
             
+            // 3. 尝试播放短音频片段
+            try {
+                if (this.audioBuffers.bgm) {
+                    const source = this.audioContext.createBufferSource();
+                    source.buffer = this.audioBuffers.bgm;
+                    const gainNode = this.audioContext.createGain();
+                    gainNode.gain.value = 0.01; // 极低音量
+                    source.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    source.start(0, 0, 0.1); // 只播放0.1秒
+                    console.log('[音效管理器] 短音频播放成功');
+                }
+            } catch (e) {
+                console.warn('[音效管理器] 短音频播放失败:', e);
+            }
+            
             this.audioUnlocked = true;
 
             // 如果刷新后恢复到投注阶段, 此时应当自动补播一次BGM
-            // (第一次自动播放因为浏览器限制被拦截了)
             try {
                 if (!this.isMuted && this.currentPhase === 'betting') {
                     console.log('[音效管理器] 🔁 解锁后自动补播BGM');
-                    // 重置音量并播放循环BGM
-                    if (this.gainNodes.bgm) {
-                        this.gainNodes.bgm.gain.value = this.volumes.bgm;
-                    }
-                    this.playSound('bgm', true);
+                    // 等待一下确保解锁完成
+                    setTimeout(() => {
+                        if (this.gainNodes.bgm) {
+                            this.gainNodes.bgm.gain.value = this.volumes.bgm;
+                        }
+                        this.playSound('bgm', true);
+                    }, 100);
                 }
             } catch (e) {
                 console.warn('[音效管理器] 解锁后补播BGM失败:', e);
             }
             
-            // 移除监听器
-            document.removeEventListener('touchstart', unlock);
-            document.removeEventListener('touchend', unlock);
-            document.removeEventListener('click', unlock);
+            // 不立即移除监听，允许多次尝试
+            if (unlockAttempts >= maxAttempts) {
+                document.removeEventListener('touchstart', unlock);
+                document.removeEventListener('touchend', unlock);
+                document.removeEventListener('click', unlock);
+                console.log('[音效管理器] 解锁监听器已移除');
+            }
         };
         
-        document.addEventListener('touchstart', unlock, { once: true, passive: true });
-        document.addEventListener('touchend', unlock, { once: true, passive: true });
-        document.addEventListener('click', unlock, { once: true });
+        // 增加更多事件监听
+        document.addEventListener('touchstart', unlock, { passive: true });
+        document.addEventListener('touchend', unlock, { passive: true });
+        document.addEventListener('click', unlock);
+        document.addEventListener('touchmove', unlock, { once: true, passive: true });
+        // 游戏中的下注按钮也触发解锁
+        document.addEventListener('pointerdown', unlock, { once: true });
     }
     
     /**

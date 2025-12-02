@@ -197,6 +197,7 @@ const translations = {
         'pass.ownedAmount': 'Owned:',
         
         // GameFi 页面
+        'game.loading': 'Loading Game...',
         'gamefi.title': '🎮',
         'gamefi.developing': 'Game In Development',
         'gamefi.subtitle': 'We are building an exciting GameFi experience<br>Stay tuned!',
@@ -764,6 +765,9 @@ const translations = {
         'partyCrisis.invalidBetAmount': '投注金额无效',
         'partyCrisis.betSuccess': '成功下注 {amount} DP 到 {room}',
         'partyCrisis.betFailed': '下注失败',
+        
+        // 游戏加载
+        'game.loading': '游戏加载中...',
     }
 };
 

@@ -492,6 +492,117 @@
             color: var(--neon-cyan);
         }
 
+        /* ========== Game Loading Screen ========== */
+        .game-loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        .game-loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        
+        .loading-poster {
+            width: 80%;
+            max-width: 400px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            border: 3px solid rgba(0, 196, 239, 0.5);
+            box-shadow: 0 0 30px rgba(0, 196, 239, 0.4);
+            animation: posterGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes posterGlow {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(0, 196, 239, 0.4),
+                           0 0 50px rgba(233, 0, 233, 0.2);
+                border-color: rgba(0, 196, 239, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(233, 0, 233, 0.6),
+                           0 0 60px rgba(0, 196, 239, 0.3);
+                border-color: rgba(233, 0, 233, 0.7);
+            }
+        }
+        
+        .loading-progress-container {
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .loading-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(0, 196, 239, 0.6);
+        }
+        
+        .loading-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 196, 239, 0.1);
+            border: 2px solid rgba(0, 196, 239, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .loading-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--primary-gradient);
+            border-radius: 8px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 196, 239, 0.6);
+            position: relative;
+        }
+        
+        .loading-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                transparent 100%
+            );
+            animation: progressShine 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes progressShine {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(200%);
+            }
+        }
+        
+        .loading-percentage {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+
         /* ========== Party Crisis Game ========== */
         .game-section {
             background: linear-gradient(135deg, rgba(233, 0, 233, 0.05) 0%, rgba(0, 196, 239, 0.08) 100%);
@@ -503,6 +614,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            position: relative;
         }
         
         .game-title-container {
@@ -2185,6 +2297,17 @@
 
         <!-- Party Crisis Game -->
         <div class="game-section">
+            <!-- 游戏加载屏幕 -->
+            <div class="game-loading-screen" id="gameLoadingScreen">
+                <img src="images/hide-and-seek.png" alt="Game Poster" class="loading-poster">
+                <div class="loading-progress-container">
+                    <div class="loading-text" id="loadingText" data-i18n="game.loading">Loading Game...</div>
+                    <div class="loading-progress-bar">
+                        <div class="loading-progress-fill" id="loadingProgressFill"></div>
+                    </div>
+                    <div class="loading-percentage" id="loadingPercentage">0%</div>
+                </div>
+            </div>
 
             <!-- 游戏容器 -->
             <div class="party-crisis-container">
@@ -3325,7 +3448,148 @@
             players: [],
             history: [],
             timer: null,
-            isBetting: false // 防止重复下注
+            isBetting: false, // 防止重复下注
+            isLoaded: false // 游戏是否已加载完成
+        };
+        
+        // 游戏加载管理器
+        const GameLoadingManager = {
+            progress: 0,
+            tasks: [],
+            
+            // 初始化加载任务
+            init: function() {
+                this.tasks = [
+                    { name: 'Audio System', weight: 15, fn: () => this.loadAudioSystem() },
+                    { name: 'Game Resources', weight: 25, fn: () => this.loadGameResources() },
+                    { name: 'API Connection', weight: 20, fn: () => this.loadAPIConnection() },
+                    { name: 'Game State', weight: 25, fn: () => this.loadGameState() },
+                    { name: 'Finalizing', weight: 15, fn: () => this.finalize() }
+                ];
+            },
+            
+            // 更新进度
+            updateProgress: function(percentage) {
+                this.progress = Math.min(100, percentage);
+                const fillEl = document.getElementById('loadingProgressFill');
+                const percentEl = document.getElementById('loadingPercentage');
+                if (fillEl) fillEl.style.width = this.progress + '%';
+                if (percentEl) percentEl.textContent = Math.round(this.progress) + '%';
+            },
+            
+            // 更新加载文本
+            updateText: function(text) {
+                const textEl = document.getElementById('loadingText');
+                if (textEl) textEl.textContent = text;
+            },
+            
+            // 加载音频系统
+            loadAudioSystem: async function() {
+                return new Promise(resolve => {
+                    if (window.gameAudioManager) {
+                        console.log('[游戏加载] 音频系统已就绪');
+                    }
+                    setTimeout(resolve, 300);
+                });
+            },
+            
+            // 加载游戏资源
+            loadGameResources: async function() {
+                return new Promise(resolve => {
+                    const images = [
+                        'map.png',
+                        'images/player-walk-right.gif',
+                        'images/player-walk-left.gif',
+                        'images/killer-walk.gif'
+                    ];
+                    
+                    let loaded = 0;
+                    const total = images.length;
+                    
+                    images.forEach(src => {
+                        const img = new Image();
+                        img.onload = img.onerror = () => {
+                            loaded++;
+                            if (loaded === total) {
+                                console.log('[游戏加载] 游戏资源加载完成');
+                                resolve();
+                            }
+                        };
+                        img.src = src;
+                    });
+                });
+            },
+            
+            // 加载API连接
+            loadAPIConnection: async function() {
+                try {
+                    const response = await fetch(`${PARTY_CRISIS_API.BASE_URL}/status`);
+                    const data = await response.json();
+                    console.log('[游戏加载] API连接成功');
+                    return data;
+                } catch (error) {
+                    console.warn('[游戏加载] API连接失败，将重试:', error);
+                    return null;
+                }
+            },
+            
+            // 加载游戏状态
+            loadGameState: async function() {
+                await loadGameHistory();
+                await syncGameState();
+                console.log('[游戏加载] 游戏状态同步完成');
+            },
+            
+            // 最终化
+            finalize: async function() {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        console.log('[游戏加载] 加载完成');
+                        resolve();
+                    }, 200);
+                });
+            },
+            
+            // 开始加载
+            start: async function() {
+                this.init();
+                this.updateProgress(0);
+                
+                let currentProgress = 0;
+                
+                for (let i = 0; i < this.tasks.length; i++) {
+                    const task = this.tasks[i];
+                    this.updateText(`Loading ${task.name}...`);
+                    
+                    try {
+                        await task.fn();
+                        currentProgress += task.weight;
+                        this.updateProgress(currentProgress);
+                    } catch (error) {
+                        console.error(`[游戏加载] ${task.name} 加载失败:`, error);
+                        currentProgress += task.weight;
+                        this.updateProgress(currentProgress);
+                    }
+                }
+                
+                // 确保到达100%
+                this.updateProgress(100);
+                this.updateText('Ready!');
+                
+                // 短暂延迟后隐藏加载屏幕
+                await new Promise(resolve => setTimeout(resolve, 500));
+                this.hide();
+            },
+            
+            // 隐藏加载屏幕
+            hide: function() {
+                const loadingScreen = document.getElementById('gameLoadingScreen');
+                if (loadingScreen) {
+                    loadingScreen.classList.add('hidden');
+                    partyCrisisGame.isLoaded = true;
+                    console.log('[游戏加载] 加载屏幕已隐藏');
+                }
+            }
         };
         
         // 初始化游戏
@@ -3342,11 +3606,10 @@
                 window.i18n.applyLanguage();
             }
             
-            createRoomZones();
-            await loadGameHistory();
+            // 开始加载流程
+            await GameLoadingManager.start();
             
-            // 第一次同步前先获取当前状态
-            await syncGameState();
+            createRoomZones();
             
             // 初始化 lastKnownPhase（避免第一次被认为阶段变化）
             lastKnownPhase = partyCrisisGame.phase;
