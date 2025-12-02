@@ -3941,17 +3941,37 @@
                     return;
                 }
                 
-                // 渲染一批Bot（先渲染，带动画）
-                const batch = botRenderQueue.splice(0, botsPerBatch);
-                batch.forEach(bot => {
-                    const botId = `char-${bot.id}`;
-                    if (!document.getElementById(botId)) {
-                        createPlayerCharacter(bot.id, bot.name, bot.roomId, false);
-                        renderedBots.add(bot.id);
-                    }
-                });
-                
-                console.log(`[Bot渲染] 已渲染 ${batch.length} 个，剩余 ${botRenderQueue.length} 个，当前总角色: ${document.querySelectorAll('.character').length}`);
+                // 移动端：先检查是否超过36人，如果超过先删除旧bot，再渲染新bot
+                if (PerformanceConfig.usePerformanceMode) {
+                    const batch = botRenderQueue.splice(0, botsPerBatch);
+                    batch.forEach(bot => {
+                        const botId = `char-${bot.id}`;
+                        if (!document.getElementById(botId)) {
+                            // 先检查人数，超过36人就先删除一个旧bot
+                            const totalRendered = document.querySelectorAll('.character').length;
+                            if (totalRendered >= 36) {
+                                removeOldestBotInRoom();
+                                console.log(`[Bot管理] 已达36人上限，删除旧bot后再渲染新bot`);
+                            }
+                            
+                            // 然后渲染新bot
+                            createPlayerCharacter(bot.id, bot.name, bot.roomId, false);
+                            renderedBots.add(bot.id);
+                        }
+                    });
+                    console.log(`[Bot渲染] 已渲染 ${batch.length} 个，剩余 ${botRenderQueue.length} 个，当前总角色: ${document.querySelectorAll('.character').length}`);
+                } else {
+                    // 桌面端：无限制，直接渲染
+                    const batch = botRenderQueue.splice(0, botsPerBatch);
+                    batch.forEach(bot => {
+                        const botId = `char-${bot.id}`;
+                        if (!document.getElementById(botId)) {
+                            createPlayerCharacter(bot.id, bot.name, bot.roomId, false);
+                            renderedBots.add(bot.id);
+                        }
+                    });
+                    console.log(`[Bot渲染] 已渲染 ${batch.length} 个，剩余 ${botRenderQueue.length} 个，当前总角色: ${document.querySelectorAll('.character').length}`);
+                }
             }
             
             botRenderTimer = setInterval(renderBatch, intervalMs);
@@ -4600,15 +4620,6 @@
                     char.style.left = `${finalX}%`;
                     char.style.top = `${finalY}%`;
                     
-                    // 到达后检查36人上限（移动端）
-                    setTimeout(() => {
-                        if (PerformanceConfig.usePerformanceMode) {
-                            const totalRendered = document.querySelectorAll('.character').length;
-                            if (totalRendered > 36) {
-                                removeOldestBotInRoom();
-                            }
-                        }
-                    }, stepDuration);
                     return;
                 }
                 
