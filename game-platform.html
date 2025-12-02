@@ -3148,6 +3148,107 @@
 
         // ========== 派对危机游戏 ==========
         
+        // ========== 性能优化：设备检测 ==========
+        const PerformanceConfig = {
+            // 检测是否为 iOS 设备
+            isIOS: () => {
+                return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            },
+            
+            // 检测是否为移动设备
+            isMobile: () => {
+                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            },
+            
+            // 是否启用性能优化模式
+            usePerformanceMode: false,
+            
+            // 初始化性能配置
+            init: function() {
+                this.usePerformanceMode = this.isIOS() || this.isMobile();
+                
+                if (this.usePerformanceMode) {
+                    console.log('%c[性能优化] 检测到移动设备，启用性能优化模式', 'background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px;');
+                    
+                    // 应用性能优化
+                    this.applyOptimizations();
+                }
+                
+                return this.usePerformanceMode;
+            },
+            
+            // 应用性能优化
+            applyOptimizations: function() {
+                // 1. 禁用背景特效
+                const particlesEl = document.getElementById('particles-js');
+                if (particlesEl) {
+                    particlesEl.style.background = 'radial-gradient(ellipse at top, #2d1b4e 0%, #1a0a2e 50%, #0a0e1a 100%)';
+                    particlesEl.style.backgroundSize = '100% 100%';
+                    // 移除扫描线动画
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        #particles-js::before { display: none !important; }
+                        @keyframes scan { 0%, 100% { transform: none; } }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                // 2. 禁用模糊效果
+                const style = document.createElement('style');
+                style.textContent = `
+                    @media (max-width: 768px) {
+                        .navbar, .modal-content {
+                            backdrop-filter: none !important;
+                            -webkit-backdrop-filter: none !important;
+                        }
+                        .navbar {
+                            background: rgba(10, 14, 26, 0.95) !important;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // 3. 禁用非关键 console.log 以提升性能
+                this.disableDebugLogs();
+                
+                console.log('[性能优化] 已禁用重 CSS 特效和调试日志');
+            },
+            
+            // 禁用非关键调试日志
+            disableDebugLogs: function() {
+                const originalLog = console.log;
+                const originalWarn = console.warn;
+                
+                // 只保留错误和关键信息
+                console.log = function(...args) {
+                    const message = args[0]?.toString() || '';
+                    // 只显示关键信息：性能优化、错误、游戏初始化
+                    if (message.includes('[性能优化]') || 
+                        message.includes('[游戏初始化]') ||
+                        message.includes('错误') ||
+                        message.includes('Error') ||
+                        message.includes('error')) {
+                        originalLog.apply(console, args);
+                    }
+                };
+                
+                console.warn = function(...args) {
+                    // 保留所有 warn
+                    originalWarn.apply(console, args);
+                };
+            },
+            
+            // 获取同步间隔（根据设备优化）
+            getSyncInterval: function() {
+                return this.usePerformanceMode ? 1800 : 1000;  // iOS/移动: 1.8秒, 桌面: 1秒
+            },
+            
+            // 获取最大 Bot 渲染数量
+            getMaxBotRenderCount: function() {
+                return this.usePerformanceMode ? 15 : 50;  // iOS/移动: 最多15个Bot, 桌面: 50个
+            }
+        };
+        
         // 游戏配置
         const PARTY_CRISIS = {
             ROOMS: {
@@ -3164,10 +3265,10 @@
             ENTRANCE: { x: 7.5, y: 50.5 }
         };
         
-        // API 配置
+        // API 配置（初始化后会根据设备动态调整）
         const PARTY_CRISIS_API = {
             BASE_URL: 'https://yhgl.zeabur.app/api/party-crisis',
-            SYNC_INTERVAL: 1000
+            SYNC_INTERVAL: 1000  // 将在初始化时根据设备调整
         };
         
         let gameSyncTimer = null;
@@ -3191,7 +3292,14 @@
         
         // 初始化游戏
         async function initPartyCrisisGame() {
-            // 确保i18n已初始化并应用翻译
+            // 性能优化：初始化设备检测和配置
+            PerformanceConfig.init();
+            
+            // 根据设备动态调整同步间隔
+            PARTY_CRISIS_API.SYNC_INTERVAL = PerformanceConfig.getSyncInterval();
+            console.log(`[游戏初始化] 同步间隔设置为: ${PARTY_CRISIS_API.SYNC_INTERVAL}ms`);
+            
+            // 确保 i18n 已初始化并应用翻译
             if (window.i18n) {
                 window.i18n.applyLanguage();
             }
@@ -3447,12 +3555,20 @@
                 });
             }
             
-            // 渲染Bot角色（分批渐进）
+            // 渲染Bot角色（分批渐进，移动端限制数量）
             if (game.phase === 'betting' && game.bots && game.bots.length > 0) {
                 // 只在投注阶段渐进式渲染Bot
                 
+                // 性能优化：限制移动端 Bot 数量
+                const maxBots = PerformanceConfig.getMaxBotRenderCount();
+                const botsToRender = game.bots.slice(0, maxBots);
+                
+                if (PerformanceConfig.usePerformanceMode && game.bots.length > maxBots) {
+                    console.log(`[性能优化] 移动端限制 Bot 数量: ${game.bots.length} -> ${maxBots}`);
+                }
+                
                 // 将未渲染的Bot加入队列
-                game.bots.forEach(bot => {
+                botsToRender.forEach(bot => {
                     if (!renderedBots.has(bot.id) && !botRenderQueue.find(b => b.id === bot.id)) {
                         botRenderQueue.push(bot);
                     }
@@ -3463,14 +3579,17 @@
                     startGradualBotRendering();
                 }
             } else if (game.phase !== 'betting') {
-                // 非投注阶段，停止渐进渲染，直接渲染所有Bot
+                // 非投注阶段，停止渐进渲染，直接渲染所有Bot（也限制数量）
                 if (botRenderTimer) {
                     clearInterval(botRenderTimer);
                     botRenderTimer = null;
                 }
                 
                 if (game.bots && game.bots.length > 0) {
-                    game.bots.forEach(bot => {
+                    const maxBots = PerformanceConfig.getMaxBotRenderCount();
+                    const botsToRender = game.bots.slice(0, maxBots);
+                    
+                    botsToRender.forEach(bot => {
                         const botId = `char-${bot.id}`;
                         if (!document.getElementById(botId)) {
                             createPlayerCharacter(bot.id, bot.name, bot.roomId, false);
