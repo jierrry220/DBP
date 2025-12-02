@@ -1293,72 +1293,13 @@
 
         // ========== Check and restore wallet connection ==========
         async function checkWalletConnection() {
-            const wasConnected = localStorage.getItem('walletConnected');
-            if (!wasConnected) return;
-
-            // Berachain Configuration
-            const TARGET_CHAIN_ID = '0x138de'; // 80094
-            const BERACHAIN_CONFIG = {
-                chainId: TARGET_CHAIN_ID,
-                chainName: 'Berachain',
-                nativeCurrency: {
-                    name: 'BERA',
-                    symbol: 'BERA',
-                    decimals: 18
-                },
-                rpcUrls: ['https://rpc.berachain.com'],
-                blockExplorerUrls: ['https://beratrail.io']
-            };
-
-            try {
-                const walletProvider = window.okxwallet || window.ethereum;
-                if (!walletProvider) return;
-
-                // Check network first
-                const chainId = await walletProvider.request({ method: 'eth_chainId' });
-                if (chainId !== TARGET_CHAIN_ID) {
-                    try {
-                        await walletProvider.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: TARGET_CHAIN_ID }]
-                        });
-                    } catch (switchError) {
-                        // Try to add network if it doesn't exist
-                        if (switchError.code === 4902) {
-                            try {
-                                await walletProvider.request({
-                                    method: 'wallet_addEthereumChain',
-                                    params: [BERACHAIN_CONFIG],
-                                });
-                            } catch (addError) {
-                                console.error('Failed to add Berachain network automatically:', addError);
-                                // Don't return here, still try to get accounts if possible, 
-                                // or let user manually switch.
-                            }
-                        } else {
-                            console.error('Failed to switch network:', switchError);
-                        }
-                    }
-                }
-
-                // Check if wallet is still connected
-                const accounts = await walletProvider.request({ method: 'eth_accounts' });
-                if (accounts && accounts.length > 0) {
-                    const userAddress = accounts[0];
-                    const shortAddr = userAddress.substring(0, 6) + '...' + userAddress.substring(38);
-                    const connectBtns = document.querySelectorAll('.connect-btn');
-                    connectBtns.forEach(btn => {
-                        btn.textContent = shortAddr;
-                        btn.disabled = true;
-                    });
-                    localStorage.setItem('walletAddress', userAddress);
-                } else {
-                    // Wallet disconnected, clear state
-                    localStorage.removeItem('walletConnected');
-                    localStorage.removeItem('walletAddress');
-                }
-            } catch (error) {
-                console.error('Error checking wallet connection:', error);
+            const walletProvider = window.okxwallet || window.ethereum;
+            const wasConnected = localStorage.getItem('walletConnected') === 'true';
+            
+            // Check if wallet is already unlocked/connected OR was connected previously
+            if ((walletProvider && walletProvider.selectedAddress) || wasConnected) {
+                console.log('Auto-connecting wallet and checking network...');
+                await connectWallet();
             }
         }
 

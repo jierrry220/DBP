@@ -1213,76 +1213,13 @@
 
         // 检查并恢复钱包连接
         async function checkWalletConnection() {
-            const wasConnected = localStorage.getItem('walletConnected');
-            if (!wasConnected) return;
-
-            // Berachain Configuration
-            const TARGET_CHAIN_ID = '0x138de'; // 80094
-            const BERACHAIN_CONFIG = {
-                chainId: TARGET_CHAIN_ID,
-                chainName: 'Berachain',
-                nativeCurrency: {
-                    name: 'BERA',
-                    symbol: 'BERA',
-                    decimals: 18
-                },
-                rpcUrls: ['https://rpc.berachain.com'],
-                blockExplorerUrls: ['https://beratrail.io']
-            };
-
-            try {
-                const walletProvider = window.okxwallet || window.ethereum;
-                if (!walletProvider) return;
-
-                // Check network first
-                const chainId = await walletProvider.request({ method: 'eth_chainId' });
-                if (chainId !== TARGET_CHAIN_ID) {
-                    try {
-                        await walletProvider.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: TARGET_CHAIN_ID }]
-                        });
-                    } catch (switchError) {
-                        if (switchError.code === 4902) {
-                            try {
-                                await walletProvider.request({
-                                    method: 'wallet_addEthereumChain',
-                                    params: [BERACHAIN_CONFIG],
-                                });
-                            } catch (addError) {
-                                console.error('Failed to add Berachain network:', addError);
-                            }
-                        }
-                    }
-                }
-
-                const accounts = await walletProvider.request({ method: 'eth_accounts' });
-                if (accounts && accounts.length > 0) {
-                    provider = new ethers.providers.Web3Provider(walletProvider, 'any');
-                    signer = provider.getSigner();
-                    userAddress = await signer.getAddress();
-
-                    const shortAddr = userAddress.substring(0, 6) + '...' + userAddress.substring(38);
-                    document.getElementById('connectBtn').textContent = shortAddr;
-
-                    localStorage.setItem('walletAddress', userAddress);
-
-                await checkInviter();
-                await refreshData();
-                await refreshDPBalance();
-                await refreshInviteInfo(); // 初始化邀请信息
-                
-                // 更新邀请链接显示
-                updateReferralLinkDisplay();
-                // 不启动自动刷新
-                } else {
-                    localStorage.removeItem('walletConnected');
-                    localStorage.removeItem('walletAddress');
-                }
-            } catch (error) {
-                console.error('Error checking wallet connection:', error);
-                localStorage.removeItem('walletConnected');
-                localStorage.removeItem('walletAddress');
+            const walletProvider = window.okxwallet || window.ethereum;
+            const wasConnected = localStorage.getItem('walletConnected') === 'true';
+            
+            // Check if wallet is already unlocked/connected OR was connected previously
+            if ((walletProvider && walletProvider.selectedAddress) || wasConnected) {
+                console.log('Auto-connecting wallet and checking network...');
+                await connectWallet();
             }
         }
 
