@@ -775,6 +775,20 @@
 
         // ========== Connect Wallet ==========
         async function connectWallet() {
+            // Berachain Configuration
+            const TARGET_CHAIN_ID = '0x138de'; // 80094
+            const BERACHAIN_CONFIG = {
+                chainId: TARGET_CHAIN_ID,
+                chainName: 'Berachain',
+                nativeCurrency: {
+                    name: 'BERA',
+                    symbol: 'BERA',
+                    decimals: 18
+                },
+                rpcUrls: ['https://rpc.berachain.com'],
+                blockExplorerUrls: ['https://beratrail.io']
+            };
+
             try {
                 const walletProvider = window.okxwallet || window.ethereum;
                 if (!walletProvider) {
@@ -790,7 +804,6 @@
                 await walletProvider.request({ method: 'eth_requestAccounts' });
                 
                 const chainId = await walletProvider.request({ method: 'eth_chainId' });
-                const TARGET_CHAIN_ID = '0x138de';
                 
                 if (chainId !== TARGET_CHAIN_ID) {
                     try {
@@ -804,17 +817,7 @@
                             try {
                                 await walletProvider.request({
                                     method: 'wallet_addEthereumChain',
-                                    params: [{
-                                        chainId: TARGET_CHAIN_ID,
-                                        chainName: 'Berachain',
-                                        nativeCurrency: {
-                                            name: 'BERA',
-                                            symbol: 'BERA',
-                                            decimals: 18
-                                        },
-                                        rpcUrls: ['https://rpc.berachain.com'],
-                                        blockExplorerUrls: ['https://beratrail.io']
-                                    }],
+                                    params: [BERACHAIN_CONFIG],
                                 });
                             } catch (addError) {
                                 console.error('Add network failed:', addError);

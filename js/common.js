@@ -231,11 +231,26 @@ class WalletManager {
 
             // Check and switch to Berachain network
             const chainId = await this.provider.request({ method: 'eth_chainId' });
-            if (chainId !== CONFIG.BERACHAIN_CHAIN_ID) {
+            
+            // Hardcode Berachain Config to ensure reliability
+            const TARGET_CHAIN_ID = '0x138de'; // 80094
+            const BERACHAIN_CONFIG = {
+                chainId: TARGET_CHAIN_ID,
+                chainName: 'Berachain',
+                nativeCurrency: {
+                    name: 'BERA',
+                    symbol: 'BERA',
+                    decimals: 18
+                },
+                rpcUrls: ['https://rpc.berachain.com'],
+                blockExplorerUrls: ['https://beratrail.io']
+            };
+
+            if (chainId !== TARGET_CHAIN_ID) {
                 try {
                     await this.provider.request({
                         method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: CONFIG.BERACHAIN_CHAIN_ID }]
+                        params: [{ chainId: TARGET_CHAIN_ID }]
                     });
                 } catch (switchError) {
                     // This error code indicates that the chain has not been added to MetaMask/OKX Wallet.
@@ -243,17 +258,7 @@ class WalletManager {
                         try {
                             await this.provider.request({
                                 method: 'wallet_addEthereumChain',
-                                params: [{
-                                    chainId: CONFIG.BERACHAIN_CHAIN_ID,
-                                    chainName: 'Berachain',
-                                    nativeCurrency: {
-                                        name: 'BERA',
-                                        symbol: 'BERA',
-                                        decimals: 18
-                                    },
-                                    rpcUrls: ['https://rpc.berachain.com'],
-                                    blockExplorerUrls: ['https://beratrail.io']
-                                }],
+                                params: [BERACHAIN_CONFIG],
                             });
                         } catch (addError) {
                             loading.hide();
