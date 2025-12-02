@@ -3979,26 +3979,26 @@
         
         // 删除已到达房间的旧Bot（移动端36个角色上限）
         function removeOldestBotInRoom() {
-            const allCharacters = document.querySelectorAll('.character:not(.current-player)');
-            
-            // 找到已到达房间的Bot（不在移动中，不删除真实玩家）
-            for (let char of allCharacters) {
+            // 找到所有bot角色（ID以bot-开头）
+            const allBots = Array.from(document.querySelectorAll('.character')).filter(char => {
                 const charId = char.id.replace('char-', '');
-                
-                // 检查是否是真实玩家
-                const isRealPlayer = partyCrisisGame.players.some(p => 
-                    p.address.toLowerCase() === charId
-                );
-                
-                // 只删除Bot，不删除真实玩家
-                if (!isRealPlayer && charId.startsWith('bot-')) {
-                    // 静默删除（无动画）
-                    char.remove();
-                    renderedBots.delete(charId);
-                    console.log(`[Bot管理] 静默删除旧Bot ${charId} 以维持36个上限`);
-                    return; // 只删除一个
-                }
+                return charId.startsWith('bot-');
+            });
+            
+            console.log(`[Bot管理] 当前场上有 ${allBots.length} 个Bot`);
+            
+            if (allBots.length > 0) {
+                // 删除第一个bot（最老的）
+                const oldestBot = allBots[0];
+                const botId = oldestBot.id.replace('char-', '');
+                oldestBot.remove();
+                renderedBots.delete(botId);
+                console.log(`[Bot管理] 静默删除旧Bot ${botId} 以维持36个上限`);
+                return true;
             }
+            
+            console.warn(`[Bot管理] 没有找到可删除的Bot`);
+            return false;
         }
         
         
