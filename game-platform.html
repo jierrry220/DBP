@@ -3310,11 +3310,21 @@
             init: function() {
                 this.usePerformanceMode = this.isIOS() || this.isMobile();
                 
+                // 输出详细设备信息
+                console.log('%c[设备检测]', 'background: #2196F3; color: white; padding: 4px 8px; border-radius: 4px;', {
+                    userAgent: navigator.userAgent,
+                    isIOS: this.isIOS(),
+                    isMobile: this.isMobile(),
+                    usePerformanceMode: this.usePerformanceMode
+                });
+                
                 if (this.usePerformanceMode) {
                     console.log('%c[性能优化] 检测到移动设备，启用性能优化模式', 'background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px;');
                     
                     // 应用性能优化
                     this.applyOptimizations();
+                } else {
+                    console.log('%c[性能优化] 桌面设备，使用标准模式', 'background: #9E9E9E; color: white; padding: 4px 8px; border-radius: 4px;');
                 }
                 
                 return this.usePerformanceMode;
@@ -3365,9 +3375,12 @@
                 // 只保留错误和关键信息
                 console.log = function(...args) {
                     const message = args[0]?.toString() || '';
-                    // 只显示关键信息：性能优化、错误、游戏初始化
+                    // 只显示关键信息：性能优化、错误、游戏初始化、Bot渲染、设备检测
                     if (message.includes('[性能优化]') || 
                         message.includes('[游戏初始化]') ||
+                        message.includes('[Bot渲染]') ||
+                        message.includes('[Bot快速渲染]') ||
+                        message.includes('[设备检测]') ||
                         message.includes('错误') ||
                         message.includes('Error') ||
                         message.includes('error')) {
