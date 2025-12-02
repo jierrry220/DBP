@@ -4685,11 +4685,10 @@
         
         // 开始玩家死亡动画（与杀手攻击同步）
         function startPlayerDeathAnimation(roomId) {
-            console.log(`%c[死亡动画] === 开始函数 === 房间ID: ${roomId}`, 'background: red; color: white; font-size: 16px; padding: 5px;');
+            console.log(`[死亡效果] 房间${roomId}被刺杀`);
             
             // 添加房间被杀效果
             const roomElement = document.getElementById(`room-${roomId}`);
-            console.log(`[死亡动画] 房间元素:`, roomElement);
             if (roomElement) {
                 roomElement.classList.add('killed');
             }
@@ -4699,45 +4698,26 @@
             
             // 获取在被刺杀房间的玩家
             const playersInRoom = partyCrisisGame.players.filter(p => p.roomId === roomId);
-            console.log(`[死亡动画] 房间内玩家数: ${playersInRoom.length}`);
             
-            // 将这些玩家切换为死亡GIF
+            // 直接变金币，然后消失
             playersInRoom.forEach(player => {
                 const charElement = document.getElementById(`char-${player.id}`);
-                console.log(`[死亡动画] 处理玩家: ${player.name}, 元素:`, charElement);
                 
                 if (charElement) {
-                    const sprite = charElement.querySelector('.character-sprite');
-                    console.log(`[死亡动画] 找到sprite:`, sprite);
+                    // 立即变成金币
+                    charElement.innerHTML = '💰<div class="character-name">' + player.name + '</div>';
+                    charElement.classList.add('coin');
+                    console.log(`[死亡效果] ${player.name} 变成金币`);
                     
-                    if (sprite) {
-                        // 移除idle类和coin类，确保GIF能播放
-                        charElement.classList.remove('coin', 'idle');
-                        
-                        const deathGifUrl = './images/player-die.gif?v=' + Date.now();
-                        sprite.src = deathGifUrl;
-                        sprite.style.display = 'block';
-                        console.log(`[死亡动画] ${player.name} 开始播放死亡动画, URL: ${deathGifUrl}`);
-                        
-                        // 检查GIF是否加载成功
-                        sprite.onerror = () => {
-                            console.error(`[死亡动画] GIF加载失败: ${deathGifUrl}`);
-                        };
-                        sprite.onload = () => {
-                            console.log(`[死亡动画] GIF加载成功: ${deathGifUrl}`);
-                        };
-                    } else {
-                        console.warn(`[死亡动画] 找不到sprite元素，角色可能已经是金币`);
-                    }
-                    
-                    // 2秒后变成金币（给足够的时间播放完整的死亡GIF）
+                    // 1秒后消失
                     setTimeout(() => {
-                        charElement.innerHTML = '💰<div class="character-name">' + player.name + '</div>';
-                        charElement.classList.add('coin');
-                        console.log(`[死亡动画] ${player.name} 变成金币`);
-                    }, 2000);
-                } else {
-                    console.warn(`[死亡动画] 找不到角色元素: char-${player.id}`);
+                        charElement.style.transition = 'opacity 0.5s ease';
+                        charElement.style.opacity = '0';
+                        setTimeout(() => {
+                            charElement.remove();
+                            console.log(`[死亡效果] ${player.name} 已消失`);
+                        }, 500);
+                    }, 1000);
                 }
             });
             
@@ -4753,22 +4733,24 @@
                     
                     // 如果距离小于10%，认为在这个房间
                     if (distX < 10 && distY < 10) {
-                        const sprite = char.querySelector('.character-sprite');
-                        if (sprite) {
-                            char.classList.remove('coin', 'idle');
-                            const deathGifUrl = './images/player-die.gif?v=' + Date.now();
-                            sprite.src = deathGifUrl;
-                            sprite.style.display = 'block';
-                            console.log(`[死亡动画] Bot ${charId} 开始播放死亡动画, URL: ${deathGifUrl}`);
-                        }
-                        // 2秒后变成金币
+                        const nameTag = char.querySelector('.character-name');
+                        const botName = nameTag ? nameTag.textContent : '';
+                        
+                        // 立即变成金币
+                        char.innerHTML = '💰<div class="character-name">' + botName + '</div>';
+                        char.classList.add('coin');
+                        console.log(`[死亡效果] Bot ${charId} 变成金币`);
+                        
+                        // 1秒后消失
                         setTimeout(() => {
-                            const nameTag = char.querySelector('.character-name');
-                            const botName = nameTag ? nameTag.textContent : '';
-                            char.innerHTML = '💰<div class="character-name">' + botName + '</div>';
-                            char.classList.add('coin');
-                            console.log(`[死亡动画] Bot ${charId} 变成金币`);
-                        }, 2000);
+                            char.style.transition = 'opacity 0.5s ease';
+                            char.style.opacity = '0';
+                            setTimeout(() => {
+                                char.remove();
+                                renderedBots.delete(charId.replace('char-', ''));
+                                console.log(`[死亡效果] Bot ${charId} 已消失`);
+                            }, 500);
+                        }, 1000);
                     }
                 }
             });
