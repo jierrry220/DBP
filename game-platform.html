@@ -3248,6 +3248,22 @@
                 // 用户反馈：为了保证游戏热闹氛围，移动端也不减少显示数量
                 // 依靠渐进式渲染和 CSS 优化来维持性能
                 return 50;
+            },
+            
+            // 获取角色图片资源（根据性能模式决定是 GIF 还是 静态 PNG）
+            getCharacterImage: function(direction, isCurrentPlayer) {
+                // 如果是当前玩家，始终使用 GIF (保留动画)
+                if (isCurrentPlayer) {
+                    return `./images/player-walk-${direction}.gif`;
+                }
+                
+                // 如果是性能模式（移动端），且不是当前玩家，使用静态 PNG
+                if (this.usePerformanceMode) {
+                    return `./images/player-static-${direction}.png`;
+                }
+                
+                // 默认情况（桌面端），使用 GIF
+                return `./images/player-walk-${direction}.gif`;
             }
         };
         
@@ -4205,7 +4221,9 @@
             // 创建玩家GIF精灵（默认向右走）
             const sprite = document.createElement('img');
             sprite.className = 'character-sprite';
-            sprite.src = './images/player-walk-right.gif?v=1';
+            // 使用性能配置获取图片资源
+            const imgUrl = PerformanceConfig.getCharacterImage('right', isCurrentPlayer);
+            sprite.src = imgUrl + '?v=1';
             char.appendChild(sprite);
             
             // 添加名字标签
@@ -4309,11 +4327,20 @@
                 return;
             }
             
-            // 根据横向移动方向切换GIF
+            // 判断是否为当前玩家
+            const isCurrentPlayer = char.classList.contains('current-player');
+            
+            // 根据横向移动方向切换GIF/静态图
             if (deltaX > 0) {
-                sprite.src = './images/player-walk-right.gif?v=1';
+                const imgUrl = PerformanceConfig.getCharacterImage('right', isCurrentPlayer);
+                if (!sprite.src.includes(imgUrl)) { // 避免重复设置相同src导致闪烁
+                    sprite.src = imgUrl + '?v=1';
+                }
             } else if (deltaX < 0) {
-                sprite.src = './images/player-walk-left.gif?v=1';
+                const imgUrl = PerformanceConfig.getCharacterImage('left', isCurrentPlayer);
+                if (!sprite.src.includes(imgUrl)) {
+                    sprite.src = imgUrl + '?v=1';
+                }
             }
         }
         
