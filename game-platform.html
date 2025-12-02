@@ -3439,6 +3439,7 @@
         let renderedBots = new Set(); // 追踪已渲染的Bot ID
         let botRenderQueue = []; // Bot渲染队列
         let botRenderTimer = null; // Bot渐进式渲染定时器
+        let isFastRenderingBots = false; // 防止快速渲染重复执行
         
         let partyCrisisGame = {
             phase: 'waiting', // waiting, betting, killer_moving, settling
@@ -3890,7 +3891,7 @@
                     });
                     
                     // 启动快速批量渲染（iPhone优化）
-                    if (botRenderQueue.length > 0) {
+                    if (botRenderQueue.length > 0 && !isFastRenderingBots) {
                         startFastBatchBotRendering();
                     }
                 }
@@ -3968,8 +3969,9 @@
         // 快速批量渲染Bot（杀手阶段，iPhone优化）
         function startFastBatchBotRendering() {
             const totalBots = botRenderQueue.length;
-            if (totalBots === 0) return;
+            if (totalBots === 0 || isFastRenderingBots) return;
             
+            isFastRenderingBots = true; // 设置锁防止重复执行
             console.log(`[Bot快速渲染] 开始批量渲染 ${totalBots} 个Bot`);
             
             // iPhone优化：分批渲染，每批间隔短暂延迟
@@ -3982,6 +3984,7 @@
                 if (currentIndex >= totalBots) {
                     console.log('[Bot快速渲染] 完成');
                     botRenderQueue = []; // 清空队列
+                    isFastRenderingBots = false; // 释放锁
                     return;
                 }
                 
@@ -4006,6 +4009,7 @@
                     setTimeout(renderNextBatch, batchDelay);
                 } else {
                     botRenderQueue = [];
+                    isFastRenderingBots = false; // 释放锁
                 }
             }
             
