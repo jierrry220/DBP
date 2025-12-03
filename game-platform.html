@@ -4005,8 +4005,8 @@
         
         // 触发幸存玩家返回出生点动画
         function triggerSurvivorsReturn() {
-            // iPhone性能优化：跳过返回动画
-            if (PerformanceConfig.usePerformanceMode) {
+            // 只有iPhone设备跳过返回动画（安卓保留动画）
+            if (PerformanceConfig.isIOS()) {
                 console.log('[结算动画] iPhone设备跳过返回动画，直接清空角色');
                 
                 // 直接隐藏所有幸存者，不播放动画
