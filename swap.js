@@ -472,24 +472,24 @@ class SwapManager {
         }
     }
     
-    async executeSwap() {
-        if (this.isSwapping) return;
-        
-        if (!this.signer) {
-            this.showMessage('Please connect wallet first', 'error');
-            return;
-        }
+async executeSwap() {
+if (this.isSwapping) return;
 
-        const swapBtn = document.getElementById('swapBtn');
-        const btnText = swapBtn.querySelector('.btn-text');
-        
-        const fromAmount = document.getElementById('fromAmount').value;
-        if (!fromAmount || fromAmount === '0') {
-            this.showMessage('Please enter swap amount', 'error');
-            return;
-        }
+if (!this.signer) {
+this.showMessage('Please connect wallet first', 'error');
+return;
+}
 
-        this.isSwapping = true;
+const swapBtn = document.getElementById('swapBtn');
+const btnText = swapBtn.querySelector('.btn-text');
+
+const fromAmount = document.getElementById('fromAmount').value;
+if (!fromAmount || fromAmount === '0') {
+this.showMessage('Please enter swap amount', 'error');
+return;
+}
+
+this.isSwapping = true;
         const originalText = btnText.textContent;
         swapBtn.disabled = true;
 

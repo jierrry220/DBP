@@ -391,6 +391,12 @@ class WalletManager {
     onChainChanged(callback) {
         if (this.provider) {
             this.provider.on('chainChanged', (chainId) => {
+                // Skip reload if LiFi bridge is switching chains
+                if (window.lifi_switching) {
+                    console.log('[Wallet] Chain switched for LiFi bridge, skipping reload');
+                    if (callback) callback(chainId);
+                    return;
+                }
                 // Reload page
                 window.location.reload();
                 if (callback) callback(chainId);

@@ -376,6 +376,46 @@
         }
         
         /* Swap 卡片 */
+        /* Tab Navigation */
+        .swap-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 5px;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 12px 20px;
+            background: transparent;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn:hover {
+            color: var(--neon-cyan);
+        }
+        
+        .tab-btn.active {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+
         .swap-card {
             background: linear-gradient(135deg, rgba(0, 212, 255, 0.08) 0%, rgba(255, 0, 255, 0.08) 100%);
             border: 2px solid rgba(0, 212, 255, 0.3);
@@ -395,7 +435,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .swap-title {
@@ -796,6 +836,14 @@
             color: var(--text-secondary);
             opacity: 0.6;
         }
+        
+        /* LI.FI Widget Container */
+        #lifi-widget-container {
+            width: 100%;
+            min-height: 600px;
+            border-radius: 16px;
+            overflow: hidden;
+        }
 
         .add-custom-token-btn {
             width: 100%;
@@ -1036,15 +1084,27 @@
             <!-- Swap 卡片 -->
             <div class="swap-card">
             <div class="swap-header">
-                <h2 class="swap-title">Swap Tokens</h2>
-                <button class="settings-btn" id="swapSettings" title="设置">
+                <h2 class="swap-title">Swap & Bridge</h2>
+            </div>
+            
+            <!-- Tab Navigation -->
+            <div class="swap-tabs">
+                <button class="tab-btn active" onclick="switchTab('kodiak')" data-i18n="swap.tab.swap">Swap</button>
+                <button class="tab-btn" onclick="switchTab('lifi')" data-i18n="swap.tab.bridge">Cross-Chain Bridge</button>
+            </div>
+
+            <!-- Kodiak Swap Tab Content -->
+            <div id="kodiak-tab" class="tab-content active">
+            <div style="margin-bottom: 10px;">
+                <button class="settings-btn" id="swapSettings" title="设置" style="float: right;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>
                     </svg>
                 </button>
+                <div style="clear: both;"></div>
             </div>
-
+            
             <!-- From Token -->
             <div class="token-input-container">
                 <div class="token-input-header">
@@ -1125,6 +1185,18 @@
                 Powered by <strong>kodiak kX</strong>
             </div>
             </div>
+            <!-- End of Kodiak Tab -->
+            
+            <!-- Cross-Chain Bridge Tab Content -->
+            <div id="lifi-tab" class="tab-content">
+                <div id="lifi-widget-container"></div>
+                <div style="text-align: center; margin-top: 12px; color: var(--text-secondary); font-size: 12px; opacity: 0.8;">
+                    Powered by <strong>LI.FI SDK</strong>
+                </div>
+            </div>
+            <!-- End of Bridge Tab -->
+            
+            </div>
         </div>
     </div>
 
@@ -1132,6 +1204,9 @@
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Web3 for bridge -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
     
     <!-- 国际化配置 -->
     <script src="js/i18n.js"></script>
@@ -1141,6 +1216,7 @@
     
     <script src="kodiak-api.js"></script>
     <script src="swap.js"></script>
+    <script src="lifi-bridge-sdk.js"></script>
     
     <script>
         // 粒子背景
@@ -1156,6 +1232,70 @@
             }
         });
 
+        // Auto switch to Berachain
+        async function autoSwitchToBerachain() {
+            const walletProvider = window.okxwallet || window.ethereum;
+            if (!walletProvider || !walletProvider.selectedAddress) return;
+            
+            try {
+                const currentChainId = await walletProvider.request({ method: 'eth_chainId' });
+                const targetChainId = '0x138de'; // 80094 Berachain
+                
+                if (currentChainId !== targetChainId) {
+                    console.log('[Swap] Auto-switching to Berachain...');
+                    window.lifi_switching = true;
+                    try {
+                        await walletProvider.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: targetChainId }]
+                        });
+                        await new Promise(r => setTimeout(r, 2000));
+                        console.log('[Swap] Switched to Berachain successfully');
+                    } catch (error) {
+                        console.error('[Swap] Failed to switch chain:', error);
+                        if (error.code === 4902) {
+                            toast.error('Please add Berachain network to your wallet');
+                        }
+                    } finally {
+                        window.lifi_switching = false;
+                    }
+                }
+            } catch (error) {
+                console.error('[Swap] Error checking chain:', error);
+            }
+        }
+        
+        // Tab switching function
+        async function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            if (tabName === 'kodiak') {
+                document.getElementById('kodiak-tab').classList.add('active');
+                // Auto switch to Berachain when entering Swap tab
+                await autoSwitchToBerachain();
+            } else if (tabName === 'lifi') {
+                document.getElementById('lifi-tab').classList.add('active');
+                // Initialize LI.FI widget if not already done
+                if (window.lifiWidget && !window.lifiWidget.initialized) {
+                    window.lifiWidget.init();
+                }
+            }
+        }
+        
+        // Auto switch to Berachain on page load
+        window.addEventListener('load', () => {
+            setTimeout(autoSwitchToBerachain, 1000);
+        });
+        
         // 移动端菜单切换
         function toggleMobileMenu() {
             const hamburger = document.querySelector('.hamburger');
