@@ -3842,8 +3842,8 @@
             // 更新房间统计（只统计已渲染的角色）
             updateRoomStatsDisplay(game);
             
-            // 渲染玩家角色
-            if (game.players && game.players.length > 0) {
+            // 渲染玩家角色（仅在投注阶段创建新角色，避免被杀后重新出现）
+            if (game.phase === 'betting' && game.players && game.players.length > 0) {
                 game.players.forEach(player => {
                     // 统一使用小写地址作为ID
                     const normalizedAddr = player.address.toLowerCase();
