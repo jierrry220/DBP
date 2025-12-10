@@ -152,6 +152,8 @@ const translations = {
         // Swap 页面
         'swap.title': '💱 Swap',
         'swap.swapTokens': 'Swap Tokens',
+        'swap.tab.swap': 'Swap',
+        'swap.tab.bridge': 'Cross-Chain Bridge',
         'swap.settings': 'Settings',
         'swap.from': 'From',
         'swap.to': 'To',
@@ -384,6 +386,13 @@ const translations = {
         'partyCrisis.invalidBetAmount': 'Invalid bet amount',
         'partyCrisis.betSuccess': 'Successfully bet {amount} DP to {room}',
         'partyCrisis.betFailed': 'Bet failed',
+        
+        // Security Announcement
+        'announcement.title': '🚨 Important Security Announcement',
+        'announcement.message': 'On December 10, 2025 at 08:18 UTC, the gaming platform suffered a major security breach resulting in over 300,000 DP+PASS being transferred by attackers. To protect all participants\' assets, the team has temporarily moved the Kodiak liquidity pool and will upgrade both the PASS and DP contracts as soon as possible. We appreciate your support and understanding! Click Help Center below to contact the team for more info.',
+        'announcement.helpCenter': '📞 Help Center',
+        'announcement.understand': 'I Understand',
+        'announcement.dontShowAgain': 'Don\'t show again',
     },
     
     'zh-TW': {
@@ -534,6 +543,8 @@ const translations = {
         // Swap 頁面
         'swap.title': '💱 Swap',
         'swap.swapTokens': 'Swap Tokens',
+        'swap.tab.swap': '交易',
+        'swap.tab.bridge': '跨鏈橋',
         'swap.settings': '設置',
         'swap.from': 'From',
         'swap.to': 'To',
@@ -765,6 +776,13 @@ const translations = {
         'partyCrisis.invalidBetAmount': '投注金额无效',
         'partyCrisis.betSuccess': '成功下注 {amount} DP 到 {room}',
         'partyCrisis.betFailed': '下注失败',
+        
+        // 安全公告
+        'announcement.title': '🚨 重要安全公告',
+        'announcement.message': '12月10日 UTC時間8:18分，遊戲平台發生重大安全漏洞事件，導致有超過300,000 DP+PASS被攻擊者轉移。為了保障所有參與者的財產安全，團隊決定暫時轉移了Kodiak的交易池子，並將盡快對PASS合約和DP合約進行更換升級。望所有參與者支持和理解！點擊下方幫助中心聯繫團隊了解更多',
+        'announcement.helpCenter': '📞 幫助中心',
+        'announcement.understand': '我知道了',
+        'announcement.dontShowAgain': '不再顯示',
         
         // 游戏加载
         'game.loading': '游戏加载中...',

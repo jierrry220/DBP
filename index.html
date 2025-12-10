@@ -395,6 +395,171 @@
             cursor: pointer;
         }
 
+        /* ========== Security Announcement Modal ========== */
+        .announcement-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: var(--z-modal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .announcement-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .announcement-modal {
+            background: linear-gradient(135deg, rgba(26, 10, 46, 0.98) 0%, rgba(10, 14, 26, 0.98) 100%);
+            border: 2px solid rgba(233, 0, 233, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(233, 0, 233, 0.3), 0 0 100px rgba(0, 196, 239, 0.2);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .announcement-overlay.show .announcement-modal {
+            transform: scale(1) translateY(0);
+        }
+        
+        .announcement-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(233, 0, 233, 0.3);
+        }
+        
+        .announcement-icon {
+            font-size: 32px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .announcement-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff3366 0%, #ff6b9d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+        
+        .announcement-content {
+            color: var(--text-secondary);
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        
+        .announcement-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .announcement-btn {
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .announcement-btn.primary {
+            background: linear-gradient(135deg, #00c4ef 0%, #e900e9 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(0, 196, 239, 0.4);
+        }
+        
+        .announcement-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(0, 196, 239, 0.6);
+        }
+        
+        .announcement-btn.secondary {
+            background: rgba(0, 196, 239, 0.1);
+            color: var(--neon-cyan);
+            border: 2px solid rgba(0, 196, 239, 0.3);
+        }
+        
+        .announcement-btn.secondary:hover {
+            background: rgba(0, 196, 239, 0.2);
+            border-color: var(--neon-cyan);
+        }
+        
+        .announcement-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0, 196, 239, 0.2);
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .announcement-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--neon-cyan);
+        }
+        
+        .announcement-checkbox label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        /* Mobile optimization for announcement */
+        @media (max-width: 768px) {
+            .announcement-modal {
+                padding: 24px;
+                max-width: 90%;
+            }
+            
+            .announcement-title {
+                font-size: 20px;
+            }
+            
+            .announcement-content {
+                font-size: 14px;
+                line-height: 1.7;
+            }
+            
+            .announcement-btn {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+        }
+        
         /* ========== Skip Link (Accessibility) ========== */
         .skip-link {
             position: absolute;
@@ -934,6 +1099,31 @@
     <!-- Skip Link for Accessibility -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
     
+    <!-- Security Announcement Modal -->
+    <div class="announcement-overlay" id="announcementModal">
+        <div class="announcement-modal">
+            <div class="announcement-header">
+                <span class="announcement-icon">🚨</span>
+                <h2 class="announcement-title" data-i18n="announcement.title">Important Security Announcement</h2>
+            </div>
+            <div class="announcement-content" data-i18n="announcement.message">
+                On December 10, 2025 at 08:18 UTC, the gaming platform suffered a major security breach resulting in over 300,000 DP+PASS being transferred by attackers. To protect all participants' assets, the team has temporarily moved the Kodiak liquidity pool and will upgrade both the PASS and DP contracts as soon as possible. We appreciate your support and understanding! Click Help Center below to contact the team for more info.
+            </div>
+            <div class="announcement-buttons">
+                <a href="https://t.me/debearparty" target="_blank" class="announcement-btn primary" data-i18n="announcement.helpCenter">
+                    📞 Help Center
+                </a>
+                <button class="announcement-btn secondary" onclick="closeAnnouncement()" data-i18n="announcement.understand">
+                    I Understand
+                </button>
+            </div>
+            <div class="announcement-checkbox" onclick="toggleDontShowAgain()">
+                <input type="checkbox" id="dontShowAgain">
+                <label for="dontShowAgain" data-i18n="announcement.dontShowAgain">Don't show again</label>
+            </div>
+        </div>
+    </div>
+    
     <!-- Particle Background -->
     <div id="particles-js"></div>
 
@@ -1107,7 +1297,6 @@
                     <li><a href="whitepaper-en.html" data-i18n="footer.developer.whitepaper">Whitepaper</a></li>
                     <li><a href="#" data-i18n="footer.developer.contract">Smart Contracts</a></li>
                     <li><a href="#" data-i18n="footer.developer.audit">Audit Report</a></li>
-                    <li id="owner-link" style="display: none;"><a href="owner/admin.html" data-i18n="footer.developer.test">Debear Party Complete Test Page</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -1204,11 +1393,52 @@
         // (Defined in common.js: window.connectWallet = () => wallet.connect())
         // Note: common.js handles auto-reconnection via DOMContentLoaded
 
+        // ========== Security Announcement Modal ==========
+        function showAnnouncement() {
+            const announcementModal = document.getElementById('announcementModal');
+            const dontShow = localStorage.getItem('dontShowAnnouncement');
+            
+            // 如果用户选择了不再显示，则不显示公告
+            if (dontShow === 'true') {
+                return;
+            }
+            
+            // 显示公告（延迟0.5秒以获得更好的用户体验）
+            setTimeout(() => {
+                announcementModal.classList.add('show');
+                // 防止背景滚动
+                document.body.style.overflow = 'hidden';
+            }, 500);
+        }
+        
+        function closeAnnouncement() {
+            const announcementModal = document.getElementById('announcementModal');
+            const dontShowAgain = document.getElementById('dontShowAgain').checked;
+            
+            // 如果用户勾选了"不再显示"，保存到localStorage
+            if (dontShowAgain) {
+                localStorage.setItem('dontShowAnnouncement', 'true');
+            }
+            
+            // 隐藏公告
+            announcementModal.classList.remove('show');
+            // 恢复背景滚动
+            document.body.style.overflow = '';
+        }
+        
+        function toggleDontShowAgain() {
+            const checkbox = document.getElementById('dontShowAgain');
+            checkbox.checked = !checkbox.checked;
+        }
+        
         // ========== Page load initialization ==========
         window.addEventListener('load', () => {
             // common.js already handles wallet connection via DOMContentLoaded
             // Just update UI elements here
             updateWhitepaperLink();
+            
+            // 显示安全公告
+            showAnnouncement();
         });
 
         // ========== Listen for language change events ==========
