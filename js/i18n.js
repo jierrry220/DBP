@@ -387,10 +387,10 @@ const translations = {
         'partyCrisis.betSuccess': 'Successfully bet {amount} DP to {room}',
         'partyCrisis.betFailed': 'Bet failed',
         
-        // Security Announcement
-        'announcement.title': '🚨 Important Security Announcement',
-        'announcement.message': 'On December 10, 2025 at 08:18 UTC, the gaming platform suffered a major security breach resulting in over 300,000 DP+PASS being transferred by attackers. To protect all participants\' assets, the team has temporarily moved the Kodiak liquidity pool and will upgrade both the PASS and DP contracts as soon as possible. We appreciate your support and understanding! Click Help Center below to contact the team for more info.',
-        'announcement.helpCenter': '📞 Help Center',
+        // Ecosystem Migration Announcement
+        'announcement.title': 'DeBear.Party Important Announcement - Ecosystem Migration Plan',
+        'announcement.message': '<p style="margin-bottom: 12px;">Dear DeBear.Party Community Members:</p><p style="margin-bottom: 12px;">On December 10, 2025, DeBear.Party experienced a serious security vulnerability incident. The team immediately took emergency measures to temporarily remove liquidity to protect user asset security.</p><p style="margin-bottom: 12px;">After three days of thorough inspection and evaluation with third-party professional security audit teams, and considering the current state of the Berachain ecosystem, we have made the following decisions:</p><p style="margin-bottom: 12px;"><strong>1. Ecosystem Migration</strong><br>DeBear.Party will officially migrate from Berachain to BNB Smart Chain (BSC). New chain launch expected: <strong>December 28, 2025</strong>.</p><p style="margin-bottom: 12px;"><strong>2. User Asset Protection</strong><br>• Multiple snapshots taken of all DP Token and Pass NFT holders (<strong>December 11, 15, and 27</strong>)<br>• After BSC launch, <strong>1:1 full mapping</strong> of all user assets<br>• Your rights will be fully protected</p><p style="margin-bottom: 12px;">We deeply understand the inconvenience this incident has caused to the community, and we sincerely apologize to all supporters. The team will learn from this experience and build a more secure and stable protocol architecture in the new ecosystem.</p><p>Thank you for your continued trust and support. Let\'s start a new chapter together on BSC!</p>',
+        'announcement.helpCenter': '📞 Contact Us',
         'announcement.understand': 'I Understand',
         'announcement.dontShowAgain': 'Don\'t show again',
     },
@@ -777,10 +777,10 @@ const translations = {
         'partyCrisis.betSuccess': '成功下注 {amount} DP 到 {room}',
         'partyCrisis.betFailed': '下注失败',
         
-        // 安全公告
-        'announcement.title': '🚨 重要安全公告',
-        'announcement.message': '12月10日 UTC時間8:18分，遊戲平台發生重大安全漏洞事件，導致有超過300,000 DP+PASS被攻擊者轉移。為了保障所有參與者的財產安全，團隊決定暫時轉移了Kodiak的交易池子，並將盡快對PASS合約和DP合約進行更換升級。望所有參與者支持和理解！點擊下方幫助中心聯繫團隊了解更多',
-        'announcement.helpCenter': '📞 幫助中心',
+        // 生態遷移公告
+        'announcement.title': 'DeBear.Party 重要公告 - 生態遷移計劃',
+        'announcement.message': '<p style="margin-bottom: 12px;">親愛的 DeBear.Party 社區成員：</p><p style="margin-bottom: 12px;">2025年12月10日，DeBear.Party 遭遇了一次嚴重的安全漏洞事件。在此期間，團隊第一時間採取了緊急措施，暫時移除流動性以保護用戶資產安全。</p><p style="margin-bottom: 12px;">經過與第三方專業安全審計團隊為期三天的深入檢查和評估，結合當前 Berachain 生態的實際情況，我們經過慎重考慮，作出以下決定：</p><p style="margin-bottom: 12px;"><strong>一、生態遷移</strong><br>DeBear.Party 將正式從 Berachain 遷移至 BNB Smart Chain (BSC)。新鏈上線預計時間：<strong>2025年12月28日</strong>。</p><p style="margin-bottom: 12px;"><strong>二、用戶資產保障</strong><br>• 我們已對所有 DP Token 和 Pass NFT 持有者進行多次快照（<strong>12月11日、15日、27日</strong>）<br>• BSC 上線後，將按照 <strong>1:1 比例完整映射</strong>所有用戶資產<br>• 您的權益將得到完全保障</p><p style="margin-bottom: 12px;">我們深知此次事件給社區帶來了困擾和不便，在此向所有支持者致以誠摯的歉意。團隊將以此為鑒，在新生態中建立更加安全、穩定的協議架構。</p><p>感謝您一直以來的信任與支持，讓我們攜手在 BSC 開啟全新篇章！</p>',
+        'announcement.helpCenter': '📞 聯繫我們',
         'announcement.understand': '我知道了',
         'announcement.dontShowAgain': '不再顯示',
         

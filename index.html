@@ -425,11 +425,14 @@
             border-radius: 20px;
             padding: 30px;
             max-width: 500px;
+            max-height: 85vh;
             width: 100%;
             box-shadow: 0 20px 60px rgba(233, 0, 233, 0.3), 0 0 100px rgba(0, 196, 239, 0.2);
             transform: scale(0.9) translateY(20px);
             transition: all 0.3s ease;
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
         
         .announcement-overlay.show .announcement-modal {
@@ -471,6 +474,28 @@
             line-height: 1.8;
             margin-bottom: 25px;
             text-align: left;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        /* 自定义滚动条样式 */
+        .announcement-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .announcement-content::-webkit-scrollbar-track {
+            background: rgba(0, 196, 239, 0.1);
+            border-radius: 10px;
+        }
+        
+        .announcement-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #00c4ef 0%, #e900e9 100%);
+            border-radius: 10px;
+        }
+        
+        .announcement-content::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #00d4ff 0%, #ff00ff 100%);
         }
         
         .announcement-buttons {
@@ -541,22 +566,70 @@
         /* Mobile optimization for announcement */
         @media (max-width: 768px) {
             .announcement-modal {
-                padding: 24px;
-                max-width: 90%;
+                padding: 20px;
+                max-width: 95%;
+                max-height: 90vh;
+            }
+            
+            .announcement-header {
+                margin-bottom: 15px;
+                padding-bottom: 12px;
+            }
+            
+            .announcement-icon {
+                font-size: 28px;
             }
             
             .announcement-title {
-                font-size: 20px;
+                font-size: 18px;
+                line-height: 1.3;
             }
             
             .announcement-content {
-                font-size: 14px;
-                line-height: 1.7;
+                font-size: 13px;
+                line-height: 1.6;
+                max-height: 45vh;
+                margin-bottom: 15px;
+            }
+            
+            .announcement-content::-webkit-scrollbar {
+                width: 6px;
+            }
+            
+            .announcement-buttons {
+                gap: 10px;
             }
             
             .announcement-btn {
-                padding: 12px 20px;
-                font-size: 14px;
+                padding: 12px 18px;
+                font-size: 13px;
+            }
+            
+            .announcement-checkbox {
+                margin-top: 12px;
+                padding-top: 12px;
+            }
+            
+            .announcement-checkbox label {
+                font-size: 12px;
+            }
+        }
+        
+        /* 小屏手机优化 */
+        @media (max-width: 480px) {
+            .announcement-modal {
+                padding: 16px;
+                max-height: 92vh;
+            }
+            
+            .announcement-title {
+                font-size: 16px;
+            }
+            
+            .announcement-content {
+                font-size: 12px;
+                line-height: 1.5;
+                max-height: 50vh;
             }
         }
         
@@ -1393,12 +1466,22 @@
         // (Defined in common.js: window.connectWallet = () => wallet.connect())
         // Note: common.js handles auto-reconnection via DOMContentLoaded
 
-        // ========== Security Announcement Modal ==========
+        // ========== Ecosystem Migration Announcement Modal ==========
+        // Version 2: Ecosystem Migration to BSC (December 2025)
+        const ANNOUNCEMENT_VERSION = 'announcement_v2_migration_bsc';
+        
+        // 清除旧版本的公告记录，确保新公告能够显示
+        function clearOldAnnouncementRecords() {
+            // 清除旧的安全公告记录
+            localStorage.removeItem('dontShowAnnouncement');
+            // 可以在这里添加更多需要清除的旧版本键
+        }
+        
         function showAnnouncement() {
             const announcementModal = document.getElementById('announcementModal');
-            const dontShow = localStorage.getItem('dontShowAnnouncement');
+            const dontShow = localStorage.getItem(ANNOUNCEMENT_VERSION);
             
-            // 如果用户选择了不再显示，则不显示公告
+            // 如果用户选择了不再显示此版本公告，则不显示
             if (dontShow === 'true') {
                 return;
             }
@@ -1415,9 +1498,9 @@
             const announcementModal = document.getElementById('announcementModal');
             const dontShowAgain = document.getElementById('dontShowAgain').checked;
             
-            // 如果用户勾选了"不再显示"，保存到localStorage
+            // 如果用户勾选了"不再显示"，保存此版本的公告状态
             if (dontShowAgain) {
-                localStorage.setItem('dontShowAnnouncement', 'true');
+                localStorage.setItem(ANNOUNCEMENT_VERSION, 'true');
             }
             
             // 隐藏公告
@@ -1437,7 +1520,10 @@
             // Just update UI elements here
             updateWhitepaperLink();
             
-            // 显示安全公告
+            // 清除旧公告记录
+            clearOldAnnouncementRecords();
+            
+            // 显示新的生态迁移公告
             showAnnouncement();
         });
 
